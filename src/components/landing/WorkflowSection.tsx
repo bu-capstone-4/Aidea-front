@@ -1,8 +1,10 @@
+import { MdAutoAwesome } from 'react-icons/md';
+
 interface Step {
   number: string;
   title: string;
   description: string;
-  badge?: string;
+  aiBadge?: boolean;
 }
 
 const STEPS: Step[] = [
@@ -32,15 +34,16 @@ const STEPS: Step[] = [
   },
 ];
 
-function StepCard({ number, title, description, badge }: Step) {
+function StepCard({ number, title, description, aiBadge }: Step) {
   return (
     <div className="flex flex-col gap-3">
       {/* Step number */}
       <div className="flex items-center gap-2">
         <span className="text-sm font-bold text-primary">{number}</span>
-        {badge && (
-          <span className="rounded-md bg-ai-bg px-2 py-0.5 text-xs font-semibold text-ai">
-            {badge}
+        {aiBadge && (
+          <span className="inline-flex items-center gap-1 rounded-md bg-ai-bg px-2 py-0.5 text-xs font-semibold text-ai">
+            <MdAutoAwesome />
+            AI
           </span>
         )}
       </div>

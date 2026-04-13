@@ -1,3 +1,4 @@
+import { MdAutoAwesome } from 'react-icons/md';
 import { cn } from '@/shared/cn';
 
 const NAV_ITEMS = ['아이디어', '기획서', '유저 시나리오', 'API 명세서'];
@@ -55,7 +56,7 @@ export default function AppMockup() {
           <div className="mb-5 flex items-center gap-3">
             <h3 className="text-2xl font-bold text-ink">아이디어</h3>
             <span className="rounded-md bg-ai-bg px-2 py-1 text-xs font-semibold text-ai">
-              ✦ AI 피드백
+              <MdAutoAwesome className="inline" /> AI 피드백
             </span>
           </div>
 

@@ -1,7 +1,9 @@
+import type { ComponentType } from 'react';
+import { MdAutoAwesome, MdGroups, MdGridView, MdCode, MdRateReview } from 'react-icons/md';
 import { cn } from '@/shared/cn';
 
 interface Feature {
-  icon: string;
+  Icon: ComponentType<{ size?: number }>;
   iconBg: string;
   iconColor: string;
   title: string;
@@ -10,7 +12,7 @@ interface Feature {
 
 const FEATURES: Feature[] = [
   {
-    icon: '✦',
+    Icon: MdAutoAwesome,
     iconBg: 'bg-ai-bg',
     iconColor: 'text-ai',
     title: 'AI 기획 문서 자동 생성',
@@ -18,7 +20,7 @@ const FEATURES: Feature[] = [
       '핵심 아이디어만 입력하면 AI가 유저 시나리오, 기능 명세 초안을 자동으로 작성합니다. 논리적 허점까지 짚어드립니다.',
   },
   {
-    icon: '⌖',
+    Icon: MdGroups,
     iconBg: 'bg-primary-light',
     iconColor: 'text-primary-dark',
     title: '실시간 팀 협업',
@@ -26,7 +28,7 @@ const FEATURES: Feature[] = [
       'Figma처럼 팀원들의 커서와 작업 현황을 실시간으로 확인하며 함께 문서를 완성합니다.',
   },
   {
-    icon: '▤',
+    Icon: MdGridView,
     iconBg: 'bg-primary-light',
     iconColor: 'text-primary-dark',
     title: '커스텀 템플릿',
@@ -34,7 +36,7 @@ const FEATURES: Feature[] = [
       '유저 스토리, API 설계, 기능 명세 등 프로젝트 유형에 맞는 기획 문서 템플릿을 선택하고 자동 생성합니다.',
   },
   {
-    icon: '⑂',
+    Icon: MdCode,
     iconBg: 'bg-surface',
     iconColor: 'text-ink',
     title: 'GitHub 이슈 자동 생성',
@@ -42,7 +44,7 @@ const FEATURES: Feature[] = [
       '완성된 기획 문서에서 바로 Epic, Story, Task 단위의 GitHub 이슈를 자동으로 생성하고 저장소에 반영합니다.',
   },
   {
-    icon: '✦',
+    Icon: MdRateReview,
     iconBg: 'bg-ai-bg',
     iconColor: 'text-ai',
     title: 'AI 문서 피드백',
@@ -51,17 +53,13 @@ const FEATURES: Feature[] = [
   },
 ];
 
-function FeatureCard({ icon, iconBg, iconColor, title, description }: Feature) {
+function FeatureCard({ Icon, iconBg, iconColor, title, description }: Feature) {
   return (
     <div className="flex flex-col gap-3 rounded-xl border border-border bg-white p-6 transition-shadow hover:shadow-md">
       <div
-        className={cn(
-          'flex h-10 w-10 items-center justify-center rounded-md text-lg',
-          iconBg,
-          iconColor
-        )}
+        className={cn('flex h-10 w-10 items-center justify-center rounded-md', iconBg, iconColor)}
       >
-        {icon}
+        <Icon size={22} />
       </div>
       <h3 className="text-lg font-semibold text-ink">{title}</h3>
       <p className="leading-relaxed text-ink-muted" style={{ fontSize: '0.8125rem' }}>
