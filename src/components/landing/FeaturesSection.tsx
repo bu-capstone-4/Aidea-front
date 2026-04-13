@@ -1,3 +1,5 @@
+import { cn } from '@/shared/cn';
+
 interface Feature {
   icon: string;
   iconBg: string;
@@ -53,7 +55,11 @@ function FeatureCard({ icon, iconBg, iconColor, title, description }: Feature) {
   return (
     <div className="flex flex-col gap-3 rounded-xl border border-border bg-white p-6 transition-shadow hover:shadow-md">
       <div
-        className={`flex h-10 w-10 items-center justify-center rounded-md text-lg ${iconBg} ${iconColor}`}
+        className={cn(
+          'flex h-10 w-10 items-center justify-center rounded-md text-lg',
+          iconBg,
+          iconColor
+        )}
       >
         {icon}
       </div>

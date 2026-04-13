@@ -1,4 +1,5 @@
 import type { ButtonHTMLAttributes } from 'react';
+import { cn } from '@/shared/cn';
 
 type Variant = 'primary' | 'secondary' | 'ghost';
 type Size = 'sm' | 'md' | 'lg';
@@ -29,7 +30,12 @@ export default function Button({
 }: ButtonProps) {
   return (
     <button
-      className={`inline-flex cursor-pointer items-center justify-center gap-2 rounded-md font-semibold transition-colors ${variantClass[variant]} ${sizeClass[size]} ${className}`}
+      className={cn(
+        'inline-flex cursor-pointer items-center justify-center gap-2 rounded-md font-semibold transition-colors',
+        variantClass[variant],
+        sizeClass[size],
+        className
+      )}
       {...props}
     >
       {children}

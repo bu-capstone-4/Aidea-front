@@ -1,3 +1,5 @@
+import { cn } from '@/shared/cn';
+
 const NAV_ITEMS = ['아이디어', '기획서', '유저 시나리오', 'API 명세서'];
 
 const SKELETON_ROWS = [
@@ -37,12 +39,9 @@ export default function AppMockup() {
 
           {/* Nav items */}
           {NAV_ITEMS.map((item, i) => (
-            <div
-              key={item}
-              className={`rounded-md px-2 py-1.5 ${i === 0 ? 'bg-primary-light' : ''}`}
-            >
+            <div key={item} className={cn('rounded-md px-2 py-1.5', i === 0 && 'bg-primary-light')}>
               <span
-                className={`text-xs font-semibold ${i === 0 ? 'text-primary-dark' : 'text-ink'}`}
+                className={cn('text-xs font-semibold', i === 0 ? 'text-primary-dark' : 'text-ink')}
               >
                 {item}
               </span>
@@ -63,7 +62,7 @@ export default function AppMockup() {
           {/* Skeleton content */}
           <div className="flex flex-col gap-2.5">
             {SKELETON_ROWS.map(({ opacity, width }, i) => (
-              <div key={i} className={`h-3 rounded bg-border ${opacity} ${width}`} />
+              <div key={i} className={cn('h-3 rounded bg-border', opacity, width)} />
             ))}
           </div>
         </main>
