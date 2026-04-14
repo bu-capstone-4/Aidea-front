@@ -4,16 +4,16 @@ import MainSideBar from './MainSideBar';
 import MainHeaderBar from './MainHeaderBar';
 
 export default function MainPageLayout() {
-  const [openSideBar, setOpenSideBar] = useState(true);
+  const [isSideBarOpen, setIsSideBarOpen] = useState(true);
   const toggleSideBar = () => {
-    setOpenSideBar((prev) => !prev);
+    setIsSideBarOpen((prev) => !prev);
   };
 
   return (
     <div className="h-screen flex">
-      <MainSideBar openSideBar={openSideBar} toggleSideBar={toggleSideBar} />
+      <MainSideBar isSideBarOpen={isSideBarOpen} toggleSideBar={toggleSideBar} />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <MainHeaderBar openSideBar={openSideBar} toggleSideBar={toggleSideBar} />
+        <MainHeaderBar isSideBarOpen={isSideBarOpen} toggleSideBar={toggleSideBar} />
         <main className="flex-1 bg-white overflow-auto">
           <Outlet></Outlet>
         </main>
