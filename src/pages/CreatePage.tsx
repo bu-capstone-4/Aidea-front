@@ -1,3 +1,5 @@
+import CreateTeamSpace from '../components/CreateTeamSpace';
+
 export default function CreatePage() {
-  return <div>CreatePage</div>;
+  return <CreateTeamSpace />;
 }
