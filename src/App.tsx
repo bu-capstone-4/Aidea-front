@@ -2,7 +2,7 @@ import { Route, Routes } from 'react-router-dom';
 import LandingPage from './pages/LandingPage';
 import MainPage from './pages/MainPage';
 import CreatePage from './pages/CreatePage';
-import MainPageLayout from './MainPageLayout';
+import MainPageLayout from './mainLayoutComponents/MainPageLayout';
 
 function App() {
   return (
