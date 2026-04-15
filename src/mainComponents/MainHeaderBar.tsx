@@ -8,7 +8,7 @@ interface HeaderBarProps {
 export default function MainHeaderBar({ isSideBarOpen, toggleSideBar }: HeaderBarProps) {
   return (
     <div>
-      <header className="flex justify-between p-4 border-b border-gray-300">
+      <header className="flex justify-between p-4 border-b border-gray-300 h-14">
         <div className="flex gap-4">
           {!isSideBarOpen && (
             <div>

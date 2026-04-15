@@ -50,7 +50,7 @@ export default function MemberModal({ isMemberModalOpen, toggleMemberModal }: me
             <div className="">이름</div>
           </div>
           {/* 초대 대기 중일 경우 */}
-          <button className='className="cursor-pointer bg-surface text-ink font-medium rounded-md px-3 h-8 text-base"'>
+          <button className="cursor-pointer bg-surface text-ink font-medium rounded-md px-3 h-8 text-base">
             초대 취소
           </button>
         </div>
@@ -59,8 +59,14 @@ export default function MemberModal({ isMemberModalOpen, toggleMemberModal }: me
         <div>
           <div className="text-xs text-gray-500 mb-2">새 멤버 초대</div>
           <div>
-            <input type="text" placeholder="name@company.com" />
-            <button>초대 보내기</button>
+            <input
+              type="text"
+              placeholder="name@company.com"
+              className="flex-1 border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 placeholder:text-gray-400 transition-all"
+            />
+            <button className="cursor-pointer bg-primary text-white rounded-md px-3 py-1.5">
+              초대 보내기
+            </button>
           </div>
         </div>
       </div>

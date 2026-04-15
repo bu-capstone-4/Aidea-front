@@ -9,7 +9,7 @@ function App() {
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route element={<MainPageLayout />}>
-        <Route path="/main" element={<MainPage />} />
+        <Route path="/main/:docId" element={<MainPage />} />
       </Route>
       <Route path="/create" element={<CreatePage />} />
     </Routes>

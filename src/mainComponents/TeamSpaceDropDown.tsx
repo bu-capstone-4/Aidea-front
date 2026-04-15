@@ -32,10 +32,12 @@ export default function TeamSpaceDropDown() {
         <div className="absolute top-full -left-4 w-60 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 flex flex-col p-2 z-50">
           {/* 현재 팀 스페이스 */}
           <div className="p-2 border-b border-gray-100 mb-1">
-            <div className="font-bold text-gray-800">팀 스페이스 이름</div>
+            <div className="text-xl font-bold group-hover:text-gray-600 transition-colors">
+              팀 스페이스 이름
+            </div>
             <div className="text-xs text-gray-500 mb-2">멤버 2명</div>
             <button
-              className="w-full text-left text-sm text-gray-600 font-medium cursor-pointer  hover:bg-gray-100 rounded-md"
+              className="h-8 w-full text-left text-gray-600 font-medium cursor-pointer  hover:bg-gray-100 rounded-md"
               onClick={() => {
                 toggleMemberModal();
                 toggleDropDown();
@@ -51,10 +53,10 @@ export default function TeamSpaceDropDown() {
               팀 스페이스
             </div>
             <div className="flex flex-col gap-0.5 ">
-              <button className="w-full text-left p-2 hover:bg-gray-100 rounded-md text-sm transition-colors cursor-pointer">
+              <button className="bg-primary-light text-primary-dark font-semibold rounded-md h-8 px-2 flex items-center text-base cursor-pointer">
                 현재 팀 스페이스
               </button>
-              <button className="w-full text-left p-2 hover:bg-gray-100 rounded-md text-sm transition-colors cursor-pointer">
+              <button className="w-full text-left p-2 hover:bg-gray-100 rounded-md transition-colors cursor-pointer">
                 이전 팀 스페이스
               </button>
             </div>
