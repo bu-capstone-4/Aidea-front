@@ -8,7 +8,7 @@ interface SideBarProps {
 
 export default function MainSideBar({ isSideBarOpen, toggleSideBar }: SideBarProps) {
   return (
-    <div
+    <aside
       className={`bg-sidebar flex flex-col h-screen transition-all duration-300 ease-in-out whitespace-nowrap overflow-hidden ${isSideBarOpen ? 'w-60' : 'w-0'}`}
     >
       {/* 팀스페이스명, 사이드바 닫기 */}
@@ -52,6 +52,6 @@ export default function MainSideBar({ isSideBarOpen, toggleSideBar }: SideBarPro
           <div className="font-medium text-gray-800">유저 이름</div>
         </div>
       </div>
-    </div>
+    </aside>
   );
 }
