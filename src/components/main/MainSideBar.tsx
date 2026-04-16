@@ -1,4 +1,3 @@
-import React from 'react';
 import TeamSpaceDropDown from './TeamSpaceDropDown';
 import { useNavigate, useParams } from 'react-router-dom';
 

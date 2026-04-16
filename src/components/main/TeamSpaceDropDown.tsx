@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import MemberModal from './MemberModal';
 
 export default function TeamSpaceDropDown() {

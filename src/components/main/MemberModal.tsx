@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface memberModalProps {
   isMemberModalOpen: boolean;
   toggleMemberModal: () => void;
