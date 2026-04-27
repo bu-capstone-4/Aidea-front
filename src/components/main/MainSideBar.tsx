@@ -1,5 +1,5 @@
 import TeamSpaceDropDown from './TeamSpaceDropDown';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router';
 
 interface SideBarProps {
   isSideBarOpen: boolean;
