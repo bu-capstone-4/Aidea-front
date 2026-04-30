@@ -2,12 +2,15 @@ import { Route, Routes } from 'react-router';
 import LandingPage from '@/pages/LandingPage';
 import MainPage from '@/pages/MainPage';
 import CreatePage from '@/pages/CreatePage';
+import MainPageLayout from '@/components/main/MainPageLayout';
 
 function App() {
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
-      <Route path="/main" element={<MainPage />} />
+      <Route element={<MainPageLayout />}>
+        <Route path="/main/:docId" element={<MainPage />} />
+      </Route>
       <Route path="/create" element={<CreatePage />} />
     </Routes>
   );
