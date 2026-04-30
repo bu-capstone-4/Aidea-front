@@ -1,5 +1,6 @@
 import { Link } from 'react-router';
 import Button from '@/components/ui/Button';
+import { useAuth } from '@/shared/useAuth';
 
 const NAV_LINKS = [
   { label: '기능', href: '#features' },
@@ -7,6 +8,8 @@ const NAV_LINKS = [
 ];
 
 export default function LandingHeader() {
+  const { login } = useAuth();
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 border-b border-border bg-white/80 backdrop-blur-md">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6">
@@ -33,10 +36,9 @@ export default function LandingHeader() {
 
         {/* Actions */}
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm">
-            로그인
+          <Button size="sm" onClick={login}>
+            무료로 시작하기
           </Button>
-          <Button size="sm">무료로 시작하기</Button>
         </div>
       </div>
     </header>

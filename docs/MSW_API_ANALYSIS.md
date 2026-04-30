@@ -13,12 +13,18 @@
 | Local      | `http://localhost:8080` |
 | Production | `https://api.aidea.com` |
 
-### 인증
+### 인증 방식
 
-- 방식: `Authorization: Bearer {accessToken}`
-- Access Token: 30분
-- Refresh Token: 14일
-- 소셜 로그인: Google, Kakao
+**httpOnly 쿠키** 기반으로 인증합니다. JS에서 토큰에 직접 접근하지 않으며, 브라우저가 쿠키를 자동으로 전송합니다.
+
+| 쿠키명          | 만료 | 속성                           |
+| --------------- | ---- | ------------------------------ |
+| `access_token`  | 30분 | HttpOnly, Secure, SameSite=Lax |
+| `refresh_token` | 14일 | HttpOnly, Secure, SameSite=Lax |
+
+- `Authorization` 헤더 **사용하지 않음**
+- 인증 상태 확인: `GET /api/auth/me` 호출 → 200이면 로그인, 401이면 비로그인
+- OAuth 제공자: **GitHub만** 지원
 
 ### 공통 응답 형식
 
@@ -47,21 +53,13 @@ interface ApiResponse<T = null> {
 ## 2. 스키마 (TypeScript 기준)
 
 ```ts
-// 토큰
-interface TokenResponse {
-  accessToken: string;
-  refreshToken: string;
-  tokenType: string; // "Bearer"
-  expiresIn: number; // 1800000 (30분, ms)
-}
-
 // 유저
 interface UserResponse {
   id: number;
   email: string;
   name: string;
   profileImageUrl: string | null;
-  provider: 'LOCAL' | 'GOOGLE' | 'KAKAO';
+  provider: 'GITHUB';
 }
 
 // 팀스페이스
@@ -123,58 +121,59 @@ interface FeedbackResponse {
 
 ---
 
-## 3. 엔드포인트 전체 목록 (21개)
+## 3. 엔드포인트 전체 목록 (22개)
 
-### Auth (4개)
+### Auth (5개)
 
-| #   | Method | Path                             | 인증 | 설명                            |
-| --- | ------ | -------------------------------- | ---- | ------------------------------- |
-| 1   | `GET`  | `/api/oauth2/callback/:provider` | ❌   | 소셜 로그인 콜백 (302 redirect) |
-| 2   | `POST` | `/api/auth/refresh`              | ❌   | Access Token 갱신               |
-| 3   | `POST` | `/api/auth/logout`               | ✅   | 로그아웃 (Refresh Token 무효화) |
-| 4   | `GET`  | `/api/auth/me`                   | ✅   | 내 정보 조회                    |
+| #   | Method | Path                           | 인증 | 설명                                         |
+| --- | ------ | ------------------------------ | ---- | -------------------------------------------- |
+| 1   | `GET`  | `/api/oauth2/authorize/github` | ❌   | GitHub OAuth 페이지로 리다이렉트             |
+| 2   | `GET`  | `/api/oauth2/callback/github`  | ❌   | GitHub 콜백 처리, httpOnly 쿠키 발급 후 이동 |
+| 3   | `POST` | `/api/auth/refresh`            | ❌   | access_token 갱신 (쿠키 자동 전송)           |
+| 4   | `POST` | `/api/auth/logout`             | ✅   | 로그아웃, 쿠키 만료 처리                     |
+| 5   | `GET`  | `/api/auth/me`                 | ✅   | 내 정보 조회 (인증 상태 확인용)              |
 
 ### Teamspace (3개)
 
 | #   | Method | Path                           | 인증 | 설명                             |
 | --- | ------ | ------------------------------ | ---- | -------------------------------- |
-| 5   | `POST` | `/api/teamspaces`              | ✅   | 팀스페이스 생성 (상태: CREATING) |
-| 6   | `GET`  | `/api/teamspaces`              | ✅   | 내 팀스페이스 목록 조회          |
-| 7   | `GET`  | `/api/teamspaces/:teamspaceId` | ✅   | 팀스페이스 상세 조회             |
+| 6   | `POST` | `/api/teamspaces`              | ✅   | 팀스페이스 생성 (상태: CREATING) |
+| 7   | `GET`  | `/api/teamspaces`              | ✅   | 내 팀스페이스 목록 조회          |
+| 8   | `GET`  | `/api/teamspaces/:teamspaceId` | ✅   | 팀스페이스 상세 조회             |
 
 ### Invitation (3개)
 
 | #   | Method   | Path                                                     | 인증 | 설명                             |
 | --- | -------- | -------------------------------------------------------- | ---- | -------------------------------- |
-| 8   | `POST`   | `/api/teamspaces/:teamspaceId/invitations`               | ✅   | 팀원 초대 이메일 발송 (최대 8명) |
-| 9   | `POST`   | `/api/invitations/accept`                                | ✅   | 초대 토큰으로 수락               |
-| 10  | `DELETE` | `/api/teamspaces/:teamspaceId/invitations/:invitationId` | ✅   | 대기 중 초대 취소 (OWNER)        |
+| 9   | `POST`   | `/api/teamspaces/:teamspaceId/invitations`               | ✅   | 팀원 초대 이메일 발송 (최대 8명) |
+| 10  | `POST`   | `/api/invitations/accept`                                | ✅   | 초대 토큰으로 수락               |
+| 11  | `DELETE` | `/api/teamspaces/:teamspaceId/invitations/:invitationId` | ✅   | 대기 중 초대 취소 (OWNER)        |
 
 ### Member (3개)
 
 | #   | Method   | Path                                             | 인증 | 설명                         |
 | --- | -------- | ------------------------------------------------ | ---- | ---------------------------- |
-| 11  | `GET`    | `/api/teamspaces/:teamspaceId/members`           | ✅   | 멤버 목록 조회               |
-| 12  | `POST`   | `/api/teamspaces/:teamspaceId/members/invite`    | ✅   | 멤버 관리 모달에서 단건 초대 |
-| 13  | `DELETE` | `/api/teamspaces/:teamspaceId/members/:memberId` | ✅   | 멤버 추방 (OWNER)            |
+| 12  | `GET`    | `/api/teamspaces/:teamspaceId/members`           | ✅   | 멤버 목록 조회               |
+| 13  | `POST`   | `/api/teamspaces/:teamspaceId/members/invite`    | ✅   | 멤버 관리 모달에서 단건 초대 |
+| 14  | `DELETE` | `/api/teamspaces/:teamspaceId/members/:memberId` | ✅   | 멤버 추방 (OWNER)            |
 
 ### Document (6개)
 
 | #   | Method   | Path                                        | 인증 | 설명                                 |
 | --- | -------- | ------------------------------------------- | ---- | ------------------------------------ |
-| 14  | `GET`    | `/api/documents?teamspaceId=`               | ✅   | 팀스페이스 내 문서 목록              |
-| 15  | `POST`   | `/api/documents`                            | ✅   | 문서 추가 생성 (사이드바 + 추가하기) |
-| 16  | `GET`    | `/api/documents/:documentId`                | ✅   | 문서 상세 조회 (yjsBinary 포함)      |
-| 17  | `PATCH`  | `/api/documents/:documentId`                | ✅   | 문서 제목 수정                       |
-| 18  | `DELETE` | `/api/documents/:documentId`                | ✅   | 문서 삭제 (IDEA 타입 불가)           |
-| 19  | `GET`    | `/api/documents/:documentId/export?format=` | ✅   | 문서 내보내기 (md \| pdf)            |
+| 15  | `GET`    | `/api/documents?teamspaceId=`               | ✅   | 팀스페이스 내 문서 목록              |
+| 16  | `POST`   | `/api/documents`                            | ✅   | 문서 추가 생성 (사이드바 + 추가하기) |
+| 17  | `GET`    | `/api/documents/:documentId`                | ✅   | 문서 상세 조회 (yjsBinary 포함)      |
+| 18  | `PATCH`  | `/api/documents/:documentId`                | ✅   | 문서 제목 수정                       |
+| 19  | `DELETE` | `/api/documents/:documentId`                | ✅   | 문서 삭제 (IDEA 타입 불가)           |
+| 20  | `GET`    | `/api/documents/:documentId/export?format=` | ✅   | 문서 내보내기 (md \| pdf)            |
 
 ### Feedback (2개)
 
 | #   | Method | Path                                  | 인증 | 설명                          |
 | --- | ------ | ------------------------------------- | ---- | ----------------------------- |
-| 20  | `POST` | `/api/documents/:documentId/feedback` | ✅   | AI 피드백 요청 → 202 Accepted |
-| 21  | `POST` | `/api/feedbacks/:feedbackId/accept`   | ✅   | AI 피드백 수락 및 문서에 적용 |
+| 21  | `POST` | `/api/documents/:documentId/feedback` | ✅   | AI 피드백 요청 → 202 Accepted |
+| 22  | `POST` | `/api/feedbacks/:feedbackId/accept`   | ✅   | AI 피드백 수락 및 문서에 적용 |
 
 ---
 
@@ -182,18 +181,76 @@ interface FeedbackResponse {
 
 ### Auth
 
+#### GitHub OAuth 전체 흐름
+
+```
+1. 프론트 → GET /api/oauth2/authorize/github
+   백엔드 → 302 redirect → https://github.com/login/oauth/authorize?client_id=...
+
+2. GitHub 인증 완료
+   GitHub → 백엔드 GET /api/oauth2/callback/github?code=xxx
+   백엔드:
+     - code로 GitHub access token 교환
+     - GitHub 사용자 정보 조회
+     - JWT 생성 (access_token: 30분, refresh_token: 14일)
+     - 응답 헤더에 httpOnly 쿠키 설정:
+         Set-Cookie: access_token=...; HttpOnly; Secure; SameSite=Lax; Max-Age=1800
+         Set-Cookie: refresh_token=...; HttpOnly; Secure; SameSite=Lax; Max-Age=1209600
+     - 302 redirect → http://localhost:5173/ (URL에 토큰 없음)
+
+3. 이후 모든 API 요청: 브라우저가 쿠키 자동 전송
+```
+
+#### GET /api/oauth2/authorize/github
+
+```
+인증: 불필요
+Response: 302 redirect → GitHub OAuth 인증 페이지
+```
+
+#### GET /api/oauth2/callback/github
+
+```
+인증: 불필요
+Query: ?code=xxx (GitHub에서 전달)
+
+Response 302:
+  Set-Cookie: access_token=...; HttpOnly; Secure; SameSite=Lax; Max-Age=1800
+  Set-Cookie: refresh_token=...; HttpOnly; Secure; SameSite=Lax; Max-Age=1209600
+  Location: http://localhost:5173/
+```
+
 #### POST /api/auth/refresh
 
 ```
-Request:  { refreshToken: string }
-Response 200: ApiResponse<TokenResponse>
+인증: 불필요 (refresh_token 쿠키 자동 전송)
+Request body: 없음
+
+Response 200:
+  Set-Cookie: access_token=...; HttpOnly; Secure; SameSite=Lax; Max-Age=1800
+  body: ApiResponse (message: "토큰이 갱신되었습니다.")
+
 Response 401: ErrorResponse (AUTH_003 | AUTH_004)
+```
+
+#### POST /api/auth/logout
+
+```
+인증: 필요 (access_token 쿠키)
+Request body: 없음
+
+Response 200:
+  Set-Cookie: access_token=; Max-Age=0
+  Set-Cookie: refresh_token=; Max-Age=0
+  body: ApiResponse (message: "로그아웃 성공")
 ```
 
 #### GET /api/auth/me
 
 ```
+인증: 필요 (access_token 쿠키)
 Response 200: ApiResponse<UserResponse>
+Response 401: ErrorResponse — 비로그인 상태 확인에 사용
 ```
 
 ---
@@ -205,14 +262,13 @@ Response 200: ApiResponse<UserResponse>
 ```
 Request:
   {
-    name: string,          // 팀스페이스 이름
-    idea: string,          // 아이디어 설명 (필수)
+    name: string,            // 팀스페이스 이름
+    idea: string,            // 아이디어 설명 (필수)
     documents: DocumentType[]  // IDEA는 항상 포함
   }
 
 Response 201:
   ApiResponse<{ teamspaceId: string }>
-  // 예: { teamspaceId: "ts_abc123" }
 
 Note: 생성 직후 status = "CREATING"
       백그라운드에서 Gemini API 호출로 각 문서 AI 초안 생성 시작
@@ -309,7 +365,6 @@ Request:
 
 Response 201:
   ApiResponse<{ id: string, type: DocumentType, title: string, createdAt: string }>
-  // 예: { id: "doc_005", type: "ERD", title: "ERD", createdAt: "2026-04-24T11:00:00" }
 ```
 
 #### GET /api/documents/:documentId
@@ -382,6 +437,18 @@ Response 200:
 
 ## 5. MSW 구현 시 주의사항
 
+### httpOnly 쿠키 한계
+
+Service Worker는 브라우저 보안 정책상 `Set-Cookie: ...; HttpOnly` 쿠키를 설정할 수 없습니다.
+MSW에서는 **일반 쿠키**로 흉내 내며, 토큰 흐름 자체는 실제 서버와 동일하게 유지합니다.
+
+```
+실제 서버: Set-Cookie: access_token=...; HttpOnly; Secure
+MSW:       Set-Cookie: access_token=...  (HttpOnly 없음)
+
+→ 개발 환경에서만 사용, 보안은 프론트엔드 배포 시 실제 서버가 담당
+```
+
 ### 비동기 처리가 필요한 엔드포인트
 
 | 엔드포인트                                 | 이유                                                          |
@@ -395,14 +462,15 @@ Response 200:
 - `feedback:ready` — AI 피드백 완료 알림
 - `versionApplied` — 피드백 수락 후 문서 버전 적용
 
-### 인증 불필요 엔드포인트 (2개)
+### 인증 불필요 엔드포인트 (3개)
 
-- `GET /api/oauth2/callback/:provider`
+- `GET /api/oauth2/authorize/github`
+- `GET /api/oauth2/callback/github`
 - `POST /api/auth/refresh`
 
 ### 특수 동작
 
-- 소셜 로그인 콜백은 302 redirect → `http://localhost:3000/oauth/callback?accessToken=...&refreshToken=...`
+- OAuth 콜백은 URL에 토큰 없이 httpOnly 쿠키 설정 후 `/`로 리다이렉트
 - 문서 내보내기는 JSON이 아닌 바이너리 응답 (`application/octet-stream`)
 - IDEA 타입 문서는 삭제 불가 (400 에러)
 - 초대 이메일은 최대 8개 제한

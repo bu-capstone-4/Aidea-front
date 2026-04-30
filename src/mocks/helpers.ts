@@ -1,21 +1,18 @@
 import { HttpResponse } from 'msw';
 import { tokens } from './db';
 
+export const parseCookieToken = (cookieHeader: string | null, key: string): string | null => {
+  if (!cookieHeader) return null;
+  const match = cookieHeader.match(new RegExp(`(?:^|;\\s*)${key}=([^;]+)`));
+  return match ? decodeURIComponent(match[1]) : null;
+};
+
 export function requireAuth(request: Request): Response | null {
-  const auth = request.headers.get('Authorization');
+  const token = parseCookieToken(request.headers.get('Cookie'), 'access_token');
 
-  if (!auth?.startsWith('Bearer ')) {
+  if (!token || token !== tokens.accessToken) {
     return HttpResponse.json(
-      { success: false, code: 'AUTH_001', message: '인증이 필요합니다.' },
-      { status: 401 }
-    );
-  }
-
-  const token = auth.slice(7);
-
-  if (!tokens.accessToken || token !== tokens.accessToken) {
-    return HttpResponse.json(
-      { success: false, code: 'AUTH_003', message: '유효하지 않은 토큰입니다.' },
+      { success: false, code: 'AUTH_003', message: '인증이 필요합니다.' },
       { status: 401 }
     );
   }

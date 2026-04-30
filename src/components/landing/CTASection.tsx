@@ -1,6 +1,9 @@
 import Button from '@/components/ui/Button';
+import { useAuth } from '@/shared/useAuth';
 
 export default function CTASection() {
+  const { login } = useAuth();
+
   return (
     <section className="bg-ink px-6 py-24 text-center">
       <div className="mx-auto max-w-2xl">
@@ -9,7 +12,7 @@ export default function CTASection() {
           아이디어가 있다면 충분합니다. AI가 나머지를 함께 완성해드립니다.
         </p>
         <div className="flex items-center justify-center gap-3">
-          <Button size="lg" className="bg-primary text-white hover:bg-primary-dark">
+          <Button size="lg" className="bg-primary text-white hover:bg-primary-dark" onClick={login}>
             무료로 시작하기
           </Button>
         </div>
