@@ -6,7 +6,6 @@ import { apiClient } from '@/shared/apiClient';
 import LandingPage from '@/pages/LandingPage';
 import MainPage from '@/pages/MainPage';
 import CreatePage from '@/pages/CreatePage';
-import MainPageLayout from '@/components/main/MainPageLayout';
 
 function AuthInitializer({ children }: { children: React.ReactNode }) {
   const { setAuthenticated, setLoading } = useAuthStore();
@@ -26,7 +25,7 @@ function RootRoute() {
   const { isAuthenticated, isLoading } = useAuth();
   if (isLoading) return null;
   if (!isAuthenticated) return <LandingPage />;
-  return <MainPageLayout />;
+  return <MainPage />;
 }
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -39,19 +38,16 @@ function App() {
   return (
     <AuthInitializer>
       <Routes>
-        <Route path="/" element={<RootRoute />}>
-          <Route index element={<MainPage />} />
-        </Route>
+        <Route path="/" element={<RootRoute />} />
 
         <Route
+          path="/main/:docId"
           element={
             <ProtectedRoute>
-              <MainPageLayout />
+              <MainPage />
             </ProtectedRoute>
           }
-        >
-          <Route path="/main/:docId" element={<MainPage />} />
-        </Route>
+        />
 
         <Route
           path="/create"
