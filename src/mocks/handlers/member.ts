@@ -1,11 +1,12 @@
 import { http, HttpResponse } from 'msw';
 import { teamspaces, invitations, nextInvitationId, nextInviteToken } from '../db';
+import type { MemberInfo } from '../types';
 import { requireAuth } from '../helpers';
 
 export const memberHandlers = [
   // GET /api/teamspaces/:teamspaceId/members — 멤버 목록 조회
-  http.get('/api/teamspaces/:teamspaceId/members', ({ request, params }) => {
-    const authError = requireAuth(request);
+  http.get('/api/teamspaces/:teamspaceId/members', ({ params }) => {
+    const authError = requireAuth();
     if (authError) return authError;
 
     const ts = teamspaces.find((t) => t.teamspaceId === params.teamspaceId);
@@ -20,7 +21,7 @@ export const memberHandlers = [
 
   // POST /api/teamspaces/:teamspaceId/members/invite — 멤버 관리 모달 단건 초대
   http.post('/api/teamspaces/:teamspaceId/members/invite', async ({ request, params }) => {
-    const authError = requireAuth(request);
+    const authError = requireAuth();
     if (authError) return authError;
 
     const { teamspaceId } = params;
@@ -55,22 +56,33 @@ export const memberHandlers = [
   }),
 
   // DELETE /api/teamspaces/:teamspaceId/members/:memberId — 멤버 추방
-  http.delete('/api/teamspaces/:teamspaceId/members/:memberId', ({ request, params }) => {
-    const authError = requireAuth(request);
+  http.delete('/api/teamspaces/:teamspaceId/members/:memberId', ({ params }) => {
+    const authError = requireAuth();
     if (authError) return authError;
 
     const { teamspaceId, memberId } = params;
     const ts = teamspaces.find((t) => t.teamspaceId === teamspaceId);
 
     if (ts) {
-      const idx = ts.members.findIndex((m) => String(m.userId) === memberId);
-      if (idx !== -1) ts.members.splice(idx, 1);
+      // userId(문자열) 또는 email(PENDING 멤버) 기준으로 삭제
+      const idx = ts.members.findIndex(
+        (m: MemberInfo) => String(m.userId) === memberId || m.email === memberId
+      );
+      if (idx !== -1) {
+        const removed = ts.members[idx];
+        ts.members.splice(idx, 1);
+        // PENDING 멤버인 경우 초대도 함께 취소
+        const invIdx = invitations.findIndex(
+          (i) => i.teamspaceId === teamspaceId && i.email === removed.email
+        );
+        if (invIdx !== -1) invitations.splice(invIdx, 1);
+      }
     }
 
     return HttpResponse.json({
       success: true,
       code: null,
-      message: '멤버가 추방되었습니다.',
+      message: '멤버가 삭제되었습니다.',
       data: null,
     });
   }),

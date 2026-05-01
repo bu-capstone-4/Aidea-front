@@ -4,8 +4,8 @@ import { requireAuth } from '../helpers';
 
 export const feedbackHandlers = [
   // POST /api/documents/:documentId/feedback — AI 피드백 요청
-  http.post('/api/documents/:documentId/feedback', async ({ request, params }) => {
-    const authError = requireAuth(request);
+  http.post('/api/documents/:documentId/feedback', async ({ params }) => {
+    const authError = requireAuth();
     if (authError) return authError;
 
     const { documentId } = params;
@@ -40,8 +40,8 @@ export const feedbackHandlers = [
   }),
 
   // POST /api/feedbacks/:feedbackId/accept — AI 피드백 수락
-  http.post('/api/feedbacks/:feedbackId/accept', ({ request, params }) => {
-    const authError = requireAuth(request);
+  http.post('/api/feedbacks/:feedbackId/accept', ({ params }) => {
+    const authError = requireAuth();
     if (authError) return authError;
 
     const fb = feedbacks.find((f) => f.feedbackId === params.feedbackId);

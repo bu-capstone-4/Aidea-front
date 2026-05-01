@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { useAuthStore } from '@/store/authStore';
 
 export const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL ?? '',
@@ -52,7 +53,7 @@ apiClient.interceptors.response.use(
       return apiClient(originalRequest);
     } catch (refreshError) {
       flushQueue(refreshError);
-      window.location.href = '/';
+      useAuthStore.getState().setAuthenticated(false);
       return Promise.reject(refreshError);
     } finally {
       isRefreshing = false;

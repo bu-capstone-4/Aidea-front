@@ -1,10 +1,14 @@
 import { useParams } from 'react-router';
-import { documents } from '@/mocks/db';
+import { useDocument } from '@/hooks/useDocument';
 import Button from '@/components/ui/Button';
 
 export default function MainContent() {
   const { docId } = useParams();
-  const doc = documents.find((d) => d.id === docId) ?? documents[0];
+  const { doc } = useDocument(docId);
+
+  if (!doc) {
+    return <main className="flex-1 bg-white overflow-auto" />;
+  }
 
   return (
     <main className="flex-1 bg-white overflow-auto">

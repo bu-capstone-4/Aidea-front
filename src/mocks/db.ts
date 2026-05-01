@@ -16,6 +16,9 @@ export const currentUser: UserResponse = {
   provider: 'GOOGLE',
 };
 
+// ── 세션 (쿠키 미지원 환경 대응용 in-memory 인증 플래그) ────────
+export const session = { isLoggedIn: false };
+
 // ── 토큰 ─────────────────────────────────────────────────────
 export const tokens = {
   accessToken: 'mock-access-token',

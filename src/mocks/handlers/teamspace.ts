@@ -14,7 +14,7 @@ const DOC_TITLE_MAP: Record<string, string> = {
 export const teamspaceHandlers = [
   // POST /api/teamspaces — 팀스페이스 생성
   http.post('/api/teamspaces', async ({ request }) => {
-    const authError = requireAuth(request);
+    const authError = requireAuth();
     if (authError) return authError;
 
     const body = (await request.json()) as TeamspaceCreateRequest;
@@ -77,8 +77,8 @@ export const teamspaceHandlers = [
   }),
 
   // GET /api/teamspaces — 팀스페이스 목록 조회
-  http.get('/api/teamspaces', ({ request }) => {
-    const authError = requireAuth(request);
+  http.get('/api/teamspaces', () => {
+    const authError = requireAuth();
     if (authError) return authError;
 
     const list = teamspaces.map(({ teamspaceId, name, status, members: m, createdAt }) => ({
@@ -93,8 +93,8 @@ export const teamspaceHandlers = [
   }),
 
   // GET /api/teamspaces/:teamspaceId — 팀스페이스 상세 조회
-  http.get('/api/teamspaces/:teamspaceId', ({ request, params }) => {
-    const authError = requireAuth(request);
+  http.get('/api/teamspaces/:teamspaceId', ({ params }) => {
+    const authError = requireAuth();
     if (authError) return authError;
 
     const ts = teamspaces.find((t) => t.teamspaceId === params.teamspaceId);

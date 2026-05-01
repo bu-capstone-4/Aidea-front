@@ -5,11 +5,27 @@ import {
   MdKeyboardDoubleArrowRight,
   MdLightbulb,
   MdDescription,
+  MdPerson,
+  MdCode,
+  MdTableChart,
   MdAdd,
 } from 'react-icons/md';
 import UserAvatar from '../ui/UserAvatar';
 import Button from '../ui/Button';
 import { cn } from '@/shared/cn';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useTeamspaceStore } from '@/store/teamspaceStore';
+import { useTeamspaceDetail } from '@/hooks/useTeamspaceDetail';
+import type { DocumentType } from '@/mocks/types';
+import type { ElementType } from 'react';
+
+const DOC_ICON: Record<DocumentType, ElementType> = {
+  IDEA: MdLightbulb,
+  PLAN: MdDescription,
+  USER_SCENARIO: MdPerson,
+  API_SPEC: MdCode,
+  ERD: MdTableChart,
+};
 
 interface SideBarProps {
   isSideBarOpen: boolean;
@@ -19,6 +35,9 @@ interface SideBarProps {
 export default function MainSideBar({ isSideBarOpen, toggleSideBar }: SideBarProps) {
   const navigate = useNavigate();
   const { docId } = useParams();
+  const { user } = useCurrentUser();
+  const { currentTeamspaceId } = useTeamspaceStore();
+  const { teamspace } = useTeamspaceDetail(currentTeamspaceId);
 
   return (
     <aside
@@ -53,31 +72,24 @@ export default function MainSideBar({ isSideBarOpen, toggleSideBar }: SideBarPro
 
       {/* 문서 목록 */}
       <div className={cn('flex flex-col p-2 space-y-1', !isSideBarOpen && 'items-center')}>
-        <Button
-          variant="ghost"
-          size={isSideBarOpen ? 'sm' : 'icon'}
-          icon={<MdLightbulb size={18} className="shrink-0" />}
-          className={cn(
-            isSideBarOpen && 'w-full justify-start',
-            docId === 'idea' && 'bg-primary-light text-primary-dark'
-          )}
-          onClick={() => navigate('/main/idea')}
-        >
-          <span className="font-semibold">아이디어</span>
-        </Button>
-
-        <Button
-          variant="ghost"
-          size={isSideBarOpen ? 'sm' : 'icon'}
-          icon={<MdDescription size={18} className="shrink-0" />}
-          className={cn(
-            isSideBarOpen && 'w-full justify-start',
-            docId === 'plan' && 'bg-primary-light text-primary-dark'
-          )}
-          onClick={() => navigate('/main/plan')}
-        >
-          <span className="font-semibold">기획서</span>
-        </Button>
+        {teamspace?.documents.map((doc) => {
+          const Icon = DOC_ICON[doc.type] ?? MdDescription;
+          return (
+            <Button
+              key={doc.id}
+              variant="ghost"
+              size={isSideBarOpen ? 'sm' : 'icon'}
+              icon={<Icon size={18} className="shrink-0" />}
+              className={cn(
+                isSideBarOpen && 'w-full justify-start',
+                docId === doc.id && 'bg-primary-light text-primary-dark'
+              )}
+              onClick={() => navigate(`/main/${doc.id}`)}
+            >
+              <span className="font-semibold">{doc.title}</span>
+            </Button>
+          );
+        })}
 
         <Button
           variant="ghost"
@@ -95,8 +107,8 @@ export default function MainSideBar({ isSideBarOpen, toggleSideBar }: SideBarPro
       {/* 사이드바 하단 유저 프로필 */}
       <div className={cn('pb-1 flex', !isSideBarOpen && 'justify-center')}>
         <div className="p-4 text-lg flex items-center gap-3">
-          <UserAvatar name="유저 이름" />
-          {isSideBarOpen && <div className="font-medium text-gray-800">유저 이름</div>}
+          <UserAvatar name={user?.name ?? ''} />
+          {isSideBarOpen && <div className="font-medium text-gray-800">{user?.name ?? ''}</div>}
         </div>
       </div>
     </aside>

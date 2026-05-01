@@ -14,7 +14,7 @@ const DOC_TITLE_MAP: Record<string, string> = {
 export const documentHandlers = [
   // GET /api/documents?teamspaceId= — 문서 목록 조회
   http.get('/api/documents', ({ request }) => {
-    const authError = requireAuth(request);
+    const authError = requireAuth();
     if (authError) return authError;
 
     const url = new URL(request.url);
@@ -35,7 +35,7 @@ export const documentHandlers = [
 
   // POST /api/documents — 문서 추가 생성
   http.post('/api/documents', async ({ request }) => {
-    const authError = requireAuth(request);
+    const authError = requireAuth();
     if (authError) return authError;
 
     const body = (await request.json()) as DocumentCreateRequest;
@@ -77,8 +77,8 @@ export const documentHandlers = [
   }),
 
   // GET /api/documents/:documentId — 문서 상세 조회
-  http.get('/api/documents/:documentId', ({ request, params }) => {
-    const authError = requireAuth(request);
+  http.get('/api/documents/:documentId', ({ params }) => {
+    const authError = requireAuth();
     if (authError) return authError;
 
     const doc = documents.find((d) => d.id === params.documentId);
@@ -95,7 +95,7 @@ export const documentHandlers = [
 
   // PATCH /api/documents/:documentId — 문서 제목 수정
   http.patch('/api/documents/:documentId', async ({ request, params }) => {
-    const authError = requireAuth(request);
+    const authError = requireAuth();
     if (authError) return authError;
 
     const body = (await request.json()) as DocumentUpdateRequest;
@@ -126,8 +126,8 @@ export const documentHandlers = [
   }),
 
   // DELETE /api/documents/:documentId — 문서 삭제
-  http.delete('/api/documents/:documentId', ({ request, params }) => {
-    const authError = requireAuth(request);
+  http.delete('/api/documents/:documentId', ({ params }) => {
+    const authError = requireAuth();
     if (authError) return authError;
 
     const idx = documents.findIndex((d) => d.id === params.documentId);
@@ -164,7 +164,7 @@ export const documentHandlers = [
 
   // GET /api/documents/:documentId/export?format= — 문서 내보내기
   http.get('/api/documents/:documentId/export', ({ request, params }) => {
-    const authError = requireAuth(request);
+    const authError = requireAuth();
     if (authError) return authError;
 
     const url = new URL(request.url);

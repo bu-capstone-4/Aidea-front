@@ -6,7 +6,7 @@ import type { InviteRequest, AcceptInvitationRequest } from './types';
 export const invitationHandlers = [
   // POST /api/teamspaces/:teamspaceId/invitations — 팀원 초대
   http.post('/api/teamspaces/:teamspaceId/invitations', async ({ request, params }) => {
-    const authError = requireAuth(request);
+    const authError = requireAuth();
     if (authError) return authError;
 
     const { teamspaceId } = params;
@@ -48,7 +48,7 @@ export const invitationHandlers = [
 
   // POST /api/invitations/accept — 초대 수락
   http.post('/api/invitations/accept', async ({ request }) => {
-    const authError = requireAuth(request);
+    const authError = requireAuth();
     if (authError) return authError;
 
     const body = (await request.json()) as AcceptInvitationRequest;
@@ -97,8 +97,8 @@ export const invitationHandlers = [
   }),
 
   // DELETE /api/teamspaces/:teamspaceId/invitations/:invitationId — 초대 취소
-  http.delete('/api/teamspaces/:teamspaceId/invitations/:invitationId', ({ request, params }) => {
-    const authError = requireAuth(request);
+  http.delete('/api/teamspaces/:teamspaceId/invitations/:invitationId', ({ params }) => {
+    const authError = requireAuth();
     if (authError) return authError;
 
     const { teamspaceId, invitationId } = params;
