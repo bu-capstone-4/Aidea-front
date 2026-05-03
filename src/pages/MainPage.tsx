@@ -1,28 +1,49 @@
-import { useParams } from 'react-router';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router';
+import { apiClient } from '@/shared/apiClient';
+import { useTeamspaceStore } from '@/store/teamspaceStore';
+import MainSideBar from '@/components/main/MainSideBar';
+import MainHeaderBar from '@/components/main/MainHeaderBar';
+import MainContent from '@/components/main/MainContent';
+import type { TeamspaceSummary, TeamspaceDetail } from '@/mocks/types';
 
-const Data = {
-  idea: {
-    title: '아이디어',
-    content: '아이디어 내용',
-  },
-  plan: {
-    title: '기획서',
-    content: '기획서 내용',
-  },
-};
-// 나중에 docId 타입 지정
 export default function MainPage() {
+  const [isSideBarOpen, setIsSideBarOpen] = useState(true);
   const { docId } = useParams();
+  const navigate = useNavigate();
+  const { setCurrentTeamspaceId } = useTeamspaceStore();
+
+  useEffect(() => {
+    if (docId) {
+      // 현재 문서로부터 teamspaceId 동기화
+      apiClient.get(`/api/documents/${docId}`).then((res) => {
+        setCurrentTeamspaceId(res.data.data.teamspaceId);
+      });
+    } else {
+      // docId 없으면 첫 번째 팀스페이스의 첫 문서로 이동
+      apiClient.get('/api/teamspaces').then(async (res) => {
+        const list: TeamspaceSummary[] = res.data.data;
+        if (!list.length) return;
+        const first = list[0];
+        setCurrentTeamspaceId(first.teamspaceId);
+        const detail = await apiClient.get(`/api/teamspaces/${first.teamspaceId}`);
+        const ts: TeamspaceDetail = detail.data.data;
+        if (ts.documents.length) {
+          navigate(`/main/${ts.documents[0].id}`, { replace: true });
+        }
+      });
+    }
+  }, [docId, navigate, setCurrentTeamspaceId]);
+
   return (
-    <div className="flex-1 overflow-y-auto bg-white">
-      <div className="max-w-4xl mx-auto px-8 py-12 flex flex-col gap-6">
-        <div className="flex items-center gap-4">
-          <h1 className="text-5xl font-bold text-gray-900 tracking-tight">{Data[docId].title}</h1>
-          <button className="w-fit bg-purple-50 text-purple-600 text-xs font-bold px-2 py-1 rounded border border-purple-100">
-            AI 피드백
-          </button>
-        </div>
-        <article className="text-lg text-gray-700 leading-relaxed">{Data[docId].content}</article>
+    <div className="h-screen flex">
+      <MainSideBar
+        isSideBarOpen={isSideBarOpen}
+        toggleSideBar={() => setIsSideBarOpen((p) => !p)}
+      />
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <MainHeaderBar />
+        <MainContent />
       </div>
     </div>
   );

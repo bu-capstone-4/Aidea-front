@@ -1,0 +1,18 @@
+import { useState, useEffect } from 'react';
+import { apiClient } from '@/shared/apiClient';
+import type { TeamspaceSummary } from '@/mocks/types';
+
+export function useTeamspaces() {
+  const [teamspaces, setTeamspaces] = useState<TeamspaceSummary[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    apiClient
+      .get('/api/teamspaces')
+      .then((res) => setTeamspaces(res.data.data))
+      .catch(() => setTeamspaces([]))
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  return { teamspaces, isLoading };
+}

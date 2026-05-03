@@ -1,7 +1,10 @@
 import Button from '@/components/ui/Button';
 import AppMockup from '@/components/landing/AppMockup';
+import { useAuth } from '@/shared/useAuth';
 
 export default function HeroSection() {
+  const { login } = useAuth();
+
   return (
     <section className="flex flex-col items-center px-6 pb-20 pt-32 text-center">
       {/* Headline */}
@@ -20,7 +23,9 @@ export default function HeroSection() {
 
       {/* CTAs */}
       <div className="mb-16 flex items-center gap-3">
-        <Button size="lg">무료로 시작하기</Button>
+        <Button size="lg" onClick={login}>
+          무료로 시작하기
+        </Button>
       </div>
 
       {/* Product mockup */}
