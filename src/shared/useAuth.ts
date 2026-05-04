@@ -1,20 +1,15 @@
-import { useNavigate } from 'react-router';
 import { apiClient } from './apiClient';
 import { useAuthStore } from '@/store/authStore';
 
 export function useAuth() {
   const { isAuthenticated, isLoading, setAuthenticated } = useAuthStore();
-  const navigate = useNavigate();
 
-  const login = async () => {
-    try {
-      await apiClient.get('/api/oauth2/callback/github');
-      setAuthenticated(true);
-      navigate('/');
-    } catch (error) {
-      setAuthenticated(false);
-      // TODO: toast 시스템 도입 시 에러 메시지 표시로 교체
-      console.error('로그인에 실패했습니다.', error);
+  const login = () => {
+    if (import.meta.env.VITE_USE_REAL_AUTH === 'true') {
+      window.location.href = `${import.meta.env.VITE_API_BASE_URL}/oauth2/authorization/github`;
+    } else {
+      // MSW 목 모드: mock-login 엔드포인트로 세션 설정
+      apiClient.post('/api/dev/mock-login').then(() => setAuthenticated(true));
     }
   };
 
@@ -22,8 +17,7 @@ export function useAuth() {
     try {
       await apiClient.post('/api/auth/logout');
     } finally {
-      setAuthenticated(false);
-      navigate('/');
+      window.location.href = '/';
     }
   };
 

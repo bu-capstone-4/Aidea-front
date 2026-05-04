@@ -1,10 +1,21 @@
 import axios from 'axios';
 import { useAuthStore } from '@/store/authStore';
 
+// 목 모드(VITE_USE_REAL_AUTH !== 'true')에서는 빈 baseURL → MSW가 동일 오리진 요청을 인터셉트
+// 실제 모드에서는 VITE_API_BASE_URL 사용
+const baseURL =
+  import.meta.env.VITE_USE_REAL_AUTH === 'true' ? (import.meta.env.VITE_API_BASE_URL ?? '') : '';
+
 export const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL ?? '',
+  baseURL,
   headers: { 'Content-Type': 'application/json' },
-  withCredentials: true, // 쿠키 자동 전송
+  withCredentials: true,
+});
+
+// 인터셉터 없는 인스턴스 — refresh 전용으로만 사용
+const basicClient = axios.create({
+  baseURL,
+  withCredentials: true,
 });
 
 // ── Response interceptor: 401 시 refresh 후 재요청 ────────────
@@ -25,7 +36,6 @@ apiClient.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // refresh 시도 없이 그냥 에러를 반환할 엔드포인트
     // /api/auth/me : 인증 상태 확인용으로 401은 정상 응답
     // /api/auth/refresh : refresh 자체가 실패한 경우
     const skipRefreshUrls = ['/api/auth/me', '/api/auth/refresh'];
@@ -33,7 +43,6 @@ apiClient.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // 이미 갱신 중이면 대기열에 추가
     if (isRefreshing) {
       return new Promise((resolve, reject) => {
         failedQueue.push({
@@ -47,13 +56,14 @@ apiClient.interceptors.response.use(
     isRefreshing = true;
 
     try {
-      // body 없음 — refresh_token 쿠키가 자동으로 전송됨
-      await apiClient.post('/api/auth/refresh');
+      // basicClient 사용 — 인터셉터 재진입 없이 refresh 호출
+      await basicClient.post('/api/auth/refresh');
       flushQueue();
       return apiClient(originalRequest);
     } catch (refreshError) {
       flushQueue(refreshError);
       useAuthStore.getState().setAuthenticated(false);
+      window.location.href = '/';
       return Promise.reject(refreshError);
     } finally {
       isRefreshing = false;
