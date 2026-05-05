@@ -14,12 +14,12 @@ interface FeedbackState {
 }
 
 export const useFeedbackStore = create<FeedbackState>()((set) => ({
-  isSplitView: false,
+  isSplitView: true,
   documentId: '',
   feedbackId: '',
   status: 'PENDING', //초깃값 pending?
-  originalText: '',
-  revisedText: '',
+  originalText: 'aaa',
+  revisedText: 'ddddd',
 
   setPending: (docId, feedId) =>
     set({
