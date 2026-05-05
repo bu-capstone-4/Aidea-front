@@ -11,7 +11,7 @@ export default function MainContent() {
   const { user } = useCurrentUser();
 
   if (!docId || !doc) {
-    return <main className="flex-1 bg-white overflow-auto" />;
+    return <main className="flex-1 bg-white" />;
   }
 
   const collabUser = {
@@ -20,15 +20,8 @@ export default function MainContent() {
   };
 
   return (
-    <main className="flex-1 bg-white overflow-auto flex flex-col">
-      <div className="flex items-center px-6 py-3 border-b shrink-0">
-        <span className="text-sm text-gray-500">{doc.title}</span>
-      </div>
-
-      <div className="flex-1" style={{ minHeight: 0 }}>
-        {/* key={docId}: docId가 바뀌면 Y.Doc + WebSocket을 완전히 새로 생성 */}
-        <CollaborativeEditor key={docId} docId={docId} editable={true} user={collabUser} token="" />
-      </div>
+    <main className="flex-1 overflow-hidden flex flex-col bg-white">
+      <CollaborativeEditor key={docId} docId={docId} editable={true} user={collabUser} token="" />
     </main>
   );
 }
