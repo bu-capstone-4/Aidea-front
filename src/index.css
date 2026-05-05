@@ -81,11 +81,12 @@ body {
   min-height: 100%;
 }
 
-/* 에디터 콘텐츠 영역: 중앙 정렬 + 노션 스타일 여백 */
+/* 에디터 콘텐츠 영역: 중앙 정렬 + 노션 스타일 여백
+   상단 패딩 없음 — 문서 타이틀이 에디터 외부(MainContent)에 있으므로 */
 .bn-editor {
   max-width: 720px !important;
   margin: 0 auto !important;
-  padding: 80px 96px 200px !important;
+  padding: 8px 96px 200px !important;
   font-family:
     'Inter',
     'Noto Sans KR',
@@ -98,14 +99,14 @@ body {
   color: #1a1a1a !important;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 768px) {
   .bn-editor {
-    padding: 60px 40px 120px !important;
+    padding: 8px 40px 120px !important;
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 640px) {
   .bn-editor {
-    padding: 40px 20px 100px !important;
+    padding: 8px 20px 100px !important;
   }
 }

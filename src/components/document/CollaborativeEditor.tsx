@@ -12,11 +12,7 @@ interface Props {
 function CollaborativeEditor({ docId, editable, user, token }: Props) {
   const { editor } = useCollabEditor({ docId, editable, user, token });
 
-  return (
-    <div className="h-full overflow-y-auto bg-white">
-      <BlockNoteView editor={editor} theme="light" />
-    </div>
-  );
+  return <BlockNoteView editor={editor} theme="light" />;
 }
 
 export default CollaborativeEditor;
