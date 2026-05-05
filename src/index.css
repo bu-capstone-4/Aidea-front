@@ -81,12 +81,13 @@ body {
   min-height: 100%;
 }
 
-/* 에디터 콘텐츠 영역: 중앙 정렬 + 노션 스타일 여백
-   상단 패딩 없음 — 문서 타이틀이 에디터 외부(MainContent)에 있으므로 */
+/* 에디터 콘텐츠 영역
+   너비/패딩은 부모 컨테이너(MainContent의 div)가 통합 관리
+   BlockNote 내부 centering/padding을 비활성화해 타이틀과 픽셀 퍼펙트 정렬 */
 .bn-editor {
-  max-width: 720px !important;
-  margin: 0 auto !important;
-  padding: 8px 96px 200px !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 0 200px !important;
   font-family:
     'Inter',
     'Noto Sans KR',
@@ -97,16 +98,4 @@ body {
   font-size: 16px !important;
   line-height: 1.7 !important;
   color: #1a1a1a !important;
-}
-
-@media (max-width: 768px) {
-  .bn-editor {
-    padding: 8px 40px 120px !important;
-  }
-}
-
-@media (max-width: 640px) {
-  .bn-editor {
-    padding: 8px 20px 100px !important;
-  }
 }
