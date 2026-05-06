@@ -12,6 +12,10 @@ export default function MainContent() {
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
   const isSplitView = useFeedbackStore((state) => state.isSplitView);
 
+  const toggleFeedbackModal = () => {
+    setIsFeedbackModalOpen((prev) => !prev);
+  };
+
   if (!doc) {
     return <main className="flex-1 bg-white overflow-auto" />;
   }
@@ -19,7 +23,7 @@ export default function MainContent() {
   return (
     <main className="flex-1 bg-white overflow-auto">
       {isSplitView ? (
-        <SplitView doc={doc} />
+        <SplitView docId={docId} />
       ) : (
         <div className="max-w-4xl mx-auto px-8 py-12 flex flex-col gap-6">
           <div className="flex items-center gap-4">
@@ -28,7 +32,7 @@ export default function MainContent() {
               variant="feedback"
               size="sm"
               onClick={() => {
-                setIsFeedbackModalOpen(true);
+                toggleFeedbackModal();
               }}
             >
               AI 피드백
@@ -42,9 +46,9 @@ export default function MainContent() {
 
       <FeedbackModal
         isFeedbackModalOpen={isFeedbackModalOpen}
-        toggleFeedbackModal={() => {
-          setIsFeedbackModalOpen(false);
-        }}
+        toggleFeedbackModal={toggleFeedbackModal}
+        docId={docId}
+        originalText={doc.yjsBinary}
       />
     </main>
   );

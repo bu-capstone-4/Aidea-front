@@ -1,15 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Button from '@/components/ui/Button';
+import useFeedback from '@/hooks/useFeedback';
 
 interface FeedbackModalProps {
   isFeedbackModalOpen: boolean;
   toggleFeedbackModal: () => void;
+  docId: string;
+  originalText: string;
 }
 
 export default function FeedbackModal({
   isFeedbackModalOpen,
   toggleFeedbackModal,
+  docId,
+  originalText,
 }: FeedbackModalProps) {
+  const { requestFeedback } = useFeedback();
+  const [prompt, setPrompt] = useState('');
   if (!isFeedbackModalOpen) return null;
 
   return (
@@ -26,12 +33,19 @@ export default function FeedbackModal({
           <span className="bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded-md">선택사항</span>
         </div>
         <textarea
-          name=""
-          id=""
+          value={prompt}
+          onChange={(e) => setPrompt(e.target.value)}
           placeholder="선택사항입니다. 입력하지 않으면 아이디어와 비교해서 피드백을 해드립니다."
           className="w-full h-32 border border-gray-300 rounded-xl p-4 text-sm resize-none focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 placeholder:text-gray-400 transition-all leading-relaxed"
         ></textarea>
-        <Button variant="primary">피드백 요청</Button>
+        <Button
+          variant="primary"
+          onClick={() => {
+            requestFeedback(docId, prompt, toggleFeedbackModal, originalText);
+          }}
+        >
+          피드백 요청
+        </Button>
       </div>
     </div>
   );

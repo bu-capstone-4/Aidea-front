@@ -1,15 +1,17 @@
+import useFeedback from '@/hooks/useFeedback';
 import { useFeedbackStore } from '@/store/FeedbackStore';
 
 interface SplitViewProps {
-  doc: string;
+  docId: string;
 }
 
-export default function FeedbackSplitView({ doc }: SplitViewProps) {
-  const { originalText, revisedText, acceptFeedback } = useFeedbackStore();
+export default function FeedbackSplitView({ docId }: SplitViewProps) {
+  const { originalText, revisedText, feedbackId } = useFeedbackStore();
+  const { chooseVersion } = useFeedback();
 
   return (
     <div className="flex flex-col h-full w-full max-w-6xl mx-auto p-6 gap-4 bg-white">
-      <h1 className="text-2xl font-bold text-gray-900 tracking-tight">{doc.title}</h1>
+      <h1 className="text-2xl font-bold text-gray-900 tracking-tight">{docId.title}</h1>
 
       {/* 상단 배너 */}
       <div className="flex items-center justify-between px-4 py-3 bg-purple-50 text-purple-700 rounded-lg text-sm font-medium">
@@ -37,7 +39,10 @@ export default function FeedbackSplitView({ doc }: SplitViewProps) {
             </div>
           </div>
           <div className="p-4 border-t border-gray-100 group-hover:border-blue-100 bg-white transition-colors">
-            <button className="w-full py-3.5 rounded-lg bg-gray-100 text-gray-500 font-semibold shadow-sm hover:bg-blue-500 hover:text-white transition-all cursor-pointer group-hover:bg-blue-50 group-hover:text-blue-600">
+            <button
+              onClick={() => chooseVersion('ORIGINAL')}
+              className="w-full py-3.5 rounded-lg bg-gray-100 text-gray-500 font-semibold shadow-sm hover:bg-blue-500 hover:text-white transition-all cursor-pointer group-hover:bg-blue-50 group-hover:text-blue-600"
+            >
               이 버전 선택
             </button>
           </div>
@@ -65,7 +70,7 @@ export default function FeedbackSplitView({ doc }: SplitViewProps) {
 
           <div className="p-4 border-t border-gray-100 group-hover:border-blue-100 bg-white transition-colors">
             <button
-              onClick={acceptFeedback}
+              onClick={() => chooseVersion('AI', feedbackId)}
               className="w-full py-3.5 rounded-lg bg-gray-100 text-gray-500 font-semibold shadow-sm hover:bg-blue-500 hover:text-white transition-all cursor-pointer group-hover:bg-blue-50 group-hover:text-blue-600"
             >
               이 버전 선택
