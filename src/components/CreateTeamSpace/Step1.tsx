@@ -8,9 +8,12 @@ interface Props {
 
 export default function Step1({ form, onChange, onNext }: Props) {
   const toggleDoc = (doc: DocType) => {
+    if (doc === 'IDEA') return;
+
     const next = form.selectedDocs.includes(doc)
       ? form.selectedDocs.filter((d) => d !== doc)
       : [...form.selectedDocs, doc];
+
     onChange({ selectedDocs: next });
   };
 
@@ -49,12 +52,12 @@ export default function Step1({ form, onChange, onNext }: Props) {
           <p className="text-xs text-gray-500 mb-2">필요한 기획 문서 선택</p>
           <div className="grid grid-cols-2 gap-2">
             {DOC_OPTIONS.map((doc) => {
-              const isSelected = form.selectedDocs.includes(doc);
+              const isSelected = form.selectedDocs.includes(doc.value);
               return (
                 <button
-                  key={doc}
+                  key={doc.value}
                   type="button"
-                  onClick={() => toggleDoc(doc)}
+                  onClick={() => toggleDoc(doc.value)}
                   className={
                     'flex justify-between items-center px-3 py-2 text-sm rounded-lg border transition-colors ' +
                     (isSelected
@@ -62,7 +65,7 @@ export default function Step1({ form, onChange, onNext }: Props) {
                       : 'border-gray-200 bg-white text-gray-700 hover:border-blue-200 hover:bg-blue-50')
                   }
                 >
-                  <span>{doc}</span>
+                  <span>{doc.label}</span>
                   {isSelected && <span className="text-green-500 text-sm leading-none">✓</span>}
                 </button>
               );

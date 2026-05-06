@@ -10,14 +10,18 @@ interface Props {
 export default function Step2({ form, onChange, onBack, onSubmit }: Props) {
   // 이메일 수정 (id 기반)
   const updateEmail = (id: string, value: string) => {
-    const next = form.emails.map((e) => (e.id === id ? { ...e, value } : e));
+    const next = form.emails.map((email) =>
+      email.id === id ? { ...email, value, error: validateEmail(value) } : email
+    );
     onChange({ emails: next });
   };
 
   // 이메일 추가
   const addEmailField = () => {
+    if (form.emails.length >= 8) return;
+
     onChange({
-      emails: [...form.emails, { id: crypto.randomUUID(), value: '' }],
+      emails: [...form.emails, { id: crypto.randomUUID(), value: '', error: null }],
     });
   };
 
@@ -27,6 +31,13 @@ export default function Step2({ form, onChange, onBack, onSubmit }: Props) {
       emails: form.emails.filter((e) => e.id !== id),
     });
   };
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  function validateEmail(value: string) {
+    if (!value.trim()) return null;
+    return emailRegex.test(value.trim()) ? null : '올바른 이메일 형식이 아닙니다.';
+  }
 
   return (
     <div className="flex flex-col min-h-[440px]">
@@ -43,7 +54,7 @@ export default function Step2({ form, onChange, onBack, onSubmit }: Props) {
         {form.emails.map((email) => (
           <div
             key={email.id}
-            className="flex items-center gap-3 px-4 py-2.5 border border-gray-200 rounded-lg focus-within:border-blue-400 transition-colors"
+            className="flex items-Fcenter gap-3 px-4 py-2.5 border border-gray-200 rounded-lg focus-within:border-blue-400 transition-colors"
           >
             {/* 아이콘 */}
             <div className="w-5 h-5 rounded-full bg-gray-100 border border-gray-300 shrink-0" />
