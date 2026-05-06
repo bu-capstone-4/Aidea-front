@@ -26,7 +26,7 @@ export default function MainContent() {
         타이틀과 에디터를 같은 컨테이너 안에 배치 — 너비/패딩을 한 곳에서 관리해
         BlockNote 내부 CSS를 따로 맞출 필요 없이 픽셀 퍼펙트 정렬 보장
       */}
-      <div className="max-w-180 mx-auto px-24 md:px-10 sm:px-5 pt-20">
+      <div className="max-w-180 mx-auto px-24 md:px-10 sm:px-5 pt-5">
         <div className="flex items-center gap-3 pb-4">
           <h1 className="text-4xl font-bold text-[#1a1a1a] tracking-tight leading-tight">
             {doc.title}

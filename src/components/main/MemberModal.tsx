@@ -53,7 +53,7 @@ export default function MemberModal({ isMemberModalOpen, toggleMemberModal }: Me
           </Button>
         </div>
 
-        <hr className="bg-border h-px border-none" />
+        <hr className="h-px border-none" />
 
         <div className="text-xs text-gray-500">멤버</div>
         <div className="flex flex-col gap-3">
@@ -91,11 +91,11 @@ export default function MemberModal({ isMemberModalOpen, toggleMemberModal }: Me
           ))}
         </div>
 
-        <hr className="bg-border h-px border-none" />
+        <hr className="h-px border-none" />
 
         <div>
           <div className="text-xs text-gray-500 mb-2">새 멤버 초대</div>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
             <input
               type="text"
               value={email}

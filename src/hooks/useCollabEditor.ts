@@ -32,9 +32,7 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
   const initializedRef = useRef(false);
 
   useEffect(() => {
-    const ws = new WebSocket(
-      `${import.meta.env.VITE_WS_BASE_URL}/ws/documents/${docId}?token=${token}`
-    );
+    const ws = new WebSocket(`${import.meta.env.VITE_WS_BASE_URL}/ws/documents/${docId}`);
 
     ws.onopen = () => setConnected(true);
     ws.onclose = () => {
