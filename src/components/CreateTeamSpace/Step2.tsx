@@ -3,11 +3,11 @@ import { type TeamSpaceForm } from './types';
 interface Props {
   form: TeamSpaceForm;
   onChange: (patch: Partial<TeamSpaceForm>) => void;
-  onBack: () => void;
+  //onBack: () => void;
   onSubmit: () => void;
 }
 
-export default function Step2({ form, onChange, onBack, onSubmit }: Props) {
+export default function Step2({ form, onChange, onSubmit }: Props) {
   // 이메일 수정 (id 기반)
   const updateEmail = (id: string, value: string) => {
     const next = form.emails.map((email) =>
@@ -92,15 +92,7 @@ export default function Step2({ form, onChange, onBack, onSubmit }: Props) {
       </button>
 
       {/* Footer */}
-      <div className="flex justify-between items-center mt-6">
-        <button
-          type="button"
-          onClick={onBack}
-          className="flex items-center gap-2 px-6 py-2.5 border border-gray-300 hover:bg-gray-50 text-gray-500 text-sm font-medium rounded-lg transition-colors"
-        >
-          ← 이전
-        </button>
-
+      <div className="flex justify-end items-center mt-6">
         <button
           type="button"
           onClick={onSubmit}
