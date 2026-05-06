@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import * as Y from 'yjs';
 import { WebsocketProvider } from 'y-websocket';
 import { useCreateBlockNote } from '@blocknote/react';
+import { ko } from '@blocknote/core/locales';
 
 function base64ToUint8Array(b64: string): Uint8Array {
   return Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
@@ -86,6 +87,7 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
       fragment: doc.getXmlFragment('document-store'),
       user: { name: user.name, color: user.color },
     },
+    dictionary: ko,
     editable,
   });
 
