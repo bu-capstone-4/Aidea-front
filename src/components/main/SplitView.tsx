@@ -2,16 +2,16 @@ import useFeedback from '@/hooks/useFeedback';
 import { useFeedbackStore } from '@/store/FeedbackStore';
 
 interface SplitViewProps {
-  docId: string;
+  title: string;
 }
 
-export default function FeedbackSplitView({ docId }: SplitViewProps) {
+export default function FeedbackSplitView({ title }: SplitViewProps) {
   const { originalText, revisedText, feedbackId } = useFeedbackStore();
   const { chooseVersion } = useFeedback();
 
   return (
     <div className="flex flex-col h-full w-full max-w-6xl mx-auto p-6 gap-4 bg-white">
-      <h1 className="text-2xl font-bold text-gray-900 tracking-tight">{docId.title}</h1>
+      <h1 className="text-2xl font-bold text-gray-900 tracking-tight">{title}</h1>
 
       {/* 상단 배너 */}
       <div className="flex items-center justify-between px-4 py-3 bg-purple-50 text-purple-700 rounded-lg text-sm font-medium">

@@ -23,7 +23,7 @@ export default function MainContent() {
   return (
     <main className="flex-1 bg-white overflow-auto">
       {isSplitView ? (
-        <SplitView docId={docId} />
+        <SplitView title={doc.title} />
       ) : (
         <div className="max-w-4xl mx-auto px-8 py-12 flex flex-col gap-6">
           <div className="flex items-center gap-4">
@@ -47,7 +47,7 @@ export default function MainContent() {
       <FeedbackModal
         isFeedbackModalOpen={isFeedbackModalOpen}
         toggleFeedbackModal={toggleFeedbackModal}
-        docId={docId}
+        docId={docId ?? ''}
         originalText={doc.yjsBinary}
       />
     </main>
