@@ -18,11 +18,8 @@ export default function useFeedback() {
       const { feedbackId } = res.data.data;
       setPending(documentId, feedbackId);
       setDone(originalText, '서버에서 받아온 revisedText');
-      const { message } = res.data;
-      alert(message);
     } catch (error) {
       console.error(error);
-      alert('피드백 요청 실패');
     }
   };
 
@@ -33,11 +30,8 @@ export default function useFeedback() {
         const { yjsBinary } = res.data.data;
         console.log(yjsBinary);
         acceptFeedback();
-        const { message } = res.data;
-        alert(message);
       } catch (error) {
         console.error(error);
-        alert('버전 선택 실패');
       }
     } else {
       acceptFeedback();
