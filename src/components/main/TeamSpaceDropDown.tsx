@@ -24,7 +24,7 @@ export default function TeamSpaceDropDown() {
     setCurrentTeamspaceId(tsId);
     const res = await apiClient.get(`/api/teamspaces/${tsId}`);
     const ts: TeamspaceDetail = res.data.data;
-    if (ts.documents.length) {
+    if (ts.documents?.length) {
       navigate(`/main/${ts.documents[0].id}`);
     }
     setIsDropDownOpen(false);
@@ -49,7 +49,7 @@ export default function TeamSpaceDropDown() {
           <div className="p-2 border-b border-gray-100 mb-1">
             <div className="text-xl font-bold truncate">{teamspace?.name}</div>
             <div className="text-xs text-gray-500 mb-2">
-              멤버 {teamspace?.members.length ?? 0}명
+              멤버 {teamspace?.members?.length ?? 0}명
             </div>
             <Button
               variant="ghost"

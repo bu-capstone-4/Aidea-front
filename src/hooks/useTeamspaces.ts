@@ -9,7 +9,7 @@ export function useTeamspaces() {
   useEffect(() => {
     apiClient
       .get('/api/teamspaces')
-      .then((res) => setTeamspaces(res.data.data))
+      .then((res) => setTeamspaces(res.data.data.teamspaces))
       .catch(() => setTeamspaces([]))
       .finally(() => setIsLoading(false));
   }, []);
