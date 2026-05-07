@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { DOC_OPTIONS, type TeamSpaceForm } from './types';
 import Step1 from './Step1';
@@ -103,14 +103,7 @@ export default function CreateTeamSpace() {
       <div className="bg-white rounded-2xl border border-gray-200 w-full max-w-[600px] mx-4 p-10">
         {step === 1 && <Step1 form={form} onChange={updateForm} onNext={handleCreateTeamspace} />}
 
-        {step === 2 && (
-          <Step2
-            form={form}
-            onChange={updateForm}
-            onBack={() => setStep(1)}
-            onSubmit={handleInviteMembers}
-          />
-        )}
+        {step === 2 && <Step2 form={form} onChange={updateForm} onSubmit={handleInviteMembers} />}
 
         {errorMessage && <p className="mt-3 text-sm text-red-500">{errorMessage}</p>}
       </div>
