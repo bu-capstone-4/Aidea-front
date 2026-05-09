@@ -53,6 +53,7 @@ export default function Step1({ form, onChange, onNext }: Props) {
           <div className="grid grid-cols-2 gap-2">
             {DOC_OPTIONS.map((doc) => {
               const isSelected = form.selectedDocs.includes(doc.value);
+              const isRequired = doc.value === 'IDEA';
               return (
                 <button
                   key={doc.value}
@@ -65,7 +66,16 @@ export default function Step1({ form, onChange, onNext }: Props) {
                       : 'border-gray-200 bg-white text-gray-700 hover:border-blue-200 hover:bg-blue-50')
                   }
                 >
-                  <span>{doc.label}</span>
+                  <span className="flex items-center gap-1.5">
+                    {doc.label}
+                    {isRequired && (
+                      <span className="flex items-center gap-1 text-[10px] font-medium text-blue-500">
+                        <span className="h-1 w-1 rounded-full bg-blue-500" />
+                        필수
+                      </span>
+                    )}
+                  </span>
+
                   {isSelected && <span className="text-green-500 text-sm leading-none">✓</span>}
                 </button>
               );
