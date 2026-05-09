@@ -3,7 +3,6 @@ import { type TeamSpaceForm } from './types';
 interface Props {
   form: TeamSpaceForm;
   onChange: (patch: Partial<TeamSpaceForm>) => void;
-  //onBack: () => void;
   onSubmit: () => void;
 }
 
