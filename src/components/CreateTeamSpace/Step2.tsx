@@ -3,21 +3,24 @@ import { type TeamSpaceForm } from './types';
 interface Props {
   form: TeamSpaceForm;
   onChange: (patch: Partial<TeamSpaceForm>) => void;
-  onBack: () => void;
   onSubmit: () => void;
 }
 
-export default function Step2({ form, onChange, onBack, onSubmit }: Props) {
+export default function Step2({ form, onChange, onSubmit }: Props) {
   // 이메일 수정 (id 기반)
   const updateEmail = (id: string, value: string) => {
-    const next = form.emails.map((e) => (e.id === id ? { ...e, value } : e));
+    const next = form.emails.map((email) =>
+      email.id === id ? { ...email, value, error: validateEmail(value) } : email
+    );
     onChange({ emails: next });
   };
 
   // 이메일 추가
   const addEmailField = () => {
+    if (form.emails.length >= 8) return;
+
     onChange({
-      emails: [...form.emails, { id: crypto.randomUUID(), value: '' }],
+      emails: [...form.emails, { id: crypto.randomUUID(), value: '', error: null }],
     });
   };
 
@@ -27,6 +30,13 @@ export default function Step2({ form, onChange, onBack, onSubmit }: Props) {
       emails: form.emails.filter((e) => e.id !== id),
     });
   };
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  function validateEmail(value: string) {
+    if (!value.trim()) return null;
+    return emailRegex.test(value.trim()) ? null : '올바른 이메일 형식이 아닙니다.';
+  }
 
   return (
     <div className="flex flex-col min-h-[440px]">
@@ -57,6 +67,8 @@ export default function Step2({ form, onChange, onBack, onSubmit }: Props) {
               className="flex-1 text-sm text-gray-500 placeholder-gray-400 outline-none bg-transparent"
             />
 
+            {email.error && <p className="mt-1 text-xs text-red-500">{email.error}</p>}
+
             {/* 삭제 버튼 */}
             <button
               type="button"
@@ -79,15 +91,7 @@ export default function Step2({ form, onChange, onBack, onSubmit }: Props) {
       </button>
 
       {/* Footer */}
-      <div className="flex justify-between items-center mt-6">
-        <button
-          type="button"
-          onClick={onBack}
-          className="flex items-center gap-2 px-6 py-2.5 border border-gray-300 hover:bg-gray-50 text-gray-500 text-sm font-medium rounded-lg transition-colors"
-        >
-          ← 이전
-        </button>
-
+      <div className="flex justify-end items-center mt-6">
         <button
           type="button"
           onClick={onSubmit}
