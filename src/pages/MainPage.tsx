@@ -22,7 +22,7 @@ export default function MainPage() {
     } else {
       // docId 없으면 첫 번째 팀스페이스의 첫 문서로 이동
       apiClient.get('/api/teamspaces').then(async (res) => {
-        const list: TeamspaceSummary[] = res.data.data;
+        const list: TeamspaceSummary[] = res.data.data.teamspaces;
         if (!list.length) return;
         const first = list[0];
         setCurrentTeamspaceId(first.teamspaceId);

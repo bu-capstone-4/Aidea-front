@@ -11,6 +11,9 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@blocknote/core": "^0.48.1",
+    "@blocknote/mantine": "^0.48.1",
+    "@blocknote/react": "^0.48.1",
     "@tailwindcss/vite": "^4.2.2",
     "axios": "^1.15.2",
     "clsx": "^2.1.1",
@@ -20,6 +23,8 @@
     "react-router": "^7.14.0",
     "tailwind-merge": "^3.5.0",
     "tailwindcss": "^4.2.2",
+    "y-websocket": "^3.0.0",
+    "yjs": "^13.6.30",
     "zustand": "^5.0.12"
   },
   "lint-staged": {
