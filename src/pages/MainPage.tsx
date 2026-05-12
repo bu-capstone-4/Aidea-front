@@ -15,24 +15,31 @@ export default function MainPage() {
 
   useEffect(() => {
     if (docId) {
-      // 현재 문서로부터 teamspaceId 동기화
       apiClient.get(`/api/documents/${docId}`).then((res) => {
         setCurrentTeamspaceId(res.data.data.teamspaceId);
       });
-    } else {
-      // docId 없으면 첫 번째 팀스페이스의 첫 문서로 이동
-      apiClient.get('/api/teamspaces').then(async (res) => {
-        const list: TeamspaceSummary[] = res.data.data.teamspaces;
-        if (!list.length) return;
-        const first = list[0];
-        setCurrentTeamspaceId(first.teamspaceId);
-        const detail = await apiClient.get(`/api/teamspaces/${first.teamspaceId}`);
-        const ts: TeamspaceDetail = detail.data.data;
-        if (ts.documents.length) {
-          navigate(`/main/${ts.documents[0].id}`, { replace: true });
-        }
-      });
+      return;
     }
+
+    apiClient.get('/api/teamspaces').then(async (res) => {
+      const data = res.data.data;
+      const list: TeamspaceSummary[] = Array.isArray(data) ? data : (data?.teamspaces ?? []);
+
+      if (!list.length) {
+        navigate('/create', { replace: true });
+        return;
+      }
+
+      const first = list[0];
+      setCurrentTeamspaceId(first.teamspaceId);
+
+      const detail = await apiClient.get(`/api/teamspaces/${first.teamspaceId}`);
+      const ts: TeamspaceDetail = detail.data.data;
+
+      if (ts.documents.length) {
+        navigate(`/main/${ts.documents[0].id}`, { replace: true });
+      }
+    });
   }, [docId, navigate, setCurrentTeamspaceId]);
 
   return (

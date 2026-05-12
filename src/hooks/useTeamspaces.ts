@@ -9,7 +9,12 @@ export function useTeamspaces() {
   useEffect(() => {
     apiClient
       .get('/api/teamspaces')
-      .then((res) => setTeamspaces(res.data.data.teamspaces))
+      .then((res) => {
+        const data = res.data.data;
+        const list: TeamspaceSummary[] = Array.isArray(data) ? data : (data?.teamspaces ?? []);
+
+        setTeamspaces(list);
+      })
       .catch(() => setTeamspaces([]))
       .finally(() => setIsLoading(false));
   }, []);
