@@ -20,6 +20,11 @@ export default function TeamSpaceDropDown() {
   const { teamspaces } = useTeamspaces();
   const { teamspace } = useTeamspaceDetail(currentTeamspaceId);
 
+  const handleCreateTeamspace = () => {
+    setIsDropDownOpen(false);
+    navigate('/create');
+  };
+
   const handleSwitchTeamspace = async (tsId: string) => {
     setCurrentTeamspaceId(tsId);
     const res = await apiClient.get(`/api/teamspaces/${tsId}`);
@@ -97,6 +102,15 @@ export default function TeamSpaceDropDown() {
           </div>
 
           <div className="border-t border-gray-100 mt-1 pt-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start pl-2 text-blue-600 hover:bg-blue-50 hover:text-blue-700"
+              onClick={handleCreateTeamspace}
+            >
+              + 팀스페이스 생성
+            </Button>
+
             <Button
               variant="ghost"
               size="sm"
