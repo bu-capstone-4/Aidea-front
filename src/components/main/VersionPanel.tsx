@@ -2,7 +2,7 @@ import Button from '../ui/Button';
 
 interface VersionPanelProps {
   panelTitle: string;
-  content: string;
+  content: string | Uint8Array;
   aiMark?: boolean;
   onSelect: () => void;
 }

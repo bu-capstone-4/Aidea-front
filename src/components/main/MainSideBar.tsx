@@ -18,6 +18,7 @@ import { useTeamspaceStore } from '@/store/teamspaceStore';
 import { useTeamspaceDetail } from '@/hooks/useTeamspaceDetail';
 import type { DocumentType } from '@/mocks/types';
 import type { ElementType } from 'react';
+import { apiClient } from '@/shared/apiClient';
 
 const DOC_ICON: Record<DocumentType, ElementType> = {
   IDEA: MdLightbulb,
@@ -38,6 +39,22 @@ export default function MainSideBar({ isSideBarOpen, toggleSideBar }: SideBarPro
   const { user } = useCurrentUser();
   const { currentTeamspaceId } = useTeamspaceStore();
   const { teamspace } = useTeamspaceDetail(currentTeamspaceId);
+
+  const handleAddDocument = async () => {
+    if (!currentTeamspaceId) return;
+    try {
+      // 8080 빼고 원래대로 복구
+      const res = await apiClient.post('/api/documents', {
+        teamspaceId: currentTeamspaceId,
+        type: 'IDEA',
+        title: '새 문서',
+      });
+      const newId = res.data?.data?.id || res.data?.id;
+      navigate(`/main/${newId}`);
+    } catch (error) {
+      console.error('문서 생성 실패:', error);
+    }
+  };
 
   return (
     <aside
@@ -96,6 +113,7 @@ export default function MainSideBar({ isSideBarOpen, toggleSideBar }: SideBarPro
           size={isSideBarOpen ? 'sm' : 'icon'}
           icon={<MdAdd size={18} className="shrink-0" />}
           className={cn('text-gray-500', isSideBarOpen && 'w-full justify-start')}
+          onClick={handleAddDocument}
         >
           추가하기
         </Button>

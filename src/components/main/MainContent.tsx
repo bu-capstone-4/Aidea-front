@@ -7,6 +7,7 @@ import FeedbackModal from './FeedbackModal';
 import { useState } from 'react';
 import SplitView from './SplitView';
 import { useFeedbackStore } from '@/store/FeedbackStore';
+import QuestionPanel from './QuestionPanel';
 
 const CURSOR_COLORS = ['#1971c2', '#e03131', '#2f9e44', '#f08c00', '#7048e8'];
 
@@ -16,6 +17,7 @@ export default function MainContent() {
   const { user } = useCurrentUser();
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
   const isSplitView = useFeedbackStore((state) => state.isSplitView);
+  const status = useFeedbackStore((state) => state.status);
 
   const toggleFeedbackModal = () => {
     setIsFeedbackModalOpen((prev) => !prev);
@@ -60,6 +62,23 @@ export default function MainContent() {
         docId={docId ?? ''}
         originalText={doc.yjsBinary}
       />
+
+      {(status === 'PENDING' || status === 'ANSWERING') && (
+        <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-[999]">
+          <div className="bg-white p-10 rounded-2xl shadow-xl flex flex-col items-center">
+            <div className="h-12 w-12 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
+            <p className="mt-6 text-gray-700 font-medium">AI가 문서를 분석하고 있습니다...</p>
+          </div>
+        </div>
+      )}
+
+      {status === 'QUESTIONING' && (
+        <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-[999]">
+          <div className="bg-white rounded-2xl shadow-xl overflow-hidden w-full max-w-2xl max-h-[85vh] overflow-y-auto">
+            <QuestionPanel variant="fullscreen" />
+          </div>
+        </div>
+      )}
     </main>
   );
 }

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { FeedbackStatus } from '@/mocks/types';
+import type { Question } from '@/types/document';
 
 interface FeedbackState {
   isSplitView: boolean;
@@ -7,19 +8,23 @@ interface FeedbackState {
   feedbackId: string;
   status: FeedbackStatus;
   originalText: string;
-  revisedText: string;
+  questions: Question[] | null;
+  revisedText: string | Uint8Array;
   setPending: (docId: string, feedId: string) => void;
-  setDone: (original: string, revised: string) => void;
+  setDone: (original: string, revised: string | Uint8Array) => void;
   acceptFeedback: () => void;
+  setAnswering: () => void;
+  setQuestioning: (questions: Question[]) => void;
 }
 
 export const useFeedbackStore = create<FeedbackState>()((set) => ({
   isSplitView: false,
   documentId: '',
   feedbackId: '',
-  status: 'PENDING', //초깃값 pending?
+  status: 'IDLE',
   originalText: '',
   revisedText: '',
+  questions: null,
 
   setPending: (docId, feedId) =>
     set({
@@ -40,5 +45,17 @@ export const useFeedbackStore = create<FeedbackState>()((set) => ({
     set({
       status: 'ACCEPTED',
       isSplitView: false,
+    }),
+
+  setQuestioning: (questions) =>
+    set({
+      questions: questions,
+      status: 'QUESTIONING',
+    }),
+
+  setAnswering: () =>
+    set({
+      questions: null,
+      status: 'ANSWERING',
     }),
 }));
