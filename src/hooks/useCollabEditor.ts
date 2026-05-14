@@ -3,6 +3,8 @@ import * as Y from 'yjs';
 import { WebsocketProvider } from 'y-websocket';
 import { useCreateBlockNote } from '@blocknote/react';
 import { ko } from '@blocknote/core/locales';
+import { handleSocketError } from '@/shared/socketErrorHandler';
+import type { DocumentServerMessage } from '@/types/socket';
 
 function base64ToUint8Array(b64: string): Uint8Array {
   return Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
@@ -42,23 +44,32 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
     };
 
     ws.onmessage = (event: MessageEvent<string>) => {
-      const msg = JSON.parse(event.data) as {
-        type: string;
-        updates?: string[];
-        update?: string;
-      };
+      const msg = JSON.parse(event.data) as DocumentServerMessage;
 
-      if (msg.type === 'doc:init') {
-        for (const b64 of msg.updates ?? []) {
-          Y.applyUpdate(doc, base64ToUint8Array(b64), 'remote');
+      // Yjs 동기화 이벤트: type 필드 사용
+      if ('type' in msg) {
+        if (msg.type === 'doc:init') {
+          for (const b64 of msg.updates ?? []) {
+            Y.applyUpdate(doc, base64ToUint8Array(b64), 'remote');
+          }
+          initializedRef.current = true;
+          return;
         }
-        initializedRef.current = true;
+        if (msg.type === 'doc:update' && msg.update) {
+          if (!initializedRef.current) return;
+          Y.applyUpdate(doc, base64ToUint8Array(msg.update), 'remote');
+        }
         return;
       }
 
-      if (msg.type === 'doc:update' && msg.update) {
-        if (!initializedRef.current) return;
-        Y.applyUpdate(doc, base64ToUint8Array(msg.update), 'remote');
+      // 비즈니스 이벤트: event 필드 사용
+      if (msg.event === 'error') {
+        handleSocketError({ code: msg.code, message: msg.message });
+        return;
+      }
+
+      if (msg.event === 'feedback:error') {
+        handleSocketError({ code: msg.data.code, message: msg.data.message });
       }
     };
 
