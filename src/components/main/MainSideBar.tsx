@@ -36,7 +36,7 @@ export default function MainSideBar({ isSideBarOpen, toggleSideBar }: SideBarPro
   const navigate = useNavigate();
   const { docId } = useParams();
   const { user } = useCurrentUser();
-  const { currentTeamspaceId } = useTeamspaceStore();
+  const { currentTeamspaceId, onlineMembers } = useTeamspaceStore();
   const { teamspace } = useTeamspaceDetail(currentTeamspaceId);
 
   return (
@@ -74,6 +74,8 @@ export default function MainSideBar({ isSideBarOpen, toggleSideBar }: SideBarPro
       <div className={cn('flex flex-col p-2 space-y-1', !isSideBarOpen && 'items-center')}>
         {teamspace?.documents.map((doc) => {
           const Icon = DOC_ICON[doc.type] ?? MdDescription;
+          const viewers = onlineMembers.filter((member) => member.currentDocumentId === doc.id);
+
           return (
             <Button
               key={doc.id}
@@ -81,12 +83,38 @@ export default function MainSideBar({ isSideBarOpen, toggleSideBar }: SideBarPro
               size={isSideBarOpen ? 'sm' : 'icon'}
               icon={<Icon size={18} className="shrink-0" />}
               className={cn(
-                isSideBarOpen && 'w-full justify-start',
+                isSideBarOpen && 'w-full justify-start overflow-hidden',
                 docId === doc.id && 'bg-primary-light text-primary-dark'
               )}
               onClick={() => navigate(`/main/${doc.id}`)}
             >
-              <span className="font-semibold">{doc.title}</span>
+              <span className="min-w-0 flex-1 truncate font-semibold">{doc.title}</span>
+              {isSideBarOpen && viewers.length > 0 && (
+                <div className="ml-auto flex shrink-0 -space-x-1">
+                  {viewers.slice(0, 3).map((member) => (
+                    <div
+                      key={member.userId}
+                      className="flex size-5 items-center justify-center overflow-hidden rounded-full border border-white bg-primary-light text-[10px] font-bold text-primary-dark"
+                      title={member.name}
+                    >
+                      {member.profileImageUrl ? (
+                        <img
+                          src={member.profileImageUrl}
+                          alt={member.name}
+                          className="size-full object-cover"
+                        />
+                      ) : (
+                        member.name.slice(0, 1).toUpperCase()
+                      )}
+                    </div>
+                  ))}
+                  {viewers.length > 3 && (
+                    <div className="flex size-5 items-center justify-center rounded-full border border-white bg-gray-200 text-[10px] font-bold text-gray-600">
+                      +{viewers.length - 3}
+                    </div>
+                  )}
+                </div>
+              )}
             </Button>
           );
         })}
