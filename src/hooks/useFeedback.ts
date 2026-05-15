@@ -1,5 +1,6 @@
 import { apiClient } from '@/shared/apiClient';
 import { useFeedbackStore } from '@/store/FeedbackStore';
+import * as Y from 'yjs';
 
 export default function useFeedback() {
   const { setPending, setDone, acceptFeedback } = useFeedbackStore();
@@ -17,38 +18,35 @@ export default function useFeedback() {
       });
       const { feedbackId } = res.data.data;
       setPending(documentId, feedbackId);
-      const eventSource = new EventSource(
-        `${import.meta.env.VITE_API_BASE_URL}/api/feedbacks / ${feedbackId} / events`,
-        { withCredentials: true }
-      );
-      eventSource.addEventListener('feedback:questioning', (e) => {
-        const data = JSON.parse(e.data);
-        console.log(data);
-      });
-      eventSource.addEventListener('feedback:ready', (e) => {
-        const data = JSON.parse(e.data);
-        const yjsBinary = Uint8Array.from(atob(data.yjsBinary), (c) => c.charCodeAt(0));
-        setDone(originalText, yjsBinary);
-        eventSource.close();
-      });
-      // setDone(originalText, '서버에서 받아온 revisedText');
+      setDone(originalText, '서버에서 받아온 revisedText');
     } catch (error) {
       console.error(error);
     }
   };
 
-  const chooseVersion = async (target: 'ORIGINAL' | 'AI', feedbackId?: string) => {
-    if (target === 'AI' && feedbackId) {
-      try {
-        const res = await apiClient.post(`/api/feedbacks/${feedbackId}/accept`);
+  const chooseVersion = async (
+    target: 'ORIGINAL' | 'AI',
+    feedbackId: string,
+    documentId: string,
+    ydoc: Y.Doc
+  ) => {
+    try {
+      const res = await apiClient.post(
+        `/api/documents/${documentId}/feedback/${feedbackId}/select`,
+        {
+          selectedVersion: target,
+        }
+      );
+      if (target === 'AI' && feedbackId) {
         const { yjsBinary } = res.data.data;
-        console.log(yjsBinary);
+        const binaryUpdate = Uint8Array.from(atob(yjsBinary), (c) => c.charCodeAt(0));
+        Y.applyUpdate(ydoc, binaryUpdate);
         acceptFeedback();
-      } catch (error) {
-        console.error(error);
+      } else {
+        acceptFeedback();
       }
-    } else {
-      acceptFeedback();
+    } catch (error) {
+      console.error(error);
     }
   };
 

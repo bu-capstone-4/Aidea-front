@@ -3,6 +3,7 @@ import * as Y from 'yjs';
 import { WebsocketProvider } from 'y-websocket';
 import { useCreateBlockNote } from '@blocknote/react';
 import { ko } from '@blocknote/core/locales';
+import { useFeedbackStore } from '@/store/FeedbackStore';
 
 function base64ToUint8Array(b64: string): Uint8Array {
   return Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
@@ -31,6 +32,13 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
 
   const [connected, setConnected] = useState(false);
   const initializedRef = useRef(false);
+  const { setYdoc } = useFeedbackStore();
+
+  useEffect(() => {
+    if (doc) {
+      setYdoc(doc);
+    }
+  }, [doc, setYdoc]);
 
   useEffect(() => {
     const ws = new WebSocket(`${import.meta.env.VITE_WS_BASE_URL}/ws/documents/${docId}`);

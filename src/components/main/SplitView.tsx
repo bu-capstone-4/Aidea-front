@@ -7,7 +7,7 @@ interface SplitViewProps {
 }
 
 export default function FeedbackSplitView({ title }: SplitViewProps) {
-  const { originalText, revisedText, feedbackId } = useFeedbackStore();
+  const { originalText, revisedText, feedbackId, documentId, ydoc } = useFeedbackStore();
   const { chooseVersion } = useFeedback();
 
   return (
@@ -29,14 +29,22 @@ export default function FeedbackSplitView({ title }: SplitViewProps) {
           panelTitle="수정 전"
           content={originalText}
           aiMark={false}
-          onSelect={() => chooseVersion('ORIGINAL')}
+          onSelect={() => {
+            if (ydoc) {
+              chooseVersion('ORIGINAL', documentId, feedbackId, ydoc);
+            }
+          }}
         />
 
         <VersionPanel
           panelTitle="AI 피드백 후"
           content={revisedText}
           aiMark={true}
-          onSelect={() => chooseVersion('AI', feedbackId)}
+          onSelect={() => {
+            if (ydoc) {
+              chooseVersion('AI', documentId, feedbackId, ydoc);
+            }
+          }}
         />
       </div>
     </div>
