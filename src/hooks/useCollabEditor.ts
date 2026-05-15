@@ -54,6 +54,8 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
         type: string;
         updates?: string[];
         update?: string;
+        event: string;
+        data: { yjsBinary: string };
       };
 
       if (msg.type === 'doc:init') {
@@ -67,6 +69,12 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
       if (msg.type === 'doc:update' && msg.update) {
         if (!initializedRef.current) return;
         Y.applyUpdate(doc, base64ToUint8Array(msg.update), 'remote');
+      }
+
+      if (msg.event === 'feedback:version-applied') {
+        const { yjsBinary } = msg.data;
+        Y.applyUpdate(doc, base64ToUint8Array(yjsBinary), 'remote');
+        useFeedbackStore.getState().acceptFeedback();
       }
     };
 
