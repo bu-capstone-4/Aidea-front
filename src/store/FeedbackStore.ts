@@ -8,25 +8,24 @@ interface FeedbackState {
   documentId: string;
   feedbackId: string;
   status: FeedbackStatus;
-  originalText: string;
   questions: Question[] | null;
-  revisedText: string | Uint8Array;
+  revisedText: Uint8Array | null;
   ydoc: Y.Doc | null;
   setPending: (docId: string, feedId: string) => void;
-  setDone: (original: string, revised: string | Uint8Array) => void;
+  setDone: (feedId: string, revised: Uint8Array) => void;
   acceptFeedback: () => void;
   setAnswering: () => void;
   setQuestioning: (questions: Question[]) => void;
   setYdoc: (doc: Y.Doc) => void;
+  resetFeedback: () => void;
 }
 
 export const useFeedbackStore = create<FeedbackState>()((set) => ({
   isSplitView: false,
   documentId: '',
   feedbackId: '',
-  status: 'DONE',
-  originalText: '',
-  revisedText: '',
+  status: 'IDLE',
+  revisedText: null,
   questions: null,
   ydoc: null,
 
@@ -38,9 +37,9 @@ export const useFeedbackStore = create<FeedbackState>()((set) => ({
       status: 'PENDING',
     }),
 
-  setDone: (original, revised) =>
+  setDone: (feedId, revised) =>
     set({
-      originalText: original,
+      feedbackId: feedId,
       revisedText: revised,
       status: 'DONE',
       isSplitView: true,
@@ -62,5 +61,13 @@ export const useFeedbackStore = create<FeedbackState>()((set) => ({
     set({
       questions: null,
       status: 'ANSWERING',
+    }),
+
+  resetFeedback: () =>
+    set({
+      status: 'IDLE',
+      isSplitView: false,
+      feedbackId: '',
+      revisedText: null,
     }),
 }));

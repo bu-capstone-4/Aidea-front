@@ -55,7 +55,16 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
         updates?: string[];
         update?: string;
         event: string;
-        data: { yjsBinary: string };
+        data?: {
+          feedbackId?: string;
+          requestedBy?: number;
+          code?: string;
+          message?: string;
+          yjsBinary?: string;
+          status?: string;
+          selectedVersion?: 'ORIGINAL' | 'AI';
+          appliedBy?: number;
+        };
       };
 
       if (msg.type === 'doc:init') {
@@ -71,10 +80,31 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
         Y.applyUpdate(doc, base64ToUint8Array(msg.update), 'remote');
       }
 
-      if (msg.event === 'feedback:version-applied') {
+      const feedbackStore = useFeedbackStore.getState();
+
+      if (msg.event === 'feedback:start' && msg.data?.feedbackId) {
+        const { feedbackId } = msg.data;
+        feedbackStore.setPending(docId, feedbackId);
+      }
+
+      if (msg.event === 'feedback:ready' && msg.data?.feedbackId && msg.data?.yjsBinary) {
+        const { feedbackId, yjsBinary } = msg.data;
+        feedbackStore.setDone(feedbackId, base64ToUint8Array(yjsBinary));
+      }
+
+      if (msg.event === 'feedback:version-applied' && msg.data?.yjsBinary) {
         const { yjsBinary } = msg.data;
-        Y.applyUpdate(doc, base64ToUint8Array(yjsBinary), 'remote');
-        useFeedbackStore.getState().acceptFeedback();
+        const newDoc = new Y.Doc();
+        Y.applyUpdate(newDoc, base64ToUint8Array(yjsBinary), 'remote');
+        Y.applyUpdate(doc, Y.encodeStateAsUpdate(newDoc), 'remote');
+        newDoc.destroy();
+        feedbackStore.acceptFeedback();
+      }
+
+      if (msg.event === 'feedback:error' && msg.data?.message) {
+        const { message } = msg.data;
+        console.log(message);
+        feedbackStore.resetFeedback();
       }
     };
 

@@ -60,7 +60,6 @@ export default function MainContent() {
         isFeedbackModalOpen={isFeedbackModalOpen}
         toggleFeedbackModal={toggleFeedbackModal}
         docId={docId ?? ''}
-        originalText={doc.yjsBinary}
       />
 
       {(status === 'PENDING' || status === 'ANSWERING') && (
