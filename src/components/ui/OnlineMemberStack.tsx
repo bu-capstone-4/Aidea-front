@@ -1,30 +1,12 @@
+import UserAvatar from './UserAvatar';
 import { cn } from '@/shared/cn';
 import type { ActiveMember } from '@/types/teamspaceSocket';
-
-const AVATAR_COLORS = [
-  '#4F86F7',
-  '#52B788',
-  '#9B72CF',
-  '#F4845F',
-  '#E07BAA',
-  '#2EC4B6',
-  '#E63946',
-  '#F9C74F',
-];
 
 interface OnlineMemberStackProps {
   members: ActiveMember[];
   currentDocumentId: string | null;
   currentUserId?: number;
   max?: number;
-}
-
-function nameToColor(name: string): string {
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
 }
 
 function sortMembers(
@@ -62,33 +44,21 @@ export default function OnlineMemberStack({
       {visibleMembers.map((member, index) => {
         const isMe = currentUserId !== undefined && member.userId === currentUserId;
         const isSameDocument = isMe || member.currentDocumentId === currentDocumentId;
-        const initial = member.name.trim().charAt(0).toUpperCase();
 
         return (
           <div
             key={member.userId}
-            title={
-              isSameDocument ? `${member.name} - 현재 문서` : `${member.name} - 다른 문서 또는 화면`
-            }
+            title={isSameDocument ? `${member.name} - 현재 문서` : `${member.name} - 다른 문서`}
             className={cn(
-              'flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-white text-sm font-bold text-white shadow-sm',
+              'rounded-full ring-2 ring-white',
               !isSameDocument && 'grayscale opacity-45'
             )}
             style={{
               marginLeft: index === 0 ? 0 : -10,
               zIndex: visibleMembers.length - index,
-              backgroundColor: nameToColor(member.name),
             }}
           >
-            {member.profileImageUrl ? (
-              <img
-                src={member.profileImageUrl}
-                alt={member.name}
-                className="size-full object-cover"
-              />
-            ) : (
-              initial
-            )}
+            <UserAvatar name={member.name} imageUrl={member.profileImageUrl} size={32} />
           </div>
         );
       })}

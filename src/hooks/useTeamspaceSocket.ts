@@ -1,62 +1,12 @@
 import { useEffect, useRef } from 'react';
 import { useTeamspaceStore } from '@/store/teamspaceStore';
-import type {
-  ActiveMember,
-  MemberFocusRequest,
-  TeamspaceServerMessage,
-} from '@/types/teamspaceSocket';
+import type { MemberFocusRequest, TeamspaceServerMessage } from '@/types/teamspaceSocket';
 
 interface UseTeamspaceSocketOptions {
   teamspaceId: string | null;
   documentId: string | null;
   enabled?: boolean;
-  mock?: boolean;
 }
-
-const MOCK_ONLINE_MEMBERS: ActiveMember[] = [
-  {
-    userId: 1,
-    name: '김민석',
-    profileImageUrl: null,
-    role: 'OWNER',
-    currentDocumentId: null,
-  },
-  {
-    userId: 2,
-    name: 'Chul',
-    profileImageUrl: null,
-    role: 'MEMBER',
-    currentDocumentId: 'doc_003',
-  },
-  {
-    userId: 3,
-    name: 'Jihyun',
-    profileImageUrl: null,
-    role: 'MEMBER',
-    currentDocumentId: 'doc_001',
-  },
-  {
-    userId: 4,
-    name: 'Soo',
-    profileImageUrl: null,
-    role: 'VIEWER',
-    currentDocumentId: 'doc_002',
-  },
-  {
-    userId: 5,
-    name: 'Doyeon',
-    profileImageUrl: null,
-    role: 'MEMBER',
-    currentDocumentId: 'doc_001',
-  },
-  {
-    userId: 6,
-    name: 'Hyun',
-    profileImageUrl: null,
-    role: 'MEMBER',
-    currentDocumentId: 'doc_001',
-  },
-];
 
 function buildMemberFocusMessage(documentId: string | null): string {
   const message: MemberFocusRequest = {
@@ -77,7 +27,6 @@ export function useTeamspaceSocket({
   teamspaceId,
   documentId,
   enabled = true,
-  mock = false,
 }: UseTeamspaceSocketOptions) {
   const wsRef = useRef<WebSocket | null>(null);
   const documentIdRef = useRef<string | null>(documentId);
@@ -90,16 +39,7 @@ export function useTeamspaceSocket({
   }, [documentId]);
 
   useEffect(() => {
-    if (!enabled || !teamspaceId || !mock) return;
-
-    setTeamspaceStatus('CREATED');
-    setOnlineMembers(MOCK_ONLINE_MEMBERS);
-
-    return () => clearTeamspacePresence();
-  }, [clearTeamspacePresence, enabled, mock, setOnlineMembers, setTeamspaceStatus, teamspaceId]);
-
-  useEffect(() => {
-    if (!enabled || !teamspaceId || mock) return;
+    if (!enabled || !teamspaceId) return;
 
     const ws = new WebSocket(`${import.meta.env.VITE_WS_BASE_URL}/ws/teamspace/${teamspaceId}`);
     wsRef.current = ws;
@@ -123,7 +63,9 @@ export function useTeamspaceSocket({
         return;
       }
 
-      setOnlineMembers(message.data.onlineMembers);
+      if (message.event === 'member:update') {
+        setOnlineMembers(message.data.onlineMembers);
+      }
     };
 
     ws.onclose = () => {
@@ -136,14 +78,12 @@ export function useTeamspaceSocket({
       clearTeamspacePresence();
       wsRef.current = null;
     };
-  }, [clearTeamspacePresence, enabled, mock, setOnlineMembers, setTeamspaceStatus, teamspaceId]);
+  }, [clearTeamspacePresence, enabled, setOnlineMembers, setTeamspaceStatus, teamspaceId]);
 
   useEffect(() => {
-    if (mock) return;
-
     const ws = wsRef.current;
     if (!ws || ws.readyState !== WebSocket.OPEN) return;
 
     ws.send(buildMemberFocusMessage(documentId));
-  }, [documentId, mock]);
+  }, [documentId]);
 }

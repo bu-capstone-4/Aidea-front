@@ -17,7 +17,6 @@ export default function MainPage() {
   useTeamspaceSocket({
     teamspaceId: currentTeamspaceId,
     documentId: docId ?? null,
-    mock: true,
   });
 
   useEffect(() => {

@@ -19,11 +19,17 @@ function nameToColor(name: string): string {
 
 interface UserAvatarProps {
   name: string;
+  imageUrl?: string | null;
   size?: number;
   className?: string;
 }
 
-export default function UserAvatar({ name, size = 32, className = '' }: UserAvatarProps) {
+export default function UserAvatar({
+  name,
+  imageUrl = null,
+  size = 32,
+  className = '',
+}: UserAvatarProps) {
   const initial = name.trim().charAt(0).toUpperCase();
   const bg = nameToColor(name);
 
@@ -32,7 +38,11 @@ export default function UserAvatar({ name, size = 32, className = '' }: UserAvat
       className={`rounded-full flex items-center justify-center text-white font-semibold shrink-0 ${className}`}
       style={{ width: size, height: size, fontSize: size * 0.4, backgroundColor: bg }}
     >
-      {initial}
+      {imageUrl ? (
+        <img src={imageUrl} alt={name} className="size-full rounded-full object-cover" />
+      ) : (
+        initial
+      )}
     </div>
   );
 }
