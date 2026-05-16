@@ -1,6 +1,6 @@
 import { useParams } from 'react-router';
 import Button from '@/components/ui/Button';
-import OnlineMemberStack from './OnlineMemberStack';
+import OnlineMemberStack from '@/components/ui/OnlineMemberStack';
 import { useTeamspaceStore } from '@/store/teamspaceStore';
 import { useTeamspaceDetail } from '@/hooks/useTeamspaceDetail';
 import { useDocument } from '@/hooks/useDocument';
