@@ -6,14 +6,12 @@ interface FeedbackModalProps {
   isFeedbackModalOpen: boolean;
   toggleFeedbackModal: () => void;
   docId: string;
-  originalText: string;
 }
 
 export default function FeedbackModal({
   isFeedbackModalOpen,
   toggleFeedbackModal,
   docId,
-  originalText,
 }: FeedbackModalProps) {
   const { requestFeedback } = useFeedback();
   const [prompt, setPrompt] = useState('');
@@ -41,7 +39,7 @@ export default function FeedbackModal({
         <Button
           variant="primary"
           onClick={() => {
-            requestFeedback(docId, prompt, toggleFeedbackModal, originalText);
+            requestFeedback(docId, prompt, toggleFeedbackModal);
           }}
         >
           피드백 요청

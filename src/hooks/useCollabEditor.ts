@@ -5,6 +5,7 @@ import { useCreateBlockNote } from '@blocknote/react';
 import { ko } from '@blocknote/core/locales';
 import { handleSocketError } from '@/shared/socketErrorHandler';
 import type { DocumentServerMessage } from '@/types/socket';
+import { useFeedbackStore } from '@/store/FeedbackStore';
 
 function base64ToUint8Array(b64: string): Uint8Array {
   return Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
@@ -33,6 +34,13 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
 
   const [connected, setConnected] = useState(false);
   const initializedRef = useRef(false);
+  const { setYdoc } = useFeedbackStore();
+
+  useEffect(() => {
+    if (doc) {
+      setYdoc(doc);
+    }
+  }, [doc, setYdoc]);
 
   useEffect(() => {
     const ws = new WebSocket(`${import.meta.env.VITE_WS_BASE_URL}/ws/documents/${docId}`);
@@ -49,13 +57,13 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
       // Yjs 동기화 이벤트: type 필드 사용
       if ('type' in msg) {
         if (msg.type === 'doc:init') {
-          for (const b64 of msg.updates ?? []) {
+          for (const b64 of msg.updates) {
             Y.applyUpdate(doc, base64ToUint8Array(b64), 'remote');
           }
           initializedRef.current = true;
           return;
         }
-        if (msg.type === 'doc:update' && msg.update) {
+        if (msg.type === 'doc:update') {
           if (!initializedRef.current) return;
           Y.applyUpdate(doc, base64ToUint8Array(msg.update), 'remote');
         }
@@ -68,8 +76,30 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
         return;
       }
 
+      const feedbackStore = useFeedbackStore.getState();
+
+      if (msg.event === 'feedback:start') {
+        feedbackStore.setPending(docId, msg.data.feedbackId);
+        return;
+      }
+
+      if (msg.event === 'feedback:ready') {
+        feedbackStore.setDone(msg.data.feedbackId, base64ToUint8Array(msg.data.yjsBinary));
+        return;
+      }
+
+      if (msg.event === 'feedback:version-applied') {
+        const newDoc = new Y.Doc();
+        Y.applyUpdate(newDoc, base64ToUint8Array(msg.data.yjsBinary), 'remote');
+        Y.applyUpdate(doc, Y.encodeStateAsUpdate(newDoc), 'remote');
+        newDoc.destroy();
+        feedbackStore.acceptFeedback();
+        return;
+      }
+
       if (msg.event === 'feedback:error') {
         handleSocketError({ code: msg.data.code, message: msg.data.message });
+        feedbackStore.resetFeedback();
       }
     };
 

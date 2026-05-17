@@ -1,26 +1,35 @@
 import { create } from 'zustand';
 import type { FeedbackStatus } from '@/mocks/types';
+import type { Question } from '@/types/document';
+import * as Y from 'yjs';
 
 interface FeedbackState {
   isSplitView: boolean;
   documentId: string;
   feedbackId: string;
   status: FeedbackStatus;
-  originalText: string;
-  revisedText: string;
+  questions: Question[] | null;
+  revisedText: Uint8Array | null;
+  ydoc: Y.Doc | null;
   setPending: (docId: string, feedId: string) => void;
-  setDone: (original: string, revised: string) => void;
+  setDone: (feedId: string, revised: Uint8Array) => void;
   acceptFeedback: () => void;
+  setAnswering: () => void;
+  setQuestioning: (questions: Question[]) => void;
+  setYdoc: (doc: Y.Doc) => void;
+  resetFeedback: () => void;
 }
 
 export const useFeedbackStore = create<FeedbackState>()((set) => ({
   isSplitView: false,
   documentId: '',
   feedbackId: '',
-  status: 'PENDING', //초깃값 pending?
-  originalText: '',
-  revisedText: '',
+  status: 'IDLE',
+  revisedText: null,
+  questions: null,
+  ydoc: null,
 
+  setYdoc: (doc) => set({ ydoc: doc }),
   setPending: (docId, feedId) =>
     set({
       documentId: docId,
@@ -28,9 +37,9 @@ export const useFeedbackStore = create<FeedbackState>()((set) => ({
       status: 'PENDING',
     }),
 
-  setDone: (original, revised) =>
+  setDone: (feedId, revised) =>
     set({
-      originalText: original,
+      feedbackId: feedId,
       revisedText: revised,
       status: 'DONE',
       isSplitView: true,
@@ -40,5 +49,25 @@ export const useFeedbackStore = create<FeedbackState>()((set) => ({
     set({
       status: 'ACCEPTED',
       isSplitView: false,
+    }),
+
+  setQuestioning: (questions) =>
+    set({
+      questions: questions,
+      status: 'QUESTIONING',
+    }),
+
+  setAnswering: () =>
+    set({
+      questions: null,
+      status: 'ANSWERING',
+    }),
+
+  resetFeedback: () =>
+    set({
+      status: 'IDLE',
+      isSplitView: false,
+      feedbackId: '',
+      revisedText: null,
     }),
 }));

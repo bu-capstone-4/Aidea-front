@@ -36,7 +36,7 @@ export default function MainSideBar({ isSideBarOpen, toggleSideBar }: SideBarPro
   const navigate = useNavigate();
   const { docId } = useParams();
   const { user } = useCurrentUser();
-  const { currentTeamspaceId } = useTeamspaceStore();
+  const { currentTeamspaceId, onlineMembers } = useTeamspaceStore();
   const { teamspace } = useTeamspaceDetail(currentTeamspaceId);
 
   return (
@@ -74,6 +74,10 @@ export default function MainSideBar({ isSideBarOpen, toggleSideBar }: SideBarPro
       <div className={cn('flex flex-col p-2 space-y-1', !isSideBarOpen && 'items-center')}>
         {teamspace?.documents.map((doc) => {
           const Icon = DOC_ICON[doc.type] ?? MdDescription;
+          const viewerCount = onlineMembers.filter(
+            (member) => member.currentDocumentId === doc.id
+          ).length;
+
           return (
             <Button
               key={doc.id}
@@ -87,6 +91,11 @@ export default function MainSideBar({ isSideBarOpen, toggleSideBar }: SideBarPro
               onClick={() => navigate(`/main/${doc.id}`)}
             >
               <span className="font-semibold">{doc.title}</span>
+              {isSideBarOpen && viewerCount > 0 && (
+                <span className="ml-auto rounded-full bg-primary-light px-1.5 py-0.5 text-[10px] font-bold text-primary-dark">
+                  {viewerCount}
+                </span>
+              )}
             </Button>
           );
         })}

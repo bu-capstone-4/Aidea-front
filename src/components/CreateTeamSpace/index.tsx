@@ -81,9 +81,11 @@ export default function CreateTeamSpace() {
     try {
       setErrorMessage(null);
 
-      await apiClient.post(`/api/teamspaces/${teamspaceId}/invitations`, {
-        emails,
-      });
+      if (emails.length > 0) {
+        await apiClient.post(`/api/teamspaces/${teamspaceId}/invitations`, {
+          emails,
+        });
+      }
 
       const detailResponse = await apiClient.get(`/api/teamspaces/${teamspaceId}`);
       const firstDocId = detailResponse.data.data.documents?.[0]?.id;

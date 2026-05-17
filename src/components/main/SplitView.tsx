@@ -1,14 +1,20 @@
 import useFeedback from '@/hooks/useFeedback';
 import { useFeedbackStore } from '@/store/FeedbackStore';
 import VersionPanel from './VersionPanel';
+import * as Y from 'yjs';
 
 interface SplitViewProps {
   title: string;
 }
 
 export default function FeedbackSplitView({ title }: SplitViewProps) {
-  const { originalText, revisedText, feedbackId } = useFeedbackStore();
+  const { revisedText, feedbackId, documentId, ydoc } = useFeedbackStore();
   const { chooseVersion } = useFeedback();
+
+  const aiDoc = new Y.Doc();
+  if (revisedText) {
+    Y.applyUpdate(aiDoc, revisedText, 'remote');
+  }
 
   return (
     <div className="flex flex-col h-full w-full max-w-6xl mx-auto p-6 gap-4 bg-white">
@@ -27,16 +33,24 @@ export default function FeedbackSplitView({ title }: SplitViewProps) {
       <div className="flex gap-6 h-full min-h-0">
         <VersionPanel
           panelTitle="수정 전"
-          content={originalText}
+          content={ydoc}
           aiMark={false}
-          onSelect={() => chooseVersion('ORIGINAL')}
+          onSelect={() => {
+            if (ydoc) {
+              chooseVersion('ORIGINAL', feedbackId, documentId, ydoc);
+            }
+          }}
         />
 
         <VersionPanel
           panelTitle="AI 피드백 후"
-          content={revisedText}
+          content={aiDoc}
           aiMark={true}
-          onSelect={() => chooseVersion('AI', feedbackId)}
+          onSelect={() => {
+            if (ydoc) {
+              chooseVersion('AI', feedbackId, documentId, ydoc);
+            }
+          }}
         />
       </div>
     </div>
