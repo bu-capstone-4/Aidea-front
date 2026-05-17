@@ -1,7 +1,6 @@
 import useFeedback from '@/hooks/useFeedback';
 import { useFeedbackStore } from '@/store/FeedbackStore';
 import VersionPanel from './VersionPanel';
-import { useMemo } from 'react';
 import * as Y from 'yjs';
 
 interface SplitViewProps {
@@ -12,13 +11,10 @@ export default function FeedbackSplitView({ title }: SplitViewProps) {
   const { revisedText, feedbackId, documentId, ydoc } = useFeedbackStore();
   const { chooseVersion } = useFeedback();
 
-  const aiDoc = useMemo(() => {
-    const d = new Y.Doc();
-    if (revisedText) {
-      Y.applyUpdate(d, revisedText, 'remote');
-    }
-    return d;
-  }, [revisedText]);
+  const aiDoc = new Y.Doc();
+  if (revisedText) {
+    Y.applyUpdate(aiDoc, revisedText, 'remote');
+  }
 
   return (
     <div className="flex flex-col h-full w-full max-w-6xl mx-auto p-6 gap-4 bg-white">
