@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { useAuthStore } from '@/store/authStore';
+import { useToastStore } from '@/store/toastStore';
 
 // 목 모드(VITE_USE_REAL_AUTH !== 'true')에서는 빈 baseURL → MSW가 동일 오리진 요청을 인터셉트
 // 실제 모드에서는 VITE_API_BASE_URL 사용
@@ -33,6 +34,13 @@ apiClient.interceptors.response.use(
     const originalRequest = error.config;
 
     if (error.response?.status !== 401 || originalRequest._retry) {
+      // 401은 refresh 흐름이 처리. 그 외 서버/네트워크 에러는 toast로 표시.
+      if (error.response?.status !== 401) {
+        const message =
+          (error.response?.data as { message?: string })?.message ??
+          '서버와 통신 중 오류가 발생했습니다.';
+        useToastStore.getState().addToast({ type: 'error', message });
+      }
       return Promise.reject(error);
     }
 

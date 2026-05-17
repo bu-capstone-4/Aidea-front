@@ -57,7 +57,7 @@ export default function CreateTeamSpace() {
       setTeamspaceId(response.data.data.teamspaceId);
       setStep(2);
     } catch {
-      setErrorMessage('팀 스페이스 생성에 실패했습니다.');
+      // 서버 에러는 apiClient 인터셉터가 toast로 처리
     }
   };
 
@@ -96,7 +96,7 @@ export default function CreateTeamSpace() {
         navigate('/');
       }
     } catch {
-      setErrorMessage('팀원 초대에 실패했습니다.');
+      // 서버 에러는 apiClient 인터셉터가 toast로 처리
     }
   };
 

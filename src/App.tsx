@@ -6,6 +6,7 @@ import { apiClient } from '@/shared/apiClient';
 import LandingPage from '@/pages/LandingPage';
 import MainPage from '@/pages/MainPage';
 import CreatePage from '@/pages/CreatePage';
+import ToastContainer from '@/components/ui/ToastContainer';
 
 function AuthInitializer({ children }: { children: React.ReactNode }) {
   const { setAuthenticated, setLoading } = useAuthStore();
@@ -58,6 +59,7 @@ function App() {
           }
         />
       </Routes>
+      <ToastContainer />
     </AuthInitializer>
   );
 }

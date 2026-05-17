@@ -3,6 +3,8 @@ import * as Y from 'yjs';
 import { WebsocketProvider } from 'y-websocket';
 import { useCreateBlockNote } from '@blocknote/react';
 import { ko } from '@blocknote/core/locales';
+import { handleSocketError } from '@/shared/socketErrorHandler';
+import type { DocumentServerMessage } from '@/types/socket';
 import { useFeedbackStore } from '@/store/FeedbackStore';
 
 function base64ToUint8Array(b64: string): Uint8Array {
@@ -50,60 +52,53 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
     };
 
     ws.onmessage = (event: MessageEvent<string>) => {
-      const msg = JSON.parse(event.data) as {
-        type: string;
-        updates?: string[];
-        update?: string;
-        event: string;
-        data?: {
-          feedbackId?: string;
-          requestedBy?: number;
-          code?: string;
-          message?: string;
-          yjsBinary?: string;
-          status?: string;
-          selectedVersion?: 'ORIGINAL' | 'AI';
-          appliedBy?: number;
-        };
-      };
+      const msg = JSON.parse(event.data) as DocumentServerMessage;
 
-      if (msg.type === 'doc:init') {
-        for (const b64 of msg.updates ?? []) {
-          Y.applyUpdate(doc, base64ToUint8Array(b64), 'remote');
+      // Yjs 동기화 이벤트: type 필드 사용
+      if ('type' in msg) {
+        if (msg.type === 'doc:init') {
+          for (const b64 of msg.updates) {
+            Y.applyUpdate(doc, base64ToUint8Array(b64), 'remote');
+          }
+          initializedRef.current = true;
+          return;
         }
-        initializedRef.current = true;
+        if (msg.type === 'doc:update') {
+          if (!initializedRef.current) return;
+          Y.applyUpdate(doc, base64ToUint8Array(msg.update), 'remote');
+        }
         return;
       }
 
-      if (msg.type === 'doc:update' && msg.update) {
-        if (!initializedRef.current) return;
-        Y.applyUpdate(doc, base64ToUint8Array(msg.update), 'remote');
+      // 비즈니스 이벤트: event 필드 사용
+      if (msg.event === 'error') {
+        handleSocketError({ code: msg.code, message: msg.message });
+        return;
       }
 
       const feedbackStore = useFeedbackStore.getState();
 
-      if (msg.event === 'feedback:start' && msg.data?.feedbackId) {
-        const { feedbackId } = msg.data;
-        feedbackStore.setPending(docId, feedbackId);
+      if (msg.event === 'feedback:start') {
+        feedbackStore.setPending(docId, msg.data.feedbackId);
+        return;
       }
 
-      if (msg.event === 'feedback:ready' && msg.data?.feedbackId && msg.data?.yjsBinary) {
-        const { feedbackId, yjsBinary } = msg.data;
-        feedbackStore.setDone(feedbackId, base64ToUint8Array(yjsBinary));
+      if (msg.event === 'feedback:ready') {
+        feedbackStore.setDone(msg.data.feedbackId, base64ToUint8Array(msg.data.yjsBinary));
+        return;
       }
 
-      if (msg.event === 'feedback:version-applied' && msg.data?.yjsBinary) {
-        const { yjsBinary } = msg.data;
+      if (msg.event === 'feedback:version-applied') {
         const newDoc = new Y.Doc();
-        Y.applyUpdate(newDoc, base64ToUint8Array(yjsBinary), 'remote');
+        Y.applyUpdate(newDoc, base64ToUint8Array(msg.data.yjsBinary), 'remote');
         Y.applyUpdate(doc, Y.encodeStateAsUpdate(newDoc), 'remote');
         newDoc.destroy();
         feedbackStore.acceptFeedback();
+        return;
       }
 
-      if (msg.event === 'feedback:error' && msg.data?.message) {
-        const { message } = msg.data;
-        console.log(message);
+      if (msg.event === 'feedback:error') {
+        handleSocketError({ code: msg.data.code, message: msg.data.message });
         feedbackStore.resetFeedback();
       }
     };
