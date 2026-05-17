@@ -1,13 +1,27 @@
+import { useCreateBlockNote } from '@blocknote/react';
+import { BlockNoteView } from '@blocknote/mantine';
 import Button from '../ui/Button';
+import * as Y from 'yjs';
 
 interface VersionPanelProps {
   panelTitle: string;
-  content: string;
+  content: Y.Doc | null;
   aiMark?: boolean;
   onSelect: () => void;
 }
 
 export default function VersionPanel({ panelTitle, content, aiMark, onSelect }: VersionPanelProps) {
+  const editor = useCreateBlockNote({
+    collaboration: {
+      fragment: (content ?? new Y.Doc()).getXmlFragment('document-store'),
+      user: {
+        name: '',
+        color: '',
+      },
+    },
+    editable: false,
+  });
+
   return (
     <div className="group flex flex-col flex-1 border border-gray-200 rounded-xl bg-white overflow-hidden hover:border-blue-500 hover:shadow-md transition-all duration-300">
       <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 group-hover:border-blue-100 transition-colors">
@@ -26,7 +40,7 @@ export default function VersionPanel({ panelTitle, content, aiMark, onSelect }: 
 
       <div className="flex-1 p-6 overflow-y-auto">
         <div className="whitespace-pre-wrap leading-relaxed group-hover:text-gray-800 transition-colors">
-          {content}
+          <BlockNoteView editor={editor} editable={false} />
         </div>
       </div>
 

@@ -3,6 +3,7 @@ import * as Y from 'yjs';
 import { WebsocketProvider } from 'y-websocket';
 import { useCreateBlockNote } from '@blocknote/react';
 import { ko } from '@blocknote/core/locales';
+import { useFeedbackStore } from '@/store/FeedbackStore';
 
 function base64ToUint8Array(b64: string): Uint8Array {
   return Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
@@ -31,6 +32,13 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
 
   const [connected, setConnected] = useState(false);
   const initializedRef = useRef(false);
+  const { setYdoc } = useFeedbackStore();
+
+  useEffect(() => {
+    if (doc) {
+      setYdoc(doc);
+    }
+  }, [doc, setYdoc]);
 
   useEffect(() => {
     const ws = new WebSocket(`${import.meta.env.VITE_WS_BASE_URL}/ws/documents/${docId}`);
@@ -46,6 +54,17 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
         type: string;
         updates?: string[];
         update?: string;
+        event: string;
+        data?: {
+          feedbackId?: string;
+          requestedBy?: number;
+          code?: string;
+          message?: string;
+          yjsBinary?: string;
+          status?: string;
+          selectedVersion?: 'ORIGINAL' | 'AI';
+          appliedBy?: number;
+        };
       };
 
       if (msg.type === 'doc:init') {
@@ -59,6 +78,33 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
       if (msg.type === 'doc:update' && msg.update) {
         if (!initializedRef.current) return;
         Y.applyUpdate(doc, base64ToUint8Array(msg.update), 'remote');
+      }
+
+      const feedbackStore = useFeedbackStore.getState();
+
+      if (msg.event === 'feedback:start' && msg.data?.feedbackId) {
+        const { feedbackId } = msg.data;
+        feedbackStore.setPending(docId, feedbackId);
+      }
+
+      if (msg.event === 'feedback:ready' && msg.data?.feedbackId && msg.data?.yjsBinary) {
+        const { feedbackId, yjsBinary } = msg.data;
+        feedbackStore.setDone(feedbackId, base64ToUint8Array(yjsBinary));
+      }
+
+      if (msg.event === 'feedback:version-applied' && msg.data?.yjsBinary) {
+        const { yjsBinary } = msg.data;
+        const newDoc = new Y.Doc();
+        Y.applyUpdate(newDoc, base64ToUint8Array(yjsBinary), 'remote');
+        Y.applyUpdate(doc, Y.encodeStateAsUpdate(newDoc), 'remote');
+        newDoc.destroy();
+        feedbackStore.acceptFeedback();
+      }
+
+      if (msg.event === 'feedback:error' && msg.data?.message) {
+        const { message } = msg.data;
+        console.log(message);
+        feedbackStore.resetFeedback();
       }
     };
 
