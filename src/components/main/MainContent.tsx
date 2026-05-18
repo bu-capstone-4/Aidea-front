@@ -68,7 +68,7 @@ export default function MainContent() {
         className={`${isSplitView ? 'hidden' : 'block'} max-w-180 mx-auto px-24 md:px-10 sm:px-5 pt-5`}
       >
         <div className="flex items-center gap-3 pb-4">
-          <h1 className="text-4xl font-bold text-[#1a1a1a] tracking-tight leading-tight">
+          <h1 className="text-[2.5rem] font-bold text-[#1a1a1a] tracking-tight leading-tight">
             {doc.title}
           </h1>
           <Button variant="feedback" size="sm" className="shrink-0" onClick={toggleFeedbackModal}>

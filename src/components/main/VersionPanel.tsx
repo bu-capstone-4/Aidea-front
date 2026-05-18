@@ -1,4 +1,5 @@
-import { useEffect } from 'react';
+import '@blocknote/mantine/style.css';
+import { useEffect, useState } from 'react';
 import { useCreateBlockNote } from '@blocknote/react';
 import { BlockNoteView } from '@blocknote/mantine';
 import Button from '../ui/Button';
@@ -19,22 +20,22 @@ export default function VersionPanel({
   aiMark,
   onSelect,
 }: VersionPanelProps) {
+  const [fallbackDoc] = useState(() => new Y.Doc());
+
   const docEditor = useCreateBlockNote({
     collaboration: {
-      fragment: (content ?? new Y.Doc()).getXmlFragment('document-store'),
+      fragment: (content ?? fallbackDoc).getXmlFragment('document-store'),
       user: { name: '', color: '' },
     },
-    editable: false,
   });
 
-  const mdEditor = useCreateBlockNote({ editable: false });
+  const mdEditor = useCreateBlockNote();
 
   useEffect(() => {
     if (!markdownContent) return;
-    mdEditor.tryParseMarkdownToBlocks(markdownContent).then((blocks) => {
-      mdEditor.replaceBlocks(mdEditor.document, blocks);
-    });
-  }, [markdownContent]);
+    const blocks = mdEditor.tryParseMarkdownToBlocks(markdownContent);
+    mdEditor.replaceBlocks(mdEditor.document, blocks);
+  }, [markdownContent, mdEditor]);
 
   const activeEditor = markdownContent !== undefined ? mdEditor : docEditor;
 
@@ -56,7 +57,7 @@ export default function VersionPanel({
 
       <div className="flex-1 p-6 overflow-y-auto">
         <div className="whitespace-pre-wrap leading-relaxed group-hover:text-gray-800 transition-colors">
-          <BlockNoteView editor={activeEditor} editable={false} />
+          <BlockNoteView editor={activeEditor} theme="light" editable={false} />
         </div>
       </div>
 
