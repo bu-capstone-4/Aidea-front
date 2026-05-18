@@ -44,6 +44,12 @@ export default function MainContent() {
   }, [status, feedbackId, docId]);
 
   useEffect(() => {
+    resetFeedback();
+    stopPolling();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [docId]);
+
+  useEffect(() => {
     if (status === 'REJECTED') {
       resetFeedback();
     }
