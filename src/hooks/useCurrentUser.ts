@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { apiClient } from '@/shared/apiClient';
-import type { UserResponse } from '@/mocks/types';
+import type { UserResponse } from '@/types/api';
 
 export function useCurrentUser() {
   const [user, setUser] = useState<UserResponse | null>(null);

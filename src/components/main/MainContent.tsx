@@ -9,8 +9,11 @@ import SplitView from './SplitView';
 import { useFeedbackStore } from '@/store/FeedbackStore';
 import QuestionPanel from './QuestionPanel';
 import Loading from './Loading';
+import useFeedback from '@/hooks/useFeedback';
 
 const CURSOR_COLORS = ['#1971c2', '#e03131', '#2f9e44', '#f08c00', '#7048e8'];
+
+const POLLING_TIMEOUT_MS = 30_000;
 
 export default function MainContent() {
   const { docId } = useParams();
@@ -19,8 +22,25 @@ export default function MainContent() {
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
   const isSplitView = useFeedbackStore((state) => state.isSplitView);
   const status = useFeedbackStore((state) => state.status);
+  const feedbackId = useFeedbackStore((state) => state.feedbackId);
 
   const resetFeedback = useFeedbackStore((state) => state.resetFeedback);
+  const { startPolling, stopPolling } = useFeedback();
+
+  // P3-2-12: PENDING/ANSWERING 상태가 30초 지속되면 폴링으로 전환
+  useEffect(() => {
+    if ((status !== 'PENDING' && status !== 'ANSWERING') || !feedbackId || !docId) {
+      stopPolling();
+      return;
+    }
+
+    const timeoutId = setTimeout(() => {
+      startPolling(feedbackId, docId);
+    }, POLLING_TIMEOUT_MS);
+
+    return () => clearTimeout(timeoutId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status, feedbackId, docId]);
 
   useEffect(() => {
     if (status === 'REJECTED') {

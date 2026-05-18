@@ -3,7 +3,7 @@ import { apiClient } from '@/shared/apiClient';
 import { useTeamspaceStore } from '@/store/teamspaceStore';
 import UserAvatar from '@/components/ui/UserAvatar';
 import Button from '@/components/ui/Button';
-import type { MemberInfo } from '@/mocks/types';
+import type { MemberInfo } from '@/types/api';
 
 interface MemberModalProps {
   isMemberModalOpen: boolean;

@@ -6,7 +6,7 @@ import MainSideBar from '@/components/main/MainSideBar';
 import MainHeaderBar from '@/components/main/MainHeaderBar';
 import MainContent from '@/components/main/MainContent';
 import { useTeamspaceSocket } from '@/hooks/useTeamspaceSocket';
-import type { TeamspaceSummary, TeamspaceDetail } from '@/mocks/types';
+import type { TeamspaceSummary, TeamspaceDetail } from '@/types/api';
 
 export default function MainPage() {
   const [isSideBarOpen, setIsSideBarOpen] = useState(true);

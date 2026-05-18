@@ -8,7 +8,7 @@ import { useTeamspaceDetail } from '@/hooks/useTeamspaceDetail';
 import { useTeamspaceStore } from '@/store/teamspaceStore';
 import { useAuth } from '@/shared/useAuth';
 import { apiClient } from '@/shared/apiClient';
-import type { TeamspaceDetail } from '@/mocks/types';
+import type { TeamspaceDetail } from '@/types/api';
 
 export default function TeamSpaceDropDown() {
   const [isDropDownOpen, setIsDropDownOpen] = useState(false);

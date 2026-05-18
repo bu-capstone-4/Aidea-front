@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { apiClient } from '@/shared/apiClient';
-import type { TeamspaceSummary } from '@/mocks/types';
+import type { TeamspaceSummary } from '@/types/api';
 
 export function useTeamspaces() {
   const [teamspaces, setTeamspaces] = useState<TeamspaceSummary[]>([]);

@@ -16,7 +16,7 @@ import { cn } from '@/shared/cn';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useTeamspaceStore } from '@/store/teamspaceStore';
 import { useTeamspaceDetail } from '@/hooks/useTeamspaceDetail';
-import type { DocumentType } from '@/mocks/types';
+import type { DocumentType } from '@/types/document';
 import type { ElementType } from 'react';
 
 const DOC_ICON: Record<DocumentType, ElementType> = {

@@ -1,4 +1,4 @@
-import type { DocumentType, Question } from '@/types/document';
+import type { DocumentType, FeedbackStatus, Question } from '@/types/document';
 
 // ─── 공통 ─────────────────────────────────────────────────────────────────────
 
@@ -31,9 +31,17 @@ export type FeedbackErrorCode =
 
 // ─── 문서 소켓 server → client ────────────────────────────────────────────────
 
+export interface ActiveFeedbackInfo {
+  feedbackId: string;
+  status: FeedbackStatus;
+  revisedMarkdown?: string | null;
+  questions?: Question[] | null;
+}
+
 export interface DocInitEvent {
   type: 'doc:init';
   updates: string[];
+  activeFeedback?: ActiveFeedbackInfo | null;
 }
 
 export interface DocUpdateEvent {
