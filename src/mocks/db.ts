@@ -117,7 +117,8 @@ export const teamspaces: TeamspaceDetail[] = [
 export const invitations: Invitation[] = [];
 
 // ── 피드백 ───────────────────────────────────────────────────
-export const feedbacks: (FeedbackResponse & { documentId: string })[] = [];
+export const feedbacks: (FeedbackResponse & { documentId: string; revisedMarkdown?: string })[] =
+  [];
 
 // ── ID 카운터 ─────────────────────────────────────────────────
 let docCounter = documents.length + 1;

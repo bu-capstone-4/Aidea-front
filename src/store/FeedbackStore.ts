@@ -1,6 +1,5 @@
 import { create } from 'zustand';
-import type { FeedbackStatus } from '@/mocks/types';
-import type { Question } from '@/types/document';
+import type { FeedbackStatus, Question } from '@/types/document';
 import * as Y from 'yjs';
 
 interface FeedbackState {
@@ -9,10 +8,10 @@ interface FeedbackState {
   feedbackId: string;
   status: FeedbackStatus;
   questions: Question[] | null;
-  revisedText: Uint8Array | null;
+  revisedMarkdown: string | null;
   ydoc: Y.Doc | null;
   setPending: (docId: string, feedId: string) => void;
-  setDone: (feedId: string, revised: Uint8Array) => void;
+  setDone: (feedId: string, revisedMarkdown: string) => void;
   acceptFeedback: () => void;
   setAnswering: () => void;
   setQuestioning: (questions: Question[]) => void;
@@ -25,7 +24,7 @@ export const useFeedbackStore = create<FeedbackState>()((set) => ({
   documentId: '',
   feedbackId: '',
   status: 'IDLE',
-  revisedText: null,
+  revisedMarkdown: null,
   questions: null,
   ydoc: null,
 
@@ -37,10 +36,10 @@ export const useFeedbackStore = create<FeedbackState>()((set) => ({
       status: 'PENDING',
     }),
 
-  setDone: (feedId, revised) =>
+  setDone: (feedId, revisedMarkdown) =>
     set({
       feedbackId: feedId,
-      revisedText: revised,
+      revisedMarkdown,
       status: 'DONE',
       isSplitView: true,
     }),
@@ -68,6 +67,6 @@ export const useFeedbackStore = create<FeedbackState>()((set) => ({
       status: 'IDLE',
       isSplitView: false,
       feedbackId: '',
-      revisedText: null,
+      revisedMarkdown: null,
     }),
 }));

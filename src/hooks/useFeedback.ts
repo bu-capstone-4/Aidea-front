@@ -1,10 +1,7 @@
 import { apiClient } from '@/shared/apiClient';
-import { useFeedbackStore } from '@/store/FeedbackStore';
-import * as Y from 'yjs';
+import type { Answer } from '@/types/document';
 
 export default function useFeedback() {
-  const { setPending, acceptFeedback } = useFeedbackStore();
-
   const requestFeedback = async (
     documentId: string,
     prompt: string | null,
@@ -16,37 +13,28 @@ export default function useFeedback() {
         additionalRequest: prompt,
       });
       const { feedbackId } = res.data.data;
-      setPending(documentId, feedbackId);
+      localStorage.setItem(`feedback:${documentId}`, feedbackId);
     } catch (error) {
       console.error(error);
     }
   };
 
-  const chooseVersion = async (
-    target: 'ORIGINAL' | 'AI',
-    feedbackId: string,
-    documentId: string,
-    ydoc: Y.Doc
-  ) => {
-    try {
-      const res = await apiClient.post(
-        `/api/documents/${documentId}/feedback/${feedbackId}/accept`,
-        {
-          selectedVersion: target,
-        }
-      );
-      if (target === 'AI' && feedbackId) {
-        const { yjsBinary } = res.data.data;
-        const binaryUpdate = Uint8Array.from(atob(yjsBinary), (c) => c.charCodeAt(0));
-        Y.applyUpdate(ydoc, binaryUpdate);
-        acceptFeedback();
-      } else {
-        acceptFeedback();
-      }
-    } catch (error) {
-      console.error(error);
-    }
+  const acceptFeedback = async (feedbackId: string) => {
+    await apiClient.post(`/api/feedbacks/${feedbackId}/accept`);
   };
 
-  return { requestFeedback, chooseVersion };
+  const rejectFeedback = async (feedbackId: string) => {
+    await apiClient.post(`/api/feedbacks/${feedbackId}/reject`);
+  };
+
+  const submitAnswers = async (feedbackId: string, answers: Answer[]) => {
+    await apiClient.post(`/api/feedbacks/${feedbackId}/answers`, { answer: answers });
+  };
+
+  const getFeedbackStatus = async (feedbackId: string) => {
+    const res = await apiClient.get(`/api/feedbacks/${feedbackId}`);
+    return res.data;
+  };
+
+  return { requestFeedback, acceptFeedback, rejectFeedback, submitAnswers, getFeedbackStatus };
 }

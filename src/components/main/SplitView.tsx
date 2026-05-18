@@ -1,20 +1,24 @@
 import useFeedback from '@/hooks/useFeedback';
 import { useFeedbackStore } from '@/store/FeedbackStore';
 import VersionPanel from './VersionPanel';
-import * as Y from 'yjs';
 
 interface SplitViewProps {
   title: string;
 }
 
 export default function FeedbackSplitView({ title }: SplitViewProps) {
-  const { revisedText, feedbackId, documentId, ydoc } = useFeedbackStore();
-  const { chooseVersion } = useFeedback();
+  const { revisedMarkdown, feedbackId, ydoc, resetFeedback, acceptFeedback } = useFeedbackStore();
+  const { acceptFeedback: acceptFeedbackApi, rejectFeedback } = useFeedback();
 
-  const aiDoc = new Y.Doc();
-  if (revisedText) {
-    Y.applyUpdate(aiDoc, revisedText, 'remote');
-  }
+  const handleAccept = async () => {
+    await acceptFeedbackApi(feedbackId);
+    acceptFeedback();
+  };
+
+  const handleReject = async () => {
+    await rejectFeedback(feedbackId);
+    resetFeedback();
+  };
 
   return (
     <div className="flex flex-col h-full w-full max-w-6xl mx-auto p-6 gap-4 bg-white">
@@ -26,31 +30,20 @@ export default function FeedbackSplitView({ title }: SplitViewProps) {
           <span>✨</span>
           <span>AI가 피드백을 반영하여 내용을 수정했습니다. 두 버전을 비교해 보세요.</span>
         </div>
-        <button className="text-purple-400 hover:text-purple-600">✕</button>
+        <button className="text-purple-400 hover:text-purple-600" onClick={handleReject}>
+          ✕
+        </button>
       </div>
 
       {/* 스플릿 뷰 */}
       <div className="flex gap-6 h-full min-h-0">
-        <VersionPanel
-          panelTitle="수정 전"
-          content={ydoc}
-          aiMark={false}
-          onSelect={() => {
-            if (ydoc) {
-              chooseVersion('ORIGINAL', feedbackId, documentId, ydoc);
-            }
-          }}
-        />
+        <VersionPanel panelTitle="수정 전" content={ydoc} aiMark={false} onSelect={handleReject} />
 
         <VersionPanel
           panelTitle="AI 피드백 후"
-          content={aiDoc}
+          markdownContent={revisedMarkdown}
           aiMark={true}
-          onSelect={() => {
-            if (ydoc) {
-              chooseVersion('AI', feedbackId, documentId, ydoc);
-            }
-          }}
+          onSelect={handleAccept}
         />
       </div>
     </div>
