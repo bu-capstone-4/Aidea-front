@@ -13,6 +13,8 @@ interface FeedbackState {
   setPending: (docId: string, feedId: string) => void;
   setDone: (feedId: string, revisedMarkdown: string) => void;
   acceptFeedback: () => void;
+  setRejected: () => void;
+  setFailed: () => void;
   setAnswering: () => void;
   setQuestioning: (questions: Question[]) => void;
   setYdoc: (doc: Y.Doc) => void;
@@ -47,6 +49,18 @@ export const useFeedbackStore = create<FeedbackState>()((set) => ({
   acceptFeedback: () =>
     set({
       status: 'ACCEPTED',
+      isSplitView: false,
+    }),
+
+  setRejected: () =>
+    set({
+      status: 'REJECTED',
+      isSplitView: false,
+    }),
+
+  setFailed: () =>
+    set({
+      status: 'FAILED',
       isSplitView: false,
     }),
 

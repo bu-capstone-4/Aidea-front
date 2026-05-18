@@ -34,6 +34,7 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
 
   const [connected, setConnected] = useState(false);
   const initializedRef = useRef(false);
+  const applyMarkdownRef = useRef<((md: string) => Promise<void>) | null>(null);
   const { setYdoc } = useFeedbackStore();
 
   useEffect(() => {
@@ -93,9 +94,16 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
 
       if (msg.type === 'feedback:resolved') {
         if (msg.outcome === 'ACCEPTED') {
-          feedbackStore.acceptFeedback();
+          const { revisedMarkdown } = useFeedbackStore.getState();
+          if (revisedMarkdown && applyMarkdownRef.current) {
+            applyMarkdownRef.current(revisedMarkdown).then(() => {
+              feedbackStore.acceptFeedback();
+            });
+          } else {
+            feedbackStore.acceptFeedback();
+          }
         } else {
-          feedbackStore.resetFeedback();
+          feedbackStore.setRejected();
         }
         return;
       }
@@ -105,7 +113,7 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
           code: 'AI_FEEDBACK_FAILED',
           message: 'AI 피드백 처리 중 오류가 발생했습니다.',
         });
-        feedbackStore.resetFeedback();
+        feedbackStore.setFailed();
       }
     };
 
@@ -137,6 +145,14 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
     dictionary: ko,
     editable,
   });
+
+  useEffect(() => {
+    applyMarkdownRef.current = (md: string) => {
+      const blocks = editor.tryParseMarkdownToBlocks(md);
+      editor.replaceBlocks(editor.document, blocks);
+      return Promise.resolve();
+    };
+  }, [editor]);
 
   return { editor, doc, provider, connected };
 }

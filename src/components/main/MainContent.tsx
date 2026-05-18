@@ -1,10 +1,10 @@
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useDocument } from '@/hooks/useDocument';
 import CollaborativeEditor from '@/components/document/CollaborativeEditor';
 import Button from '@/components/ui/Button';
 import FeedbackModal from './FeedbackModal';
-import { useState } from 'react';
 import SplitView from './SplitView';
 import { useFeedbackStore } from '@/store/FeedbackStore';
 import QuestionPanel from './QuestionPanel';
@@ -19,6 +19,14 @@ export default function MainContent() {
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
   const isSplitView = useFeedbackStore((state) => state.isSplitView);
   const status = useFeedbackStore((state) => state.status);
+
+  const resetFeedback = useFeedbackStore((state) => state.resetFeedback);
+
+  useEffect(() => {
+    if (status === 'REJECTED') {
+      resetFeedback();
+    }
+  }, [status, resetFeedback]);
 
   const toggleFeedbackModal = () => {
     setIsFeedbackModalOpen((prev) => !prev);
@@ -68,6 +76,17 @@ export default function MainContent() {
       />
 
       <Loading isLoading={status === 'PENDING' || status === 'ANSWERING'} />
+
+      {status === 'FAILED' && (
+        <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-999">
+          <div className="bg-white p-10 rounded-2xl shadow-xl flex flex-col items-center gap-4">
+            <p className="text-gray-700 font-medium">AI 피드백 생성에 실패했습니다.</p>
+            <Button variant="feedback" size="sm" onClick={resetFeedback}>
+              다시 시도
+            </Button>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

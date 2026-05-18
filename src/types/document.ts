@@ -22,7 +22,7 @@ export interface Question {
   id: string;
   section: string;
   text: string;
-  options?: string[];
+  options?: string[] | null;
 }
 
 export interface Answer {
