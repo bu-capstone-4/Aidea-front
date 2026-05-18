@@ -8,6 +8,9 @@ export const DOC_OPTIONS = [
 
 export type DocType = (typeof DOC_OPTIONS)[number]['value'];
 
+export const getDocLabel = (type: DocType | string): string =>
+  DOC_OPTIONS.find((o) => o.value === type)?.label ?? type;
+
 export interface EmailField {
   id: string;
   value: string;

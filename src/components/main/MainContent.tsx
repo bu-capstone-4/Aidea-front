@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useDocument } from '@/hooks/useDocument';
+import { getDocLabel } from '@/components/CreateTeamSpace/types';
 import CollaborativeEditor from '@/components/document/CollaborativeEditor';
 import Button from '@/components/ui/Button';
 import FeedbackModal from './FeedbackModal';
@@ -63,13 +64,13 @@ export default function MainContent() {
 
   return (
     <main className="flex-1 overflow-y-auto bg-white relative">
-      {isSplitView && <SplitView title={doc.title} />}
+      {isSplitView && <SplitView title={getDocLabel(doc.type)} />}
       <div
         className={`${isSplitView ? 'hidden' : 'block'} max-w-180 mx-auto px-24 md:px-10 sm:px-5 pt-5`}
       >
         <div className="flex items-center gap-3 pb-4">
           <h1 className="text-[2.5rem] font-bold text-[#1a1a1a] tracking-tight leading-tight">
-            {doc.title}
+            {getDocLabel(doc.type)}
           </h1>
           <Button variant="feedback" size="sm" className="shrink-0" onClick={toggleFeedbackModal}>
             + AI 피드백

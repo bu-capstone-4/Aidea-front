@@ -18,6 +18,7 @@ import { useTeamspaceStore } from '@/store/teamspaceStore';
 import { useTeamspaceDetail } from '@/hooks/useTeamspaceDetail';
 import type { DocumentType } from '@/types/document';
 import type { ElementType } from 'react';
+import { getDocLabel } from '@/components/CreateTeamSpace/types';
 import { useState } from 'react';
 import { apiClient } from '@/shared/apiClient';
 import CreateDocumentModal from './CreateDocumentModal';
@@ -100,7 +101,7 @@ export default function MainSideBar({ isSideBarOpen, toggleSideBar }: SideBarPro
               )}
               onClick={() => navigate(`/main/${doc.id}`)}
             >
-              <span className="font-semibold">{doc.title}</span>
+              <span className="font-semibold">{getDocLabel(doc.type)}</span>
               {isSideBarOpen && viewerCount > 0 && (
                 <span className="ml-auto rounded-full bg-primary-light px-1.5 py-0.5 text-[10px] font-bold text-primary-dark">
                   {viewerCount}

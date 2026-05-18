@@ -1,15 +1,6 @@
 import { useState } from 'react';
 import Button from '@/components/ui/Button';
-
-const DOC_OPTIONS = [
-  { label: '아이디어', value: 'IDEA', title: '아이디어' },
-  { label: '기획서', value: 'PLAN', title: '기획서' },
-  { label: '유저 시나리오', value: 'USER_SCENARIO', title: '유저 시나리오' },
-  { label: 'API 명세서', value: 'API_SPEC', title: 'API 명세서' },
-  { label: 'ERD', value: 'ERD', title: 'ERD' },
-] as const;
-
-type DocType = (typeof DOC_OPTIONS)[number]['value'];
+import { DOC_OPTIONS, type DocType } from '@/components/CreateTeamSpace/types';
 
 interface Props {
   isOpen: boolean;
@@ -98,7 +89,7 @@ export default function CreateDocumentModal({ isOpen, onClose, onConfirm }: Prop
                 : 'border-gray-200 bg-gray-50 text-gray-300')
             }
           >
-            {selectedOption ? selectedOption.title : '문서 타입을 선택하면 자동으로 설정됩니다'}
+            {selectedOption ? selectedOption.label : '문서 타입을 선택하면 자동으로 설정됩니다'}
           </div>
         </div>
 
