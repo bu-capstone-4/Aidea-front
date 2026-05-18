@@ -18,6 +18,9 @@ import { useTeamspaceStore } from '@/store/teamspaceStore';
 import { useTeamspaceDetail } from '@/hooks/useTeamspaceDetail';
 import type { DocumentType } from '@/types/document';
 import type { ElementType } from 'react';
+import { useState } from 'react';
+import { apiClient } from '@/shared/apiClient';
+import CreateDocumentModal from './CreateDocumentModal';
 
 const DOC_ICON: Record<DocumentType, ElementType> = {
   IDEA: MdLightbulb,
@@ -37,7 +40,14 @@ export default function MainSideBar({ isSideBarOpen, toggleSideBar }: SideBarPro
   const { docId } = useParams();
   const { user } = useCurrentUser();
   const { currentTeamspaceId, onlineMembers } = useTeamspaceStore();
-  const { teamspace } = useTeamspaceDetail(currentTeamspaceId);
+  const { teamspace, refetch } = useTeamspaceDetail(currentTeamspaceId);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleCreateDocument = async (type: string) => {
+    if (!currentTeamspaceId) return;
+    await apiClient.post('/api/documents', { teamspaceId: currentTeamspaceId, type });
+    refetch();
+  };
 
   return (
     <aside
@@ -105,10 +115,17 @@ export default function MainSideBar({ isSideBarOpen, toggleSideBar }: SideBarPro
           size={isSideBarOpen ? 'sm' : 'icon'}
           icon={<MdAdd size={18} className="shrink-0" />}
           className={cn('text-gray-500', isSideBarOpen && 'w-full justify-start')}
+          onClick={() => setIsModalOpen(true)}
         >
           추가하기
         </Button>
       </div>
+
+      <CreateDocumentModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={handleCreateDocument}
+      />
 
       {/* 하단으로 밀기 */}
       <div className="mt-auto" />
