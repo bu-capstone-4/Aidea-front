@@ -11,7 +11,13 @@ export default function QuestionPanel() {
   const setAnswering = useFeedbackStore((state) => state.setAnswering);
   const { submitAnswers } = useFeedback();
 
+  const [prevQuestions, setPrevQuestions] = useState(questions);
   const [answers, setAnswers] = useState<Record<string, string>>({});
+
+  if (prevQuestions !== questions) {
+    setPrevQuestions(questions);
+    setAnswers({});
+  }
 
   const handleSelect = (questionId: string, value: string) => {
     setAnswers((prev) => ({ ...prev, [questionId]: value }));

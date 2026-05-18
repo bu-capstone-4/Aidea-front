@@ -54,8 +54,10 @@ export const useFeedbackStore = create<FeedbackState>()((set) => ({
 
   setRejected: () =>
     set({
-      status: 'REJECTED',
+      status: 'IDLE',
       isSplitView: false,
+      feedbackId: '',
+      revisedMarkdown: null,
     }),
 
   setFailed: () =>

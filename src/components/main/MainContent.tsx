@@ -49,12 +49,6 @@ export default function MainContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [docId]);
 
-  useEffect(() => {
-    if (status === 'REJECTED') {
-      resetFeedback();
-    }
-  }, [status, resetFeedback]);
-
   const toggleFeedbackModal = () => {
     setIsFeedbackModalOpen((prev) => !prev);
   };
@@ -78,9 +72,11 @@ export default function MainContent() {
           <h1 className="text-[2.5rem] font-bold text-[#1a1a1a] tracking-tight leading-tight">
             {getDocLabel(doc.type)}
           </h1>
-          <Button variant="feedback" size="sm" className="shrink-0" onClick={toggleFeedbackModal}>
-            + AI 피드백
-          </Button>
+          {status === 'IDLE' && (
+            <Button variant="feedback" size="sm" className="shrink-0" onClick={toggleFeedbackModal}>
+              + AI 피드백
+            </Button>
+          )}
         </div>
 
         <QuestionPanel />

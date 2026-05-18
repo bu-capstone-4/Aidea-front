@@ -14,7 +14,14 @@ export default function FeedbackModal({
   docId,
 }: FeedbackModalProps) {
   const { requestFeedback } = useFeedback();
+  const [prevOpen, setPrevOpen] = useState(isFeedbackModalOpen);
   const [prompt, setPrompt] = useState('');
+
+  if (prevOpen !== isFeedbackModalOpen) {
+    setPrevOpen(isFeedbackModalOpen);
+    if (isFeedbackModalOpen) setPrompt('');
+  }
+
   if (!isFeedbackModalOpen) return null;
 
   return (
