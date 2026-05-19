@@ -1,6 +1,6 @@
-export type DocumentType = 'IDEA' | 'PLAN' | 'USER_SCENARIO' | 'API_SPEC' | 'ERD';
+import type { DocumentType, FeedbackStatus } from '@/types/document';
+
 export type TeamspaceStatus = 'CREATING' | 'CREATED';
-export type FeedbackStatus = 'IDLE' | 'PENDING' | 'QUESTIONING' | 'ANSWERING' | 'DONE' | 'ACCEPTED';
 
 export interface UserResponse {
   id: number;

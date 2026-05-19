@@ -1,5 +1,13 @@
 export type DocumentType = 'IDEA' | 'PLAN' | 'USER_SCENARIO' | 'API_SPEC' | 'ERD';
-export type FeedbackStatus = 'PENDING' | 'QUESTIONING' | 'ANSWERING' | 'DONE' | 'ACCEPTED';
+export type FeedbackStatus =
+  | 'IDLE'
+  | 'PENDING'
+  | 'QUESTIONING'
+  | 'ANSWERING'
+  | 'DONE'
+  | 'ACCEPTED'
+  | 'REJECTED'
+  | 'FAILED';
 export type TeamRole = 'OWNER' | 'MEMBER' | 'VIEWER';
 
 export interface DocumentMeta {
@@ -14,7 +22,7 @@ export interface Question {
   id: string;
   section: string;
   text: string;
-  options?: string[];
+  options?: string[] | null;
 }
 
 export interface Answer {
@@ -27,5 +35,6 @@ export interface Feedback {
   documentId: string;
   status: FeedbackStatus;
   questions: Question[] | null;
-  yjsBinary: Uint8Array | null;
+  revisedMarkdown: string | null;
+  originalMarkdown: string | null;
 }

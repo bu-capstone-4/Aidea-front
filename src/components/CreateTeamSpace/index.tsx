@@ -51,7 +51,6 @@ export default function CreateTeamSpace() {
       const response = await apiClient.post('/api/teamspaces', {
         name: form.teamName.trim(),
         idea: form.idea.trim(),
-        documents: form.selectedDocs,
       });
 
       setTeamspaceId(response.data.data.teamspaceId);
@@ -61,7 +60,7 @@ export default function CreateTeamSpace() {
     }
   };
 
-  const handleInviteMembers = async () => {
+  const handleCompleteSetup = async () => {
     if (!teamspaceId) {
       setErrorMessage('팀 스페이스 정보가 없습니다.');
       return;
@@ -81,10 +80,12 @@ export default function CreateTeamSpace() {
     try {
       setErrorMessage(null);
 
+      await Promise.all(
+        form.selectedDocs.map((type) => apiClient.post('/api/documents', { teamspaceId, type }))
+      );
+
       if (emails.length > 0) {
-        await apiClient.post(`/api/teamspaces/${teamspaceId}/invitations`, {
-          emails,
-        });
+        await apiClient.post(`/api/teamspaces/${teamspaceId}/invitations`, { emails });
       }
 
       const detailResponse = await apiClient.get(`/api/teamspaces/${teamspaceId}`);
@@ -105,7 +106,7 @@ export default function CreateTeamSpace() {
       <div className="bg-white rounded-2xl border border-gray-200 w-full max-w-[600px] mx-4 p-10">
         {step === 1 && <Step1 form={form} onChange={updateForm} onNext={handleCreateTeamspace} />}
 
-        {step === 2 && <Step2 form={form} onChange={updateForm} onSubmit={handleInviteMembers} />}
+        {step === 2 && <Step2 form={form} onChange={updateForm} onSubmit={handleCompleteSetup} />}
 
         {errorMessage && <p className="mt-3 text-sm text-red-500">{errorMessage}</p>}
       </div>

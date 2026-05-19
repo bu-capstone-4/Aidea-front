@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { apiClient } from '@/shared/apiClient';
-import type { DocumentDetail } from '@/mocks/types';
+import type { DocumentDetail } from '@/types/api';
 
 export function useDocument(documentId: string | undefined) {
   const [doc, setDoc] = useState<DocumentDetail | null>(null);

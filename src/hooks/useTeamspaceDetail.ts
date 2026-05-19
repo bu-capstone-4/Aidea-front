@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { apiClient } from '@/shared/apiClient';
-import type { TeamspaceDetail } from '@/mocks/types';
+import type { TeamspaceDetail } from '@/types/api';
 
 export function useTeamspaceDetail(teamspaceId: string | null) {
   const [teamspace, setTeamspace] = useState<TeamspaceDetail | null>(null);

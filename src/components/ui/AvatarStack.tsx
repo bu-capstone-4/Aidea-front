@@ -1,5 +1,5 @@
 import UserAvatar from './UserAvatar';
-import type { MemberInfo } from '@/mocks/types';
+import type { MemberInfo } from '@/types/api';
 
 interface AvatarStackProps {
   members: MemberInfo[];

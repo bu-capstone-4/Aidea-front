@@ -6,6 +6,7 @@ import { ko } from '@blocknote/core/locales';
 import { handleSocketError } from '@/shared/socketErrorHandler';
 import type { DocumentServerMessage } from '@/types/socket';
 import { useFeedbackStore } from '@/store/FeedbackStore';
+import { restoreFeedbackState } from '@/hooks/useFeedback';
 
 function base64ToUint8Array(b64: string): Uint8Array {
   return Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
@@ -34,6 +35,7 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
 
   const [connected, setConnected] = useState(false);
   const initializedRef = useRef(false);
+  const applyMarkdownRef = useRef<((md: string) => Promise<void>) | null>(null);
   const { setYdoc } = useFeedbackStore();
 
   useEffect(() => {
@@ -54,52 +56,68 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
     ws.onmessage = (event: MessageEvent<string>) => {
       const msg = JSON.parse(event.data) as DocumentServerMessage;
 
-      // Yjs 동기화 이벤트: type 필드 사용
-      if ('type' in msg) {
-        if (msg.type === 'doc:init') {
-          for (const b64 of msg.updates) {
-            Y.applyUpdate(doc, base64ToUint8Array(b64), 'remote');
-          }
-          initializedRef.current = true;
-          return;
+      // DocumentSocketErrorEvent는 event 필드 사용
+      if ('event' in msg) {
+        handleSocketError({ code: msg.code, message: msg.message });
+        return;
+      }
+
+      if (msg.type === 'doc:init') {
+        for (const b64 of msg.updates) {
+          Y.applyUpdate(doc, base64ToUint8Array(b64), 'remote');
         }
-        if (msg.type === 'doc:update') {
-          if (!initializedRef.current) return;
-          Y.applyUpdate(doc, base64ToUint8Array(msg.update), 'remote');
+        initializedRef.current = true;
+        if (msg.activeFeedback) {
+          restoreFeedbackState(docId, msg.activeFeedback.feedbackId, msg.activeFeedback);
         }
         return;
       }
 
-      // 비즈니스 이벤트: event 필드 사용
-      if (msg.event === 'error') {
-        handleSocketError({ code: msg.code, message: msg.message });
+      if (msg.type === 'doc:update') {
+        if (!initializedRef.current) return;
+        Y.applyUpdate(doc, base64ToUint8Array(msg.update), 'remote');
         return;
       }
 
       const feedbackStore = useFeedbackStore.getState();
 
-      if (msg.event === 'feedback:start') {
-        feedbackStore.setPending(docId, msg.data.feedbackId);
+      if (msg.type === 'feedback:started') {
+        feedbackStore.setPending(docId, msg.feedbackId);
         return;
       }
 
-      if (msg.event === 'feedback:ready') {
-        feedbackStore.setDone(msg.data.feedbackId, base64ToUint8Array(msg.data.yjsBinary));
+      if (msg.type === 'feedback:questioning') {
+        feedbackStore.setQuestioning(msg.questions);
         return;
       }
 
-      if (msg.event === 'feedback:version-applied') {
-        const newDoc = new Y.Doc();
-        Y.applyUpdate(newDoc, base64ToUint8Array(msg.data.yjsBinary), 'remote');
-        Y.applyUpdate(doc, Y.encodeStateAsUpdate(newDoc), 'remote');
-        newDoc.destroy();
-        feedbackStore.acceptFeedback();
+      if (msg.type === 'feedback:ready') {
+        feedbackStore.setDone(msg.feedbackId, msg.revisedMarkdown);
         return;
       }
 
-      if (msg.event === 'feedback:error') {
-        handleSocketError({ code: msg.data.code, message: msg.data.message });
-        feedbackStore.resetFeedback();
+      if (msg.type === 'feedback:resolved') {
+        if (msg.outcome === 'ACCEPTED') {
+          const { revisedMarkdown } = useFeedbackStore.getState();
+          if (revisedMarkdown && applyMarkdownRef.current) {
+            applyMarkdownRef.current(revisedMarkdown).then(() => {
+              feedbackStore.acceptFeedback();
+            });
+          } else {
+            feedbackStore.acceptFeedback();
+          }
+        } else {
+          feedbackStore.setRejected();
+        }
+        return;
+      }
+
+      if (msg.type === 'feedback:error') {
+        handleSocketError({
+          code: 'AI_FEEDBACK_FAILED',
+          message: 'AI 피드백 처리 중 오류가 발생했습니다.',
+        });
+        feedbackStore.setFailed();
       }
     };
 
@@ -131,6 +149,14 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
     dictionary: ko,
     editable,
   });
+
+  useEffect(() => {
+    applyMarkdownRef.current = (md: string) => {
+      const blocks = editor.tryParseMarkdownToBlocks(md);
+      editor.replaceBlocks(editor.document, blocks);
+      return Promise.resolve();
+    };
+  }, [editor]);
 
   return { editor, doc, provider, connected };
 }

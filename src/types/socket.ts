@@ -1,4 +1,4 @@
-import type { DocumentType } from '@/types/document';
+import type { DocumentType, FeedbackStatus, Question } from '@/types/document';
 
 // ─── 공통 ─────────────────────────────────────────────────────────────────────
 
@@ -31,9 +31,17 @@ export type FeedbackErrorCode =
 
 // ─── 문서 소켓 server → client ────────────────────────────────────────────────
 
+export interface ActiveFeedbackInfo {
+  feedbackId: string;
+  status: FeedbackStatus;
+  revisedMarkdown?: string | null;
+  questions?: Question[] | null;
+}
+
 export interface DocInitEvent {
   type: 'doc:init';
   updates: string[];
+  activeFeedback?: ActiveFeedbackInfo | null;
 }
 
 export interface DocUpdateEvent {
@@ -41,29 +49,33 @@ export interface DocUpdateEvent {
   update: string;
 }
 
-export interface FeedbackStartEvent {
-  event: 'feedback:start';
-  data: { feedbackId: string; requestedBy: number };
+export interface FeedbackStartedEvent {
+  type: 'feedback:started';
+  feedbackId: string;
+  requestedBy: { userId: number; name: string };
 }
 
-export interface FeedbackErrorEvent {
-  event: 'feedback:error';
-  data: { feedbackId: string; code: FeedbackErrorCode | string; message: string };
+export interface FeedbackQuestioningEvent {
+  type: 'feedback:questioning';
+  feedbackId: string;
+  questions: Question[];
 }
 
 export interface FeedbackReadyEvent {
-  event: 'feedback:ready';
-  data: { feedbackId: string; yjsBinary: string; status: 'DONE' };
+  type: 'feedback:ready';
+  feedbackId: string;
+  revisedMarkdown: string;
 }
 
-export interface FeedbackVersionAppliedEvent {
-  event: 'feedback:version-applied';
-  data: {
-    feedbackId: string;
-    selectedVersion: 'ORIGINAL' | 'AI';
-    yjsBinary: string;
-    appliedBy: number;
-  };
+export interface FeedbackErrorEvent {
+  type: 'feedback:error';
+  feedbackId: string;
+}
+
+export interface FeedbackResolvedEvent {
+  type: 'feedback:resolved';
+  feedbackId: string;
+  outcome: 'ACCEPTED' | 'REJECTED';
 }
 
 export interface DocumentSocketErrorEvent {
@@ -75,10 +87,11 @@ export interface DocumentSocketErrorEvent {
 export type DocumentServerMessage =
   | DocInitEvent
   | DocUpdateEvent
-  | FeedbackStartEvent
-  | FeedbackErrorEvent
+  | FeedbackStartedEvent
+  | FeedbackQuestioningEvent
   | FeedbackReadyEvent
-  | FeedbackVersionAppliedEvent
+  | FeedbackErrorEvent
+  | FeedbackResolvedEvent
   | DocumentSocketErrorEvent;
 
 // ─── 문서 소켓 client → server ────────────────────────────────────────────────

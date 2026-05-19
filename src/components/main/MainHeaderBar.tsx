@@ -5,6 +5,7 @@ import { useTeamspaceStore } from '@/store/teamspaceStore';
 import { useTeamspaceDetail } from '@/hooks/useTeamspaceDetail';
 import { useDocument } from '@/hooks/useDocument';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { getDocLabel } from '@/components/CreateTeamSpace/types';
 
 export default function MainHeaderBar() {
   const { docId } = useParams();
@@ -13,7 +14,9 @@ export default function MainHeaderBar() {
   const { doc } = useDocument(docId);
   const { user } = useCurrentUser();
 
-  const breadcrumb = [teamspace?.name, doc?.title].filter(Boolean).join(' / ');
+  const breadcrumb = [teamspace?.name, doc ? getDocLabel(doc.type) : undefined]
+    .filter(Boolean)
+    .join(' / ');
 
   return (
     <header className="flex h-14 justify-between p-4">
