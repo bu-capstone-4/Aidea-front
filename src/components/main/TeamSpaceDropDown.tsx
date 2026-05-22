@@ -9,10 +9,12 @@ import { useTeamspaceStore } from '@/store/teamspaceStore';
 import { useAuth } from '@/shared/useAuth';
 import { apiClient } from '@/shared/apiClient';
 import type { TeamspaceDetail } from '@/types/api';
+import CreateTeamSpace from '@/components/CreateTeamSpace';
 
 export default function TeamSpaceDropDown() {
   const [isDropDownOpen, setIsDropDownOpen] = useState(false);
   const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
+  const [isCreateTeamspaceModalOpen, setIsCreateTeamspaceModalOpen] = useState(false);
   const navigate = useNavigate();
   const { logout } = useAuth();
 
@@ -22,7 +24,7 @@ export default function TeamSpaceDropDown() {
 
   const handleCreateTeamspace = () => {
     setIsDropDownOpen(false);
-    navigate('/create');
+    setIsCreateTeamspaceModalOpen(true);
   };
 
   const handleSwitchTeamspace = async (tsId: string) => {
@@ -127,6 +129,10 @@ export default function TeamSpaceDropDown() {
         isMemberModalOpen={isMemberModalOpen}
         toggleMemberModal={() => setIsMemberModalOpen(false)}
       />
+
+      {isCreateTeamspaceModalOpen && (
+        <CreateTeamSpace onClose={() => setIsCreateTeamspaceModalOpen(false)} />
+      )}
     </div>
   );
 }
