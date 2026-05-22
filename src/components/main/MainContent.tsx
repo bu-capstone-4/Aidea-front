@@ -8,8 +8,6 @@ import Button from '@/components/ui/Button';
 import FeedbackModal from './FeedbackModal';
 import SplitView from './SplitView';
 import { useFeedbackStore } from '@/store/FeedbackStore';
-import QuestionPanel from './QuestionPanel';
-import Loading from './Loading';
 import useFeedback from '@/hooks/useFeedback';
 
 const CURSOR_COLORS = ['#1971c2', '#e03131', '#2f9e44', '#f08c00', '#7048e8'];
@@ -72,16 +70,20 @@ export default function MainContent() {
           <h1 className="text-[2.5rem] font-bold text-[#1a1a1a] tracking-tight leading-tight">
             {getDocLabel(doc.type)}
           </h1>
-          {status === 'IDLE' && (
-            <Button variant="feedback" size="sm" className="shrink-0" onClick={toggleFeedbackModal}>
-              + AI 피드백
-            </Button>
-          )}
+          {status === 'IDLE' ||
+            (status === 'ACCEPTED' && (
+              <Button
+                variant="feedback"
+                size="sm"
+                className="shrink-0"
+                onClick={toggleFeedbackModal}
+              >
+                + AI 피드백
+              </Button>
+            ))}
         </div>
 
-        <QuestionPanel />
-
-        <div className={status === 'QUESTIONING' ? 'hidden' : 'block'}>
+        <div className={isSplitView === true ? 'hidden' : 'block'}>
           <CollaborativeEditor
             key={docId}
             docId={docId}
@@ -97,8 +99,6 @@ export default function MainContent() {
         toggleFeedbackModal={toggleFeedbackModal}
         docId={docId ?? ''}
       />
-
-      <Loading isLoading={status === 'PENDING' || status === 'ANSWERING'} />
 
       {status === 'FAILED' && (
         <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-999">
