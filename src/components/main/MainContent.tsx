@@ -70,17 +70,11 @@ export default function MainContent() {
           <h1 className="text-[2.5rem] font-bold text-[#1a1a1a] tracking-tight leading-tight">
             {getDocLabel(doc.type)}
           </h1>
-          {status === 'IDLE' ||
-            (status === 'ACCEPTED' && (
-              <Button
-                variant="feedback"
-                size="sm"
-                className="shrink-0"
-                onClick={toggleFeedbackModal}
-              >
-                + AI 피드백
-              </Button>
-            ))}
+          {(status === 'IDLE' || status === 'ACCEPTED') && (
+            <Button variant="feedback" size="sm" className="shrink-0" onClick={toggleFeedbackModal}>
+              + AI 피드백
+            </Button>
+          )}
         </div>
 
         <div className={isSplitView === true ? 'hidden' : 'block'}>
