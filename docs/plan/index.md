@@ -1,7 +1,7 @@
 # 백로그 기능 프론트엔드 구현 계획 — 마스터 인덱스
 
 > 기반 문서: [backlog-frontend-spec.md](../backlog-frontend-spec.md)  
-> 마지막 업데이트: 2026-05-26
+> 마지막 업데이트: 2026-05-26 (작업 진행 절차 섹션 추가)
 
 ---
 
@@ -43,7 +43,7 @@ REST API (직접 수행한 작업)
 | --- | ------------------------------------------------------------- | -------------------------------------------------------------------------------- | ------------ |
 | 01  | [타입 정의 및 API 레이어](task-01-types-and-api.md)           | `src/types/backlog.ts`, `src/api/backlog.ts`                                     | ✅ 완료      |
 | 02  | [Zustand 백로그 스토어](task-02-store.md)                     | `src/store/backlogStore.ts`                                                      | ✅ 완료      |
-| 03  | [WebSocket 훅](task-03-ws-hook.md)                            | `src/hooks/useBacklogSocket.ts`                                                  | ⬜ 미완료    |
+| 03  | [WebSocket 훅](task-03-ws-hook.md)                            | `src/hooks/useBacklogSocket.ts`                                                  | ✅ 완료      |
 | 04  | [Welcome 화면 & Config 모달 UI](task-04-welcome-config-ui.md) | `src/components/backlog/WelcomeScreen.tsx`, `ConfigModal.tsx`                    | ⬜ 미완료    |
 | 05  | [백로그 메인 모달 (목록 뷰)](task-05-list-view.md)            | `src/components/backlog/BacklogModal.tsx`, `BacklogListView.tsx`, `StoryRow.tsx` | ⬜ 미완료    |
 | 06  | [보드 뷰 (칸반)](task-06-board-view.md)                       | `src/components/backlog/BacklogBoardView.tsx`, `StoryCard.tsx`                   | ⬜ 미완료    |
@@ -53,6 +53,42 @@ REST API (직접 수행한 작업)
 | BE  | [백엔드 제안 사항](backend-proposal.md)                       | —                                                                                | 📋 검토 필요 |
 
 **권장 구현 순서**: 01 → 02 → 03 → 09 → 04 → 05 → 06 → 07 → 08
+
+---
+
+## 작업 진행 절차
+
+각 작업을 시작하기 전 **반드시** 아래 절차를 따른다.
+
+### 1단계 — 계획 수립 (구현 전)
+
+해당 작업의 태스크 파일(`task-NN-*.md`)을 읽고, 구현을 시작하기 전에 다음 항목을 포함한 계획을 제시한다:
+
+1. **작업 범위**: 생성/수정할 파일 목록과 각 파일에서 할 일
+2. **의존성 확인**: 선행 작업 완료 여부, 참조할 기존 코드 패턴
+3. **설계 결정**: 스펙과 다르게 구현할 부분이 있으면 이유와 함께 명시
+4. **구현 순서**: 파일 단위 작업 순서
+
+계획을 사용자가 확인한 뒤 구현을 시작한다.
+
+### 2단계 — 구현
+
+계획대로 구현한다. 스펙과 달라지는 부분이 생기면 즉시 사용자에게 알리고 작업 로그에 기록한다.
+
+### 3단계 — 린트 & 타입 체크
+
+구현 완료 후 반드시 아래 명령어를 실행하고 오류가 없어야 다음 단계로 넘어간다.
+
+```bash
+npx tsc --noEmit   # 타입 체크
+npx eslint src     # 린트 (프로젝트 eslint 설정 기준)
+```
+
+오류가 있으면 수정 후 재실행한다.
+
+### 4단계 — 커밋 메시지 추천
+
+린트·타입 체크가 모두 통과하면 아래 [커밋 메시지 규칙](#커밋-메시지-규칙)에 따라 커밋 메시지를 추천한다.
 
 ---
 

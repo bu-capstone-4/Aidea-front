@@ -196,6 +196,10 @@ export type BacklogSocketErrorCode =
 
 ## 작업 로그
 
-| 날짜 | 내용 |
-| ---- | ---- |
-| —    | —    |
+| 날짜       | 내용                                                                                    |
+| ---------- | --------------------------------------------------------------------------------------- |
+| 2026-05-26 | 작업 시작.                                                                              |
+| 2026-05-26 | `BacklogSocketErrorCode` 타입을 `src/types/backlog.ts`에 추가.                          |
+| 2026-05-26 | `socketErrorHandler.ts`에 `BacklogSocketErrorCode` 유니온 추가.                         |
+| 2026-05-26 | `src/hooks/useBacklogSocket.ts` 구현 완료. 15개 WS 이벤트 → 스토어 액션 매핑 전체 처리. |
+| 2026-05-26 | 작업 완료.                                                                              |

@@ -178,9 +178,17 @@ export interface TaskDeletedEvent {
   taskId: number;
 }
 
+export type BacklogSocketErrorCode =
+  | 'INSUFFICIENT_PERMISSION'
+  | 'DOCUMENT_NOT_FOUND'
+  | 'INVALID_MESSAGE'
+  | 'INTERNAL_SERVER_ERROR'
+  | 'UNAUTHORIZED'
+  | 'SESSION_EXPIRED';
+
 export interface BacklogSocketErrorEvent {
   event: 'error';
-  code: string;
+  code: BacklogSocketErrorCode | string;
   message: string;
 }
 
