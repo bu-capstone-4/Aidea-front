@@ -169,6 +169,8 @@ hover:shadow-md transition-shadow cursor-pointer
 
 ## 작업 로그
 
-| 날짜 | 내용 |
-| ---- | ---- |
-| —    | —    |
+| 날짜       | 내용                                                                                                        |
+| ---------- | ----------------------------------------------------------------------------------------------------------- |
+| 2026-05-26 | 작업 시작. StoryCard.tsx, BacklogBoardView.tsx 신규 생성, BacklogModal.tsx 플레이스홀더 교체.               |
+| 2026-05-26 | onAddStory/onEditStory를 BacklogMainView props로 추가. BacklogModal에서 Task 07 연결 전까지 no-op으로 전달. |
+| 2026-05-26 | 작업 완료. tsc & eslint 오류 없음.                                                                          |

@@ -2,10 +2,11 @@ import { useEffect, useCallback, useState } from 'react';
 import { MdClose, MdSettings, MdList, MdGridView } from 'react-icons/md';
 import { useBacklogSocket } from '@/hooks/useBacklogSocket';
 import { useBacklogStore } from '@/store/backlogStore';
-import type { StoryStatus, BacklogConfigResponse } from '@/types/backlog';
+import type { StoryStatus, BacklogConfigResponse, StorySummary } from '@/types/backlog';
 import WelcomeScreen from './WelcomeScreen';
 import ConfigModal from './ConfigModal';
 import BacklogListView from './BacklogListView';
+import BacklogBoardView from './BacklogBoardView';
 
 interface BacklogModalProps {
   teamspaceId: string;
@@ -33,9 +34,18 @@ interface BacklogMainViewProps {
   config: BacklogConfigResponse;
   onConfigOpen: () => void;
   onClose: () => void;
+  onAddStory: (defaultStatus?: StoryStatus) => void;
+  onEditStory: (story: StorySummary) => void;
 }
 
-function BacklogMainView({ teamspaceId, config, onConfigOpen, onClose }: BacklogMainViewProps) {
+function BacklogMainView({
+  teamspaceId,
+  config,
+  onConfigOpen,
+  onClose,
+  onAddStory,
+  onEditStory,
+}: BacklogMainViewProps) {
   const stories = useBacklogStore((s) => s.stories);
 
   const [viewMode, setViewMode] = useState<ViewMode>('list');
@@ -146,12 +156,15 @@ function BacklogMainView({ teamspaceId, config, onConfigOpen, onClose }: Backlog
             teamspaceId={teamspaceId}
             statusFilter={statusFilter}
             groupByEpic={groupByEpic}
-            onEditStory={() => {}}
+            onEditStory={onEditStory}
           />
         ) : (
-          <div className="flex items-center justify-center h-full text-ink-muted text-sm">
-            보드 뷰 준비 중 (Task 06)
-          </div>
+          <BacklogBoardView
+            teamspaceId={teamspaceId}
+            config={config}
+            onAddStory={onAddStory}
+            onEditStory={onEditStory}
+          />
         )}
       </div>
     </div>
@@ -219,6 +232,8 @@ export default function BacklogModal({ teamspaceId, onClose }: BacklogModalProps
             config={config!}
             onConfigOpen={() => setShowConfig(true)}
             onClose={onClose}
+            onAddStory={() => {}}
+            onEditStory={() => {}}
           />
         </div>
       </div>

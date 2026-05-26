@@ -27,6 +27,25 @@
 
 ### 2026-05-26
 
+**[Task 06]** 작업 완료. 보드 뷰 (칸반) 구현.
+
+내용:
+
+- `BacklogMainView`에 `onAddStory`, `onEditStory` props 추가. Task 07 연결 전까지 BacklogModal에서 no-op으로 전달.
+- 드래그앤드롭 미구현. 카드 더보기 버튼(···) 클릭으로 상태 변경 드롭다운 제공 (스펙 동일).
+- `CLOSED` 스토리는 보드 뷰 3개 컬럼(OPEN/IN_PROGRESS/DONE)에서 숨김 처리.
+- `storiesByStatus` map에 `CLOSED` 키도 초기화해 TypeScript Record 완전 충족.
+
+영향 범위:
+
+- `src/components/backlog/StoryCard.tsx` (신규)
+- `src/components/backlog/BacklogBoardView.tsx` (신규)
+- `src/components/backlog/BacklogModal.tsx` (수정)
+
+---
+
+### 2026-05-26
+
 **[Task 05]** 작업 완료. 백로그 메인 모달 및 목록 뷰 구현.
 
 내용:
