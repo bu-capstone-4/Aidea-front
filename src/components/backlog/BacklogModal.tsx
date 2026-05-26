@@ -1,5 +1,5 @@
 import { useEffect, useCallback, useState } from 'react';
-import { MdClose, MdSettings, MdList, MdGridView } from 'react-icons/md';
+import { MdClose, MdSettings, MdList, MdGridView, MdTune } from 'react-icons/md';
 import { useBacklogSocket } from '@/hooks/useBacklogSocket';
 import { useBacklogStore } from '@/store/backlogStore';
 import { useTeamspaceDetail } from '@/hooks/useTeamspaceDetail';
@@ -16,6 +16,7 @@ import ConfigModal from './ConfigModal';
 import BacklogListView from './BacklogListView';
 import BacklogBoardView from './BacklogBoardView';
 import StoryFormModal from './StoryFormModal';
+import EpicManagerModal from './EpicManagerModal';
 
 interface BacklogModalProps {
   teamspaceId: string;
@@ -61,6 +62,7 @@ function BacklogMainView({ teamspaceId, config, onConfigOpen, onClose }: Backlog
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [groupByEpic, setGroupByEpic] = useState(false);
   const [storyForm, setStoryForm] = useState<StoryFormState | null>(null);
+  const [epicManagerOpen, setEpicManagerOpen] = useState(false);
 
   const STATUS_TABS: { label: string; value: StatusFilter }[] = [
     { label: '전체', value: 'all' },
@@ -132,18 +134,29 @@ function BacklogMainView({ teamspaceId, config, onConfigOpen, onClose }: Backlog
 
         <div className="flex-1" />
 
-        {/* 에픽 그룹 버튼 */}
+        {/* 에픽 관련 버튼 */}
         {config.epicEnabled && (
-          <button
-            onClick={() => setGroupByEpic((v) => !v)}
-            className={`flex items-center gap-1 px-3 py-1 rounded border text-sm transition-colors ${
-              groupByEpic
-                ? 'border-primary text-primary bg-primary/5'
-                : 'border-border text-ink-muted hover:text-ink'
-            }`}
-          >
-            그룹: 에픽 {groupByEpic ? '▲' : '▼'}
-          </button>
+          <>
+            <button
+              onClick={() => setGroupByEpic((v) => !v)}
+              className={`flex items-center gap-1 px-3 py-1 rounded border text-sm transition-colors ${
+                groupByEpic
+                  ? 'border-primary text-primary bg-primary/5'
+                  : 'border-border text-ink-muted hover:text-ink'
+              }`}
+            >
+              그룹: 에픽 {groupByEpic ? '▲' : '▼'}
+            </button>
+            <button
+              onClick={() => setEpicManagerOpen(true)}
+              className="flex items-center gap-1 px-2 py-1 rounded border border-border text-sm text-ink-muted hover:text-ink transition-colors"
+              aria-label="에픽 관리"
+              title="에픽 관리"
+            >
+              <MdTune size={16} />
+              <span>에픽 관리</span>
+            </button>
+          </>
         )}
 
         {/* 뷰 전환 */}
@@ -225,6 +238,16 @@ function BacklogMainView({ teamspaceId, config, onConfigOpen, onClose }: Backlog
           members={members}
           onSave={handleFormSave}
           onClose={() => setStoryForm(null)}
+          onManageEpics={() => setEpicManagerOpen(true)}
+        />
+      )}
+
+      {/* 에픽 관리 모달 */}
+      {epicManagerOpen && (
+        <EpicManagerModal
+          teamspaceId={teamspaceId}
+          epics={epics}
+          onClose={() => setEpicManagerOpen(false)}
         />
       )}
     </div>

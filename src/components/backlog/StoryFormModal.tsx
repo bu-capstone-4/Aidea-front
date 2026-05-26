@@ -21,6 +21,7 @@ interface StoryFormModalProps {
   members: MemberInfo[];
   onSave: (data: CreateStoryRequest & { status?: StoryStatus }) => Promise<StoryDetail>;
   onClose: () => void;
+  onManageEpics?: () => void;
 }
 
 const STATUS_OPTIONS: { value: StoryStatus; label: string }[] = [
@@ -51,6 +52,7 @@ export default function StoryFormModal({
   members,
   onSave,
   onClose,
+  onManageEpics,
 }: StoryFormModalProps) {
   const [form, setForm] = useState({
     title: initialData?.title ?? '',
@@ -188,7 +190,7 @@ export default function StoryFormModal({
                   {selectedEpicNames || '에픽 선택'}
                 </button>
                 {epicPopoverOpen && (
-                  <div className="absolute left-0 top-full mt-1 w-52 bg-white border border-border rounded-lg shadow-lg z-10 py-1 max-h-48 overflow-y-auto">
+                  <div className="absolute left-0 top-full mt-1 w-52 bg-white border border-border rounded-lg shadow-lg z-10 py-1 max-h-48 overflow-y-auto flex flex-col">
                     {epics.map((epic) => (
                       <label
                         key={epic.id}
@@ -207,6 +209,18 @@ export default function StoryFormModal({
                         <span className="truncate">{epic.name}</span>
                       </label>
                     ))}
+                    {onManageEpics && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEpicPopoverOpen(false);
+                          onManageEpics();
+                        }}
+                        className="flex items-center gap-1 px-3 py-1.5 text-xs text-primary font-medium hover:bg-surface border-t border-border mt-1 transition-colors"
+                      >
+                        + 에픽 관리
+                      </button>
+                    )}
                   </div>
                 )}
               </div>

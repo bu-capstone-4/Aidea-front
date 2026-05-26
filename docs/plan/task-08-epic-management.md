@@ -139,6 +139,9 @@ export function EpicBadge({ epic }: { epic: EpicSummary }) {
 
 ## 작업 로그
 
-| 날짜 | 내용 |
-| ---- | ---- |
-| —    | —    |
+| 날짜       | 내용                                                                                                                         |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| 2026-05-26 | 작업 시작. EpicManagerModal.tsx 신규 생성, BacklogModal.tsx / StoryFormModal.tsx 수정.                                       |
+| 2026-05-26 | EpicBadge.tsx는 `epics: EpicSummary[]` 인터페이스로 이미 구현되어 있어 스펙 단일 epic 서명 대신 기존 구현 유지.              |
+| 2026-05-26 | StoryFormModal에 `onManageEpics` 선택적 prop 추가. EpicManagerModal z-[70]으로 StoryFormModal(z-[60]) 위에 스택 렌더링 가능. |
+| 2026-05-26 | 작업 완료. tsc & eslint 오류 없음.                                                                                           |

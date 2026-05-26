@@ -27,6 +27,26 @@
 
 ### 2026-05-26
 
+**[Task 08]** 작업 완료. 에픽 관리 모달 구현.
+
+내용:
+
+- `EpicManagerModal.tsx` 신규 생성. 에픽 목록 표시, 인라인 생성/수정 폼, 삭제 확인 포함.
+- `BacklogModal.tsx`의 필터 바 "그룹: 에픽" 버튼 옆에 "에픽 관리" 버튼(MdTune 아이콘) 추가. `epicManagerOpen` 상태로 EpicManagerModal 렌더링.
+- `StoryFormModal.tsx`에 `onManageEpics?: () => void` prop 추가. 에픽 팝오버 하단에 "+ 에픽 관리" 버튼으로 EpicManagerModal 진입 가능.
+- EpicManagerModal z-index `z-[70]`으로 설정 → StoryFormModal(`z-[60]`) 위에 스택 가능.
+- 스펙의 EpicBadge 단일 epic 서명과 달리 기존 `epics: EpicSummary[]` 구현 유지 (이미 사용 중인 코드 변경 불필요).
+
+영향 범위:
+
+- `src/components/backlog/EpicManagerModal.tsx` (신규)
+- `src/components/backlog/BacklogModal.tsx` (수정)
+- `src/components/backlog/StoryFormModal.tsx` (수정)
+
+---
+
+### 2026-05-26
+
 **[Task 07]** 작업 완료. 스토리 생성/수정 폼 및 태스크 목록 완전 구현.
 
 내용:
