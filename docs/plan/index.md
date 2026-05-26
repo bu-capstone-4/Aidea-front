@@ -44,7 +44,7 @@ REST API (직접 수행한 작업)
 | 01  | [타입 정의 및 API 레이어](task-01-types-and-api.md)           | `src/types/backlog.ts`, `src/api/backlog.ts`                                     | ✅ 완료      |
 | 02  | [Zustand 백로그 스토어](task-02-store.md)                     | `src/store/backlogStore.ts`                                                      | ✅ 완료      |
 | 03  | [WebSocket 훅](task-03-ws-hook.md)                            | `src/hooks/useBacklogSocket.ts`                                                  | ✅ 완료      |
-| 04  | [Welcome 화면 & Config 모달 UI](task-04-welcome-config-ui.md) | `src/components/backlog/WelcomeScreen.tsx`, `ConfigModal.tsx`                    | ⬜ 미완료    |
+| 04  | [Welcome 화면 & Config 모달 UI](task-04-welcome-config-ui.md) | `src/components/backlog/WelcomeScreen.tsx`, `ConfigModal.tsx`                    | ✅ 완료      |
 | 05  | [백로그 메인 모달 (목록 뷰)](task-05-list-view.md)            | `src/components/backlog/BacklogModal.tsx`, `BacklogListView.tsx`, `StoryRow.tsx` | ⬜ 미완료    |
 | 06  | [보드 뷰 (칸반)](task-06-board-view.md)                       | `src/components/backlog/BacklogBoardView.tsx`, `StoryCard.tsx`                   | ⬜ 미완료    |
 | 07  | [스토리 생성/수정 폼](task-07-story-form.md)                  | `src/components/backlog/StoryFormModal.tsx`, `TaskList.tsx`                      | ⬜ 미완료    |
@@ -60,9 +60,30 @@ REST API (직접 수행한 작업)
 
 각 작업을 시작하기 전 **반드시** 아래 절차를 따른다.
 
-### 1단계 — 계획 수립 (구현 전)
+### 0단계 — 문서 & 코드 읽기 (구현 전 필수)
 
-해당 작업의 태스크 파일(`task-NN-*.md`)을 읽고, 구현을 시작하기 전에 다음 항목을 포함한 계획을 제시한다:
+1. `docs/plan/index.md`(이 파일)를 읽어 전체 작업 현황을 파악한다.
+2. 다음으로 진행할 태스크 파일(`task-NN-*.md`)을 읽는다.
+3. 태스크 파일에 명시된 **변경 파일**을 모두 읽어 기존 코드 패턴을 파악한다.
+
+### 1단계 — TodoWrite 설정
+
+문서와 코드를 모두 읽은 뒤, **구현을 시작하기 전에** 반드시 `TodoWrite`로 작업 목록을 설정한다.
+
+목록은 아래 구조를 따른다:
+
+```
+[ 구현 항목들 ... ]
+타입 체크 & 린트 실행
+작업 로그 업데이트
+커밋 메시지 추천
+```
+
+> 마지막 세 항목(타입 체크 & 린트 실행 / 작업 로그 업데이트 / 커밋 메시지 추천)은 **모든 작업에 고정**으로 포함한다.
+
+### 2단계 — 계획 수립 (구현 전)
+
+TodoWrite 설정 후, 구현을 시작하기 전에 다음 항목을 포함한 계획을 사용자에게 제시한다:
 
 1. **작업 범위**: 생성/수정할 파일 목록과 각 파일에서 할 일
 2. **의존성 확인**: 선행 작업 완료 여부, 참조할 기존 코드 패턴
@@ -71,11 +92,12 @@ REST API (직접 수행한 작업)
 
 계획을 사용자가 확인한 뒤 구현을 시작한다.
 
-### 2단계 — 구현
+### 3단계 — 구현
 
-계획대로 구현한다. 스펙과 달라지는 부분이 생기면 즉시 사용자에게 알리고 작업 로그에 기록한다.
+계획대로 구현한다. 각 파일 완료 시 즉시 해당 Todo를 `completed`로 표시한다.  
+스펙과 달라지는 부분이 생기면 즉시 사용자에게 알리고 작업 로그에 기록한다.
 
-### 3단계 — 린트 & 타입 체크
+### 4단계 — 린트 & 타입 체크
 
 구현 완료 후 반드시 아래 명령어를 실행하고 오류가 없어야 다음 단계로 넘어간다.
 
@@ -84,11 +106,17 @@ npx tsc --noEmit   # 타입 체크
 npx eslint src     # 린트 (프로젝트 eslint 설정 기준)
 ```
 
-오류가 있으면 수정 후 재실행한다.
+오류가 있으면 수정 후 재실행한다. 완료 시 Todo를 `completed`로 표시한다.
 
-### 4단계 — 커밋 메시지 추천
+### 5단계 — 작업 로그 업데이트
 
-린트·타입 체크가 모두 통과하면 아래 [커밋 메시지 규칙](#커밋-메시지-규칙)에 따라 커밋 메시지를 추천한다.
+린트·타입 체크 통과 후 해당 태스크 파일 하단의 **작업 로그 섹션**과 `index.md`의 상태 표를 업데이트한다.  
+완료 시 Todo를 `completed`로 표시한다.
+
+### 6단계 — 커밋 메시지 추천
+
+아래 [커밋 메시지 규칙](#커밋-메시지-규칙)에 따라 커밋 메시지를 사용자에게 추천한다.  
+완료 시 Todo를 `completed`로 표시한다.
 
 ---
 
