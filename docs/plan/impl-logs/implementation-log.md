@@ -27,6 +27,96 @@
 
 ### 2026-05-26
 
+**[Task 05]** 작업 완료. 백로그 메인 모달 및 목록 뷰 구현.
+
+내용:
+
+- `editingStory` 상태 제거: StoryFormModal은 Task 07 스코프이므로 `onEditStory` 콜백을 no-op으로 연결. Task 07에서 상태 복구 예정.
+- `deleteStory` import를 StoryRow에서 제거: 삭제 confirm + API 호출 로직을 BacklogListView로 이동해 관심사 분리.
+- `StoryDetailPanel`은 최소 스텁(태스크 읽기 전용 표시)만 구현. 태스크 CRUD는 Task 07에서 확장.
+- `BacklogMainView`는 별도 파일 없이 BacklogModal.tsx 내부 컴포넌트로 선언.
+
+영향 범위:
+
+- `src/components/backlog/BacklogModal.tsx` (수정)
+- `src/components/backlog/BacklogListView.tsx` (신규)
+- `src/components/backlog/StoryRow.tsx` (신규)
+- `src/components/backlog/StoryDetailPanel.tsx` (신규, 스텁)
+- `src/components/backlog/StatusBadge.tsx` (신규)
+- `src/components/backlog/IssueTypeTag.tsx` (신규)
+- `src/components/backlog/EpicBadge.tsx` (신규)
+- `src/components/backlog/PriorityBadge.tsx` (신규)
+
+---
+
+### 2026-05-26
+
+**[Task 04]** BacklogModal 화면 전환 — useEffect 내 setState 제거
+
+내용:
+
+- ESLint `react-hooks/set-state-in-effect` 규칙으로 useEffect 내 `setScreen()` 호출 불가
+- 해결: `isInitialized`, `config` 스토어 값에서 `storeScreen`을 직접 파생 (별도 effect 없음)
+- 사용자 조작(welcome → config) 전환은 `showConfig: boolean` 단일 상태로만 관리
+
+영향 범위:
+
+- `src/components/backlog/BacklogModal.tsx`
+
+---
+
+**[Task 04]** Toggle 컴포넌트 분리
+
+내용:
+
+- 스펙에서 ConfigModal 내부 또는 `ui/Toggle.tsx`로 분리 선택 가능 → 분리 선택
+- Task 06 보드 뷰 필터 바 및 이후 태스크에서 재사용 예정
+
+영향 범위:
+
+- `src/components/ui/Toggle.tsx` (신규)
+
+---
+
+**[Task 04]** 작업 완료. WelcomeScreen, ConfigModal, Toggle, BacklogModal(교체) 구현. tsc & eslint 통과.
+
+영향 범위:
+
+- `src/components/backlog/WelcomeScreen.tsx` (신규)
+- `src/components/backlog/ConfigModal.tsx` (신규)
+- `src/components/backlog/BacklogModal.tsx` (교체)
+
+---
+
+**[Task 03]** 작업 완료. useBacklogSocket 훅 구현. 모든 WS 이벤트 타입 핸들링.
+
+영향 범위:
+
+- `src/hooks/useBacklogSocket.ts` (신규)
+
+---
+
+**[Task 01 / 02]** 작업 완료. 타입 정의, API 레이어, Zustand 스토어 구현.
+
+내용:
+
+- `BacklogUser` 타입을 기존 `UserResponse`와 분리 (필드 구조 불일치)
+- REST 응답 래퍼 `GlobalResponse<T>` 타입을 api 파일 내부에서만 사용 (외부 노출 안 함)
+
+영향 범위:
+
+- `src/types/backlog.ts`, `src/api/backlog.ts`, `src/store/backlogStore.ts` (신규)
+
+---
+
+**[Task 09]** 작업 완료. 사이드바 백로그 버튼 및 MainPage 오버레이 상태 추가.
+
+영향 범위:
+
+- `src/components/main/MainSideBar.tsx`, `src/pages/MainPage.tsx`
+
+---
+
 **[계획]** 백로그 구현 계획 문서 초안 작성 완료
 
 내용:

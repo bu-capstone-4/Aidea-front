@@ -45,7 +45,7 @@ REST API (직접 수행한 작업)
 | 02  | [Zustand 백로그 스토어](task-02-store.md)                     | `src/store/backlogStore.ts`                                                      | ✅ 완료      |
 | 03  | [WebSocket 훅](task-03-ws-hook.md)                            | `src/hooks/useBacklogSocket.ts`                                                  | ✅ 완료      |
 | 04  | [Welcome 화면 & Config 모달 UI](task-04-welcome-config-ui.md) | `src/components/backlog/WelcomeScreen.tsx`, `ConfigModal.tsx`                    | ✅ 완료      |
-| 05  | [백로그 메인 모달 (목록 뷰)](task-05-list-view.md)            | `src/components/backlog/BacklogModal.tsx`, `BacklogListView.tsx`, `StoryRow.tsx` | ⬜ 미완료    |
+| 05  | [백로그 메인 모달 (목록 뷰)](task-05-list-view.md)            | `src/components/backlog/BacklogModal.tsx`, `BacklogListView.tsx`, `StoryRow.tsx` | ✅ 완료      |
 | 06  | [보드 뷰 (칸반)](task-06-board-view.md)                       | `src/components/backlog/BacklogBoardView.tsx`, `StoryCard.tsx`                   | ⬜ 미완료    |
 | 07  | [스토리 생성/수정 폼](task-07-story-form.md)                  | `src/components/backlog/StoryFormModal.tsx`, `TaskList.tsx`                      | ⬜ 미완료    |
 | 08  | [에픽 관리](task-08-epic-management.md)                       | `src/components/backlog/EpicManagerModal.tsx`                                    | ⬜ 미완료    |
@@ -110,8 +110,30 @@ npx eslint src     # 린트 (프로젝트 eslint 설정 기준)
 
 ### 5단계 — 작업 로그 업데이트
 
-린트·타입 체크 통과 후 해당 태스크 파일 하단의 **작업 로그 섹션**과 `index.md`의 상태 표를 업데이트한다.  
-완료 시 Todo를 `completed`로 표시한다.
+린트·타입 체크 통과 후 **두 곳을 반드시 업데이트**한다.
+
+#### 5-A. 태스크 파일 로그 (`task-NN-*.md` 하단)
+
+해당 태스크 파일 하단의 작업 로그 테이블에 시작/완료 행을 추가한다.
+
+#### 5-B. 전역 구현 로그 (`impl-logs/implementation-log.md`) ← **가장 자주 누락되는 항목**
+
+특이사항이 **하나라도** 있었으면 반드시 새 항목을 추가한다.  
+"특이사항 없음"이더라도 작업 완료 한 줄은 기록한다.
+
+기록 기준:
+
+- 스펙과 달라진 구현 결정 (이유 포함)
+- ESLint / tsc 오류 및 해결 방법
+- 기존 코드 패턴 충돌 및 해결책
+- 설계 변경 (성능, 재사용성, 단순성 등)
+- 백엔드 추가 제안 사항 발생
+
+#### 5-C. `index.md` 상태 표
+
+완료된 태스크의 상태를 `✅ 완료`로 변경한다.
+
+모두 완료 시 Todo를 `completed`로 표시한다.
 
 ### 6단계 — 커밋 메시지 추천
 
@@ -122,15 +144,15 @@ npx eslint src     # 린트 (프로젝트 eslint 설정 기준)
 
 ## 작업 로그
 
-작업 진행 중 발생하는 특이사항, 결정 사항, 막힌 부분은 아래 로그 파일에 기록한다.
-
-- [구현 로그](impl-logs/implementation-log.md)
+- [전역 구현 로그](impl-logs/implementation-log.md) — 특이사항·결정 사항 발생 시 **즉시** 기록 (5단계에서 반드시 확인)
 
 ---
 
 ## 작업 로그 작성 지침
 
-각 작업 계획 문서 하단에는 **작업 로그 섹션**을 유지한다. 작업 시작/완료 시 반드시 기록한다.
+### 태스크 파일 로그 (각 `task-NN-*.md` 하단)
+
+작업 시작/완료 시 반드시 기록한다.
 
 ```markdown
 ## 작업 로그
@@ -142,12 +164,32 @@ npx eslint src     # 린트 (프로젝트 eslint 설정 기준)
 | YYYY-MM-DD | 작업 완료.                   |
 ```
 
+### 전역 구현 로그 (`impl-logs/implementation-log.md`)
+
+특이사항이 있을 때마다 아래 형식으로 항목을 **추가**한다.  
+매 작업 완료 시 최소 한 줄("작업 완료")은 반드시 기록한다.
+
+```markdown
+### YYYY-MM-DD
+
+**[Task NN]** 제목
+
+내용:
+
+- 발생한 상황 / 결정 이유 / 변경 사항
+
+영향 범위:
+
+- 변경된 파일 또는 연관 태스크
+```
+
 **기록해야 할 항목:**
 
-- 구현 중 스펙과 달라진 부분
-- 기존 코드와 충돌한 부분 및 해결책
-- 성능 고려로 인한 설계 변경
-- 백엔드 제안 사항이 추가로 발생한 경우
+- 구현 중 스펙과 달라진 부분 (이유 포함)
+- ESLint / tsc 오류 및 해결 방법
+- 기존 코드 패턴과 충돌한 부분 및 해결책
+- 성능·재사용성 고려로 인한 설계 변경
+- 백엔드 추가 제안 사항이 발생한 경우
 
 ---
 

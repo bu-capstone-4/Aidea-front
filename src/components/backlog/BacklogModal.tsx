@@ -1,22 +1,18 @@
 import { useEffect, useCallback, useState } from 'react';
+import { MdClose, MdSettings, MdList, MdGridView } from 'react-icons/md';
 import { useBacklogSocket } from '@/hooks/useBacklogSocket';
 import { useBacklogStore } from '@/store/backlogStore';
+import type { StoryStatus, BacklogConfigResponse } from '@/types/backlog';
 import WelcomeScreen from './WelcomeScreen';
 import ConfigModal from './ConfigModal';
+import BacklogListView from './BacklogListView';
 
 interface BacklogModalProps {
   teamspaceId: string;
   onClose: () => void;
 }
 
-function isConfigEmpty(config: {
-  feBeEnabled: boolean;
-  epicEnabled: boolean;
-  storyEnabled: boolean;
-  priorityEnabled: boolean;
-  sprintEnabled: boolean;
-  dueDateEnabled: boolean;
-}) {
+function isConfigEmpty(config: BacklogConfigResponse) {
   return (
     !config.feBeEnabled &&
     !config.epicEnabled &&
@@ -27,6 +23,143 @@ function isConfigEmpty(config: {
   );
 }
 
+// ── 메인 뷰 ──────────────────────────────────────────────────────
+
+type ViewMode = 'list' | 'board';
+type StatusFilter = StoryStatus | 'all';
+
+interface BacklogMainViewProps {
+  teamspaceId: string;
+  config: BacklogConfigResponse;
+  onConfigOpen: () => void;
+  onClose: () => void;
+}
+
+function BacklogMainView({ teamspaceId, config, onConfigOpen, onClose }: BacklogMainViewProps) {
+  const stories = useBacklogStore((s) => s.stories);
+
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [groupByEpic, setGroupByEpic] = useState(false);
+
+  const STATUS_TABS: { label: string; value: StatusFilter }[] = [
+    { label: '전체', value: 'all' },
+    { label: '할 일', value: 'OPEN' },
+    { label: '진행 중', value: 'IN_PROGRESS' },
+    { label: '완료', value: 'DONE' },
+  ];
+
+  return (
+    <div className="flex flex-col h-full overflow-hidden">
+      {/* 헤더 */}
+      <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
+        <h2 className="text-xl font-bold text-ink">백로그</h2>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onConfigOpen}
+            className="p-1.5 rounded text-ink-muted hover:text-ink hover:bg-surface transition-colors"
+            aria-label="설정"
+          >
+            <MdSettings size={20} />
+          </button>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded text-ink-muted hover:text-ink hover:bg-surface transition-colors"
+            aria-label="닫기"
+          >
+            <MdClose size={20} />
+          </button>
+        </div>
+      </div>
+
+      {/* 필터 툴바 */}
+      <div className="flex items-center gap-2 px-6 py-2 border-b border-border shrink-0 flex-wrap">
+        {/* 상태 탭 */}
+        <div className="flex items-center gap-1">
+          {STATUS_TABS.map((tab) => (
+            <button
+              key={tab.value}
+              onClick={() => setStatusFilter(tab.value)}
+              className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                statusFilter === tab.value
+                  ? 'bg-primary/10 text-primary'
+                  : 'text-ink-muted hover:text-ink'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="flex-1" />
+
+        {/* 에픽 그룹 버튼 */}
+        {config.epicEnabled && (
+          <button
+            onClick={() => setGroupByEpic((v) => !v)}
+            className={`flex items-center gap-1 px-3 py-1 rounded border text-sm transition-colors ${
+              groupByEpic
+                ? 'border-primary text-primary bg-primary/5'
+                : 'border-border text-ink-muted hover:text-ink'
+            }`}
+          >
+            그룹: 에픽 {groupByEpic ? '▲' : '▼'}
+          </button>
+        )}
+
+        {/* 뷰 전환 */}
+        <div className="flex items-center border border-border rounded overflow-hidden">
+          <button
+            onClick={() => setViewMode('list')}
+            className={`flex items-center gap-1 px-2.5 py-1 text-sm transition-colors ${
+              viewMode === 'list' ? 'bg-primary text-white' : 'text-ink-muted hover:bg-surface'
+            }`}
+            aria-label="목록 뷰"
+          >
+            <MdList size={16} />
+            <span>목록</span>
+          </button>
+          <button
+            onClick={() => setViewMode('board')}
+            className={`flex items-center gap-1 px-2.5 py-1 text-sm transition-colors ${
+              viewMode === 'board' ? 'bg-primary text-white' : 'text-ink-muted hover:bg-surface'
+            }`}
+            aria-label="보드 뷰"
+          >
+            <MdGridView size={16} />
+            <span>보드</span>
+          </button>
+        </div>
+
+        {/* 이슈 추가 버튼 (Task 07에서 연결) */}
+        <button className="flex items-center gap-1 px-3 py-1 rounded bg-primary text-white text-sm font-medium hover:bg-primary-dark transition-colors">
+          + 이슈 추가
+        </button>
+      </div>
+
+      {/* 뷰 본문 */}
+      <div className="flex-1 min-h-0">
+        {viewMode === 'list' ? (
+          <BacklogListView
+            stories={stories}
+            config={config}
+            teamspaceId={teamspaceId}
+            statusFilter={statusFilter}
+            groupByEpic={groupByEpic}
+            onEditStory={() => {}}
+          />
+        ) : (
+          <div className="flex items-center justify-center h-full text-ink-muted text-sm">
+            보드 뷰 준비 중 (Task 06)
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── 모달 컨테이너 ─────────────────────────────────────────────────
+
 export default function BacklogModal({ teamspaceId, onClose }: BacklogModalProps) {
   const { isInitialized, config, reset } = useBacklogStore((s) => ({
     isInitialized: s.isInitialized,
@@ -36,10 +169,8 @@ export default function BacklogModal({ teamspaceId, onClose }: BacklogModalProps
 
   useBacklogSocket({ teamspaceId, enabled: true });
 
-  // 사용자 조작으로 전환되는 화면 (welcome → config)
   const [showConfig, setShowConfig] = useState(false);
 
-  // 스토어 기반 파생 화면 계산 — useEffect 내 setState 없이 직접 파생
   const storeScreen =
     !isInitialized || !config ? 'loading' : isConfigEmpty(config) ? 'welcome' : 'main';
 
@@ -82,21 +213,13 @@ export default function BacklogModal({ teamspaceId, onClose }: BacklogModalProps
   if (screen === 'main') {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-        <div className="bg-white rounded-xl shadow-xl w-240 max-h-[85vh] flex flex-col">
-          <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-            <h2 className="text-lg font-bold text-ink">백로그</h2>
-            <button
-              onClick={onClose}
-              className="text-ink-muted hover:text-ink transition-colors text-2xl leading-none"
-              aria-label="닫기"
-            >
-              ×
-            </button>
-          </div>
-          {/* Task 05에서 BacklogListView로 교체 예정 */}
-          <div className="flex-1 flex items-center justify-center text-ink-muted">
-            목록 뷰 준비 중 (Task 05)
-          </div>
+        <div className="bg-white rounded-xl shadow-xl w-250 max-w-[96vw] h-[80vh] flex flex-col overflow-hidden">
+          <BacklogMainView
+            teamspaceId={teamspaceId}
+            config={config!}
+            onConfigOpen={() => setShowConfig(true)}
+            onClose={onClose}
+          />
         </div>
       </div>
     );
