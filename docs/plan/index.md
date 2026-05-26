@@ -41,8 +41,8 @@ REST API (직접 수행한 작업)
 
 | #   | 작업                                                          | 파일                                                                             | 상태         |
 | --- | ------------------------------------------------------------- | -------------------------------------------------------------------------------- | ------------ |
-| 01  | [타입 정의 및 API 레이어](task-01-types-and-api.md)           | `src/types/backlog.ts`, `src/api/backlog.ts`                                     | ⬜ 미완료    |
-| 02  | [Zustand 백로그 스토어](task-02-store.md)                     | `src/store/backlogStore.ts`                                                      | ⬜ 미완료    |
+| 01  | [타입 정의 및 API 레이어](task-01-types-and-api.md)           | `src/types/backlog.ts`, `src/api/backlog.ts`                                     | ✅ 완료      |
+| 02  | [Zustand 백로그 스토어](task-02-store.md)                     | `src/store/backlogStore.ts`                                                      | ✅ 완료      |
 | 03  | [WebSocket 훅](task-03-ws-hook.md)                            | `src/hooks/useBacklogSocket.ts`                                                  | ⬜ 미완료    |
 | 04  | [Welcome 화면 & Config 모달 UI](task-04-welcome-config-ui.md) | `src/components/backlog/WelcomeScreen.tsx`, `ConfigModal.tsx`                    | ⬜ 미완료    |
 | 05  | [백로그 메인 모달 (목록 뷰)](task-05-list-view.md)            | `src/components/backlog/BacklogModal.tsx`, `BacklogListView.tsx`, `StoryRow.tsx` | ⬜ 미완료    |
@@ -60,7 +60,7 @@ REST API (직접 수행한 작업)
 
 작업 진행 중 발생하는 특이사항, 결정 사항, 막힌 부분은 아래 로그 파일에 기록한다.
 
-- [구현 로그](logs/implementation-log.md)
+- [구현 로그](impl-logs/implementation-log.md)
 
 ---
 
@@ -84,6 +84,45 @@ REST API (직접 수행한 작업)
 - 기존 코드와 충돌한 부분 및 해결책
 - 성능 고려로 인한 설계 변경
 - 백엔드 제안 사항이 추가로 발생한 경우
+
+---
+
+## 커밋 메시지 규칙
+
+작업 완료 시 아래 규칙에 따라 커밋 메시지를 작성(또는 AI에게 추천 요청)한다.
+
+### Commit Type
+
+- `feature`: 기능 추가
+- `refactor`: 기능 변경없이 개선
+- `fix`: 느긋한 버그 수정
+- `hotfix`: 급한 버그 수정
+- `chore`: 환경 설정 (문서 추가, 파일 위치 변경 등)
+- `style`: 스타일 관련 작업 (CSS, 코드 포맷팅 등)
+- `remove`: 파일 & 폴더 제거 단순 작업
+
+### Commit 양식
+
+```
+{type}: commit명
+
+- ...
+- ...
+```
+
+### 작업별 커밋 메시지 예시
+
+| #   | 커밋 메시지                                                     |
+| --- | --------------------------------------------------------------- |
+| 01  | `feature: 백로그 타입 정의, API 레이어, Zustand 스토어 구현` ✅ |
+| 02  | (01과 함께 커밋) ✅                                             |
+| 03  | `feature: 백로그 WebSocket 훅 구현`                             |
+| 04  | `feature: 백로그 Welcome 화면 및 Config 모달 UI 구현`           |
+| 05  | `feature: 백로그 메인 모달 및 목록 뷰 구현`                     |
+| 06  | `feature: 백로그 보드 뷰(칸반) 구현`                            |
+| 07  | `feature: 스토리 생성/수정 폼 구현`                             |
+| 08  | `feature: 에픽 관리 모달 구현`                                  |
+| 09  | `feature: 사이드바 및 라우팅 백로그 통합`                       |
 
 ---
 

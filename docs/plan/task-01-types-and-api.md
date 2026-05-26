@@ -362,6 +362,6 @@ deleteTask(teamspaceId: string, storyId: number, taskId: number): Promise<void>
 
 ## 작업 로그
 
-| 날짜 | 내용 |
-| ---- | ---- |
-| —    | —    |
+| 날짜       | 내용                                                                                                                                       |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| 2026-05-26 | 작업 시작 및 완료. `src/types/backlog.ts`, `src/api/backlog.ts`, `src/utils/backlog.ts` 생성. `src/api/`, `src/utils/` 디렉토리 신규 생성. |
