@@ -1,70 +1,123 @@
 import { useMemo, useState } from 'react';
-import type { StorySummary, BacklogConfigResponse, StoryStatus } from '@/types/backlog';
-import { deleteStory } from '@/api/backlog';
+import type {
+  StorySummary,
+  BacklogTask,
+  EpicResponse,
+  BacklogConfigResponse,
+  StoryStatus,
+} from '@/types/backlog';
+import { deleteStory, deleteBacklogTask, deleteEpic } from '@/api/backlog';
 import { useBacklogStore } from '@/store/backlogStore';
 import { useToastStore } from '@/store/toastStore';
 import StoryRow from './StoryRow';
+import BacklogTaskRow from './BacklogTaskRow';
+import EpicRow from './EpicRow';
+
+type BacklogListItem =
+  | { itemType: 'story'; data: StorySummary }
+  | { itemType: 'task'; data: BacklogTask }
+  | { itemType: 'epic'; data: EpicResponse };
 
 interface BacklogListViewProps {
   stories: StorySummary[];
+  backlogTasks: BacklogTask[];
+  epics: EpicResponse[];
   config: BacklogConfigResponse;
   teamspaceId: string;
   statusFilter: StoryStatus | 'all';
   groupByEpic: boolean;
   onEditStory: (story: StorySummary) => void;
-}
-
-function sortStoriesByEpic(stories: StorySummary[]): StorySummary[] {
-  return [...stories].sort((a, b) => {
-    const aEpicId = a.epics[0]?.id ?? Infinity;
-    const bEpicId = b.epics[0]?.id ?? Infinity;
-    return aEpicId - bEpicId;
-  });
+  onEditTask: (task: BacklogTask) => void;
+  onEditEpic: (epic: EpicResponse) => void;
 }
 
 export default function BacklogListView({
   stories,
+  backlogTasks,
+  epics,
   config,
   teamspaceId,
   statusFilter,
   groupByEpic,
   onEditStory,
+  onEditTask,
+  onEditEpic,
 }: BacklogListViewProps) {
   const [expandedStoryId, setExpandedStoryId] = useState<number | null>(null);
   const applyStoryDeleted = useBacklogStore((s) => s.applyStoryDeleted);
+  const applyBacklogtaskDeleted = useBacklogStore((s) => s.applyBacklogtaskDeleted);
+  const applyEpicDeleted = useBacklogStore((s) => s.applyEpicDeleted);
   const addToast = useToastStore((s) => s.addToast);
 
-  const filteredStories = useMemo(() => {
-    if (statusFilter === 'all') return stories;
-    return stories.filter((s) => s.status === statusFilter);
-  }, [stories, statusFilter]);
+  const allItems = useMemo<BacklogListItem[]>(() => {
+    const storyItems: BacklogListItem[] = stories.map((s) => ({ itemType: 'story', data: s }));
+    const taskItems: BacklogListItem[] = backlogTasks.map((t) => ({ itemType: 'task', data: t }));
+    const epicItems: BacklogListItem[] = epics.map((e) => ({ itemType: 'epic', data: e }));
+    return [...storyItems, ...taskItems, ...epicItems].sort(
+      (a, b) => a.data.position - b.data.position
+    );
+  }, [stories, backlogTasks, epics]);
 
-  const displayedStories = useMemo(
-    () => (groupByEpic ? sortStoriesByEpic(filteredStories) : filteredStories),
-    [filteredStories, groupByEpic]
-  );
+  const filteredItems = useMemo(() => {
+    if (statusFilter === 'all') return allItems;
+    return allItems.filter((item) => item.data.status === statusFilter);
+  }, [allItems, statusFilter]);
+
+  const displayedItems = useMemo(() => {
+    if (!groupByEpic) return filteredItems;
+    return [...filteredItems].sort((a, b) => {
+      const aEpicId = a.itemType === 'story' ? (a.data.epics[0]?.id ?? Infinity) : Infinity;
+      const bEpicId = b.itemType === 'story' ? (b.data.epics[0]?.id ?? Infinity) : Infinity;
+      return aEpicId - bEpicId;
+    });
+  }, [filteredItems, groupByEpic]);
 
   const counts = useMemo(
     () => ({
-      total: stories.length,
-      inProgress: stories.filter((s) => s.status === 'IN_PROGRESS').length,
-      open: stories.filter((s) => s.status === 'OPEN').length,
-      done: stories.filter((s) => s.status === 'DONE').length,
+      total: allItems.length,
+      inProgress: allItems.filter((i) => i.data.status === 'IN_PROGRESS').length,
+      open: allItems.filter((i) => i.data.status === 'OPEN').length,
+      done: allItems.filter((i) => i.data.status === 'DONE').length,
     }),
-    [stories]
+    [allItems]
   );
 
   const handleExpandToggle = (storyId: number) => {
     setExpandedStoryId((prev) => (prev === storyId ? null : storyId));
   };
 
-  const handleDelete = async (story: StorySummary) => {
+  const handleDeleteStory = async (story: StorySummary) => {
     if (!window.confirm(`"${story.title}" 이슈를 삭제하시겠습니까?`)) return;
     try {
       await deleteStory(teamspaceId, story.id);
       applyStoryDeleted(story.id);
     } catch {
       addToast({ type: 'error', message: '이슈 삭제에 실패했습니다.' });
+    }
+  };
+
+  const handleDeleteTask = async (task: BacklogTask) => {
+    if (!window.confirm(`"${task.title}" 태스크를 삭제하시겠습니까?`)) return;
+    try {
+      await deleteBacklogTask(teamspaceId, task.id);
+      applyBacklogtaskDeleted(task.id);
+    } catch {
+      addToast({ type: 'error', message: '태스크 삭제에 실패했습니다.' });
+    }
+  };
+
+  const handleDeleteEpic = async (epic: EpicResponse) => {
+    if (
+      !window.confirm(
+        `"${epic.name}" 에픽을 삭제하시겠습니까?\n연결된 스토리의 에픽 관계도 해제됩니다.`
+      )
+    )
+      return;
+    try {
+      await deleteEpic(teamspaceId, epic.id);
+      applyEpicDeleted(epic.id);
+    } catch {
+      addToast({ type: 'error', message: '에픽 삭제에 실패했습니다.' });
     }
   };
 
@@ -84,25 +137,51 @@ export default function BacklogListView({
         <div className="w-6 shrink-0" />
       </div>
 
-      {/* 스토리 목록 */}
+      {/* 아이템 목록 */}
       <div className="flex-1 overflow-y-auto">
-        {displayedStories.length === 0 ? (
+        {displayedItems.length === 0 ? (
           <div className="flex items-center justify-center h-32 text-sm text-ink-muted">
             이슈가 없습니다.
           </div>
         ) : (
-          displayedStories.map((story) => (
-            <StoryRow
-              key={story.id}
-              story={story}
-              config={config}
-              teamspaceId={teamspaceId}
-              isExpanded={expandedStoryId === story.id}
-              onExpandToggle={() => handleExpandToggle(story.id)}
-              onEditClick={() => onEditStory(story)}
-              onDeleteClick={() => handleDelete(story)}
-            />
-          ))
+          displayedItems.map((item) => {
+            if (item.itemType === 'story') {
+              return (
+                <StoryRow
+                  key={`story-${item.data.id}`}
+                  story={item.data}
+                  config={config}
+                  teamspaceId={teamspaceId}
+                  isExpanded={expandedStoryId === item.data.id}
+                  onExpandToggle={() => handleExpandToggle(item.data.id)}
+                  onEditClick={() => onEditStory(item.data)}
+                  onDeleteClick={() => handleDeleteStory(item.data)}
+                />
+              );
+            }
+            if (item.itemType === 'task') {
+              return (
+                <BacklogTaskRow
+                  key={`task-${item.data.id}`}
+                  task={item.data}
+                  config={config}
+                  teamspaceId={teamspaceId}
+                  onEditClick={() => onEditTask(item.data)}
+                  onDeleteClick={() => handleDeleteTask(item.data)}
+                />
+              );
+            }
+            return (
+              <EpicRow
+                key={`epic-${item.data.id}`}
+                epic={item.data}
+                config={config}
+                teamspaceId={teamspaceId}
+                onEditClick={() => onEditEpic(item.data)}
+                onDeleteClick={() => handleDeleteEpic(item.data)}
+              />
+            );
+          })
         )}
       </div>
 

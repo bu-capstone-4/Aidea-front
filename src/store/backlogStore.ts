@@ -5,6 +5,7 @@ import type {
   StorySummary,
   TaskResponse,
   StoryStatus,
+  BacklogTask,
 } from '@/types/backlog';
 
 interface BacklogState {
@@ -12,6 +13,7 @@ interface BacklogState {
   config: BacklogConfigResponse | null;
   epics: EpicResponse[];
   stories: StorySummary[];
+  backlogTasks: BacklogTask[];
   tasksByStoryId: Record<number, TaskResponse[]>;
   expandedStoryId: number | null;
 }
@@ -20,7 +22,8 @@ interface BacklogActions {
   applyInit: (
     config: BacklogConfigResponse,
     epics: EpicResponse[],
-    stories: StorySummary[]
+    stories: StorySummary[],
+    tasks: BacklogTask[]
   ) => void;
   reset: () => void;
 
@@ -29,6 +32,8 @@ interface BacklogActions {
   applyEpicCreated: (epic: EpicResponse) => void;
   applyEpicUpdated: (epic: EpicResponse) => void;
   applyEpicDeleted: (epicId: number) => void;
+  applyEpicStatusChanged: (epicId: number, status: StoryStatus) => void;
+  applyEpicReordered: (orderedIds: number[]) => void;
 
   applyStoryCreated: (story: StorySummary) => void;
   applyStoryUpdated: (story: StorySummary) => void;
@@ -43,6 +48,12 @@ interface BacklogActions {
   applyTaskReordered: (storyId: number, orderedIds: number[]) => void;
   applyTaskDeleted: (storyId: number, taskId: number) => void;
 
+  applyBacklogtaskCreated: (task: BacklogTask) => void;
+  applyBacklogtaskUpdated: (task: BacklogTask) => void;
+  applyBacklogtaskStatusChanged: (taskId: number, status: StoryStatus) => void;
+  applyBacklogtaskReordered: (orderedIds: number[]) => void;
+  applyBacklogtaskDeleted: (taskId: number) => void;
+
   setExpandedStoryId: (id: number | null) => void;
 }
 
@@ -51,6 +62,7 @@ const initialState: BacklogState = {
   config: null,
   epics: [],
   stories: [],
+  backlogTasks: [],
   tasksByStoryId: {},
   expandedStoryId: null,
 };
@@ -58,7 +70,8 @@ const initialState: BacklogState = {
 export const useBacklogStore = create<BacklogState & BacklogActions>()((set) => ({
   ...initialState,
 
-  applyInit: (config, epics, stories) => set({ config, epics, stories, isInitialized: true }),
+  applyInit: (config, epics, stories, tasks) =>
+    set({ config, epics, stories, backlogTasks: tasks, isInitialized: true }),
 
   reset: () => set(initialState),
 
@@ -79,6 +92,21 @@ export const useBacklogStore = create<BacklogState & BacklogActions>()((set) => 
         epics: s.epics.filter((e) => e.id !== epicId),
       })),
     })),
+
+  applyEpicStatusChanged: (epicId, status) =>
+    set((state) => ({
+      epics: state.epics.map((e) => (e.id === epicId ? { ...e, status } : e)),
+    })),
+
+  applyEpicReordered: (orderedIds) =>
+    set((state) => {
+      const map = new Map(state.epics.map((e) => [e.id, e]));
+      const reordered = orderedIds.flatMap((id) => {
+        const e = map.get(id);
+        return e ? [e] : [];
+      });
+      return { epics: reordered };
+    }),
 
   applyStoryCreated: (story) => set((state) => ({ stories: [...state.stories, story] })),
 
@@ -184,6 +212,34 @@ export const useBacklogStore = create<BacklogState & BacklogActions>()((set) => 
         ),
       };
     }),
+
+  applyBacklogtaskCreated: (task) =>
+    set((state) => ({ backlogTasks: [...state.backlogTasks, task] })),
+
+  applyBacklogtaskUpdated: (task) =>
+    set((state) => ({
+      backlogTasks: state.backlogTasks.map((t) => (t.id === task.id ? task : t)),
+    })),
+
+  applyBacklogtaskStatusChanged: (taskId, status) =>
+    set((state) => ({
+      backlogTasks: state.backlogTasks.map((t) => (t.id === taskId ? { ...t, status } : t)),
+    })),
+
+  applyBacklogtaskReordered: (orderedIds) =>
+    set((state) => {
+      const map = new Map(state.backlogTasks.map((t) => [t.id, t]));
+      const reordered = orderedIds.flatMap((id) => {
+        const t = map.get(id);
+        return t ? [t] : [];
+      });
+      return { backlogTasks: reordered };
+    }),
+
+  applyBacklogtaskDeleted: (taskId) =>
+    set((state) => ({
+      backlogTasks: state.backlogTasks.filter((t) => t.id !== taskId),
+    })),
 
   setExpandedStoryId: (id) => set({ expandedStoryId: id }),
 }));

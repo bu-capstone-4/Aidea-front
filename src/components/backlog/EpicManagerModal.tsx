@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { MdClose, MdEdit, MdDelete, MdCheck } from 'react-icons/md';
-import type { EpicResponse } from '@/types/backlog';
+import type { EpicResponse, BacklogConfigResponse } from '@/types/backlog';
 import { createEpic, updateEpic, deleteEpic } from '@/api/backlog';
 import { useBacklogStore } from '@/store/backlogStore';
 import { useToastStore } from '@/store/toastStore';
+import type { MemberInfo } from '@/types/api';
+import StatusBadge from './StatusBadge';
 
 const EPIC_COLORS = [
   '#6366f1',
@@ -20,9 +22,11 @@ const EPIC_COLORS = [
   '#6b7280',
 ];
 
-interface EpicManagerModalProps {
+export interface EpicManagerModalProps {
   teamspaceId: string;
   epics: EpicResponse[];
+  config: BacklogConfigResponse;
+  members: MemberInfo[];
   onClose: () => void;
 }
 
@@ -120,7 +124,7 @@ export default function EpicManagerModal({ teamspaceId, epics, onClose }: EpicMa
 
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/40">
-      <div className="bg-white rounded-xl shadow-xl w-[480px] max-w-[96vw] max-h-[80vh] flex flex-col">
+      <div className="bg-white rounded-xl shadow-xl w-[520px] max-w-[96vw] max-h-[80vh] flex flex-col">
         {/* 헤더 */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
           <h2 className="text-base font-bold text-ink">에픽 관리</h2>
@@ -177,13 +181,25 @@ export default function EpicManagerModal({ teamspaceId, epics, onClose }: EpicMa
                     className="inline-block w-3 h-3 rounded-full shrink-0"
                     style={{ backgroundColor: epic.color }}
                   />
-                  <span className="flex-1 text-sm text-ink font-medium truncate">{epic.name}</span>
+                  <span className="text-sm text-ink font-medium truncate min-w-0 flex-1">
+                    {epic.name}
+                  </span>
+                  {/* 상태 배지 */}
+                  <div className="shrink-0">
+                    <StatusBadge status={epic.status} />
+                  </div>
+                  {/* 스토리 진행 */}
+                  {epic.storyCount > 0 && (
+                    <span className="text-xs text-ink-muted shrink-0">
+                      {epic.completedStoryCount}/{epic.storyCount}
+                    </span>
+                  )}
                   {epic.description && (
-                    <span className="text-xs text-ink-muted truncate max-w-[120px]">
+                    <span className="text-xs text-ink-muted truncate max-w-[100px] shrink-0">
                       {epic.description}
                     </span>
                   )}
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                     <button
                       onClick={() => handleOpenEdit(epic)}
                       className="p-1 rounded text-ink-muted hover:text-ink hover:bg-surface transition-colors"
@@ -230,7 +246,7 @@ interface EpicInlineFormProps {
 function EpicInlineForm({ form, onChange, onSave, onCancel, saving }: EpicInlineFormProps) {
   return (
     <div className="flex flex-col gap-2 p-3 rounded-lg border border-border bg-surface">
-      {/* 이름 + 색상 */}
+      {/* 이름 + 설명 */}
       <div className="flex items-center gap-2">
         <input
           autoFocus

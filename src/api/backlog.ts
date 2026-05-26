@@ -11,6 +11,9 @@ import type {
   StoryStatus,
   Priority,
   IssueType,
+  BacklogTask,
+  CreateBacklogTaskRequest,
+  CreateEpicRequest,
 } from '@/types/backlog';
 
 type GlobalResponse<T> = { data: T };
@@ -46,7 +49,7 @@ export async function getEpics(teamspaceId: string): Promise<EpicResponse[]> {
 
 export async function createEpic(
   teamspaceId: string,
-  body: { name: string; color: string; description?: string }
+  body: CreateEpicRequest
 ): Promise<EpicResponse> {
   const res = await apiClient.post<GlobalResponse<EpicResponse>>(
     `/api/teamspaces/${teamspaceId}/epics`,
@@ -58,11 +61,34 @@ export async function createEpic(
 export async function updateEpic(
   teamspaceId: string,
   epicId: number,
-  body: { name: string; color: string; description?: string }
+  body: CreateEpicRequest
 ): Promise<EpicResponse> {
   const res = await apiClient.put<GlobalResponse<EpicResponse>>(
     `/api/teamspaces/${teamspaceId}/epics/${epicId}`,
     body
+  );
+  return res.data.data;
+}
+
+export async function updateEpicStatus(
+  teamspaceId: string,
+  epicId: number,
+  status: StoryStatus
+): Promise<{ id: number; status: StoryStatus }> {
+  const res = await apiClient.patch<GlobalResponse<{ id: number; status: StoryStatus }>>(
+    `/api/teamspaces/${teamspaceId}/epics/${epicId}/status`,
+    { status }
+  );
+  return res.data.data;
+}
+
+export async function reorderEpics(
+  teamspaceId: string,
+  orderedIds: number[]
+): Promise<ReorderResponse> {
+  const res = await apiClient.patch<GlobalResponse<ReorderResponse>>(
+    `/api/teamspaces/${teamspaceId}/epics/reorder`,
+    { orderedIds }
   );
   return res.data.data;
 }
@@ -153,7 +179,7 @@ export async function deleteStory(teamspaceId: string, storyId: number): Promise
   await apiClient.delete(`/api/teamspaces/${teamspaceId}/stories/${storyId}`);
 }
 
-// ── Task ──────────────────────────────────────────────────────
+// ── Story-level Task ──────────────────────────────────────────
 
 export async function createTask(
   teamspaceId: string,
@@ -209,4 +235,56 @@ export async function deleteTask(
   taskId: number
 ): Promise<void> {
   await apiClient.delete(`/api/teamspaces/${teamspaceId}/stories/${storyId}/tasks/${taskId}`);
+}
+
+// ── Backlog-level Task (최상위 태스크) ────────────────────────
+
+export async function createBacklogTask(
+  teamspaceId: string,
+  body: CreateBacklogTaskRequest
+): Promise<BacklogTask> {
+  const res = await apiClient.post<GlobalResponse<BacklogTask>>(
+    `/api/teamspaces/${teamspaceId}/tasks`,
+    body
+  );
+  return res.data.data;
+}
+
+export async function updateBacklogTask(
+  teamspaceId: string,
+  taskId: number,
+  body: CreateBacklogTaskRequest
+): Promise<BacklogTask> {
+  const res = await apiClient.put<GlobalResponse<BacklogTask>>(
+    `/api/teamspaces/${teamspaceId}/tasks/${taskId}`,
+    body
+  );
+  return res.data.data;
+}
+
+export async function updateBacklogTaskStatus(
+  teamspaceId: string,
+  taskId: number,
+  status: StoryStatus
+): Promise<{ id: number; status: StoryStatus }> {
+  const res = await apiClient.patch<GlobalResponse<{ id: number; status: StoryStatus }>>(
+    `/api/teamspaces/${teamspaceId}/tasks/${taskId}/status`,
+    { status }
+  );
+  return res.data.data;
+}
+
+export async function reorderBacklogTasks(
+  teamspaceId: string,
+  orderedIds: number[]
+): Promise<ReorderResponse> {
+  const res = await apiClient.patch<GlobalResponse<ReorderResponse>>(
+    `/api/teamspaces/${teamspaceId}/tasks/reorder`,
+    { orderedIds }
+  );
+  return res.data.data;
+}
+
+export async function deleteBacklogTask(teamspaceId: string, taskId: number): Promise<void> {
+  await apiClient.delete(`/api/teamspaces/${teamspaceId}/tasks/${taskId}`);
 }

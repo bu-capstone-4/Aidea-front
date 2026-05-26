@@ -7,7 +7,11 @@ import { useDocument } from '@/hooks/useDocument';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { getDocLabel } from '@/components/CreateTeamSpace/types';
 
-export default function MainHeaderBar() {
+interface MainHeaderBarProps {
+  onBacklogClick?: () => void;
+}
+
+export default function MainHeaderBar({ onBacklogClick }: MainHeaderBarProps) {
   const { docId } = useParams();
   const { currentTeamspaceId, onlineMembers } = useTeamspaceStore();
   const { teamspace } = useTeamspaceDetail(currentTeamspaceId);
@@ -31,6 +35,9 @@ export default function MainHeaderBar() {
             currentUserId={user?.id}
           />
         </div>
+        <Button variant="secondary" size="sm" onClick={onBacklogClick}>
+          백로그
+        </Button>
         <Button variant="dark" size="sm">
           ↑ 내보내기
         </Button>

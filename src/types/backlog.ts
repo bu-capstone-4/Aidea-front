@@ -27,10 +27,21 @@ export interface EpicSummary {
 
 export interface EpicResponse {
   id: number;
+  number: number;
   name: string;
   color: string;
   description: string | null;
+  status: StoryStatus;
+  priority: Priority | null;
+  issueType: IssueType | null;
+  assignee: BacklogUser | null;
+  reporter: BacklogUser;
+  dueDate: string | null;
+  position: number;
+  storyCount: number;
+  completedStoryCount: number;
   createdAt: string;
+  updatedAt: string;
   createdBy: BacklogUser;
 }
 
@@ -90,6 +101,43 @@ export interface CreateStoryRequest {
   dueDate?: string | null;
 }
 
+// ── 최상위 태스크 (백로그 직접 항목) ─────────────────────────────
+
+export interface BacklogTask {
+  id: number;
+  number: number;
+  title: string;
+  status: StoryStatus;
+  priority: Priority | null;
+  issueType: IssueType | null;
+  sprint: string | null;
+  assignee: BacklogUser | null;
+  reporter: BacklogUser;
+  dueDate: string | null;
+  position: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateBacklogTaskRequest {
+  title: string;
+  priority?: Priority | null;
+  issueType?: IssueType | null;
+  sprint?: string | null;
+  assigneeId?: number | null;
+  dueDate?: string | null;
+}
+
+export interface CreateEpicRequest {
+  name: string;
+  color: string;
+  description?: string;
+  priority?: Priority | null;
+  issueType?: IssueType | null;
+  assigneeId?: number | null;
+  dueDate?: string | null;
+}
+
 // ── WebSocket 이벤트 타입 ──────────────────────────────────────
 
 export interface BacklogInitEvent {
@@ -97,6 +145,7 @@ export interface BacklogInitEvent {
   config: BacklogConfigResponse;
   epics: EpicResponse[];
   stories: StorySummary[];
+  tasks: BacklogTask[];
 }
 
 export interface BacklogConfigUpdatedEvent {
@@ -118,6 +167,17 @@ export interface EpicDeletedEvent {
   type: 'epic:deleted';
   actorId: string;
   epicId: number;
+}
+export interface EpicStatusChangedEvent {
+  type: 'epic:status_changed';
+  actorId: string;
+  epicId: number;
+  status: StoryStatus;
+}
+export interface EpicReorderedEvent {
+  type: 'epic:reordered';
+  actorId: string;
+  orderedIds: number[];
 }
 export interface StoryCreatedEvent {
   type: 'story:created';
@@ -178,6 +238,35 @@ export interface TaskDeletedEvent {
   taskId: number;
 }
 
+// ── 최상위 태스크 WS 이벤트 ───────────────────────────────────
+
+export interface BacklogtaskCreatedEvent {
+  type: 'backlogtask:created';
+  actorId: string;
+  task: BacklogTask;
+}
+export interface BacklogtaskUpdatedEvent {
+  type: 'backlogtask:updated';
+  actorId: string;
+  task: BacklogTask;
+}
+export interface BacklogtaskStatusChangedEvent {
+  type: 'backlogtask:status_changed';
+  actorId: string;
+  taskId: number;
+  status: StoryStatus;
+}
+export interface BacklogtaskReorderedEvent {
+  type: 'backlogtask:reordered';
+  actorId: string;
+  orderedIds: number[];
+}
+export interface BacklogtaskDeletedEvent {
+  type: 'backlogtask:deleted';
+  actorId: string;
+  taskId: number;
+}
+
 export type BacklogSocketErrorCode =
   | 'INSUFFICIENT_PERMISSION'
   | 'DOCUMENT_NOT_FOUND'
@@ -198,6 +287,8 @@ export type BacklogServerMessage =
   | EpicCreatedEvent
   | EpicUpdatedEvent
   | EpicDeletedEvent
+  | EpicStatusChangedEvent
+  | EpicReorderedEvent
   | StoryCreatedEvent
   | StoryUpdatedEvent
   | StoryStatusChangedEvent
@@ -208,4 +299,9 @@ export type BacklogServerMessage =
   | TaskCompletedEvent
   | TaskReorderedEvent
   | TaskDeletedEvent
+  | BacklogtaskCreatedEvent
+  | BacklogtaskUpdatedEvent
+  | BacklogtaskStatusChangedEvent
+  | BacklogtaskReorderedEvent
+  | BacklogtaskDeletedEvent
   | BacklogSocketErrorEvent;

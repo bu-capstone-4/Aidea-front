@@ -1,22 +1,33 @@
 import { useEffect, useCallback, useState } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { MdClose, MdSettings, MdList, MdGridView, MdTune } from 'react-icons/md';
 import { useBacklogSocket } from '@/hooks/useBacklogSocket';
 import { useBacklogStore } from '@/store/backlogStore';
 import { useTeamspaceDetail } from '@/hooks/useTeamspaceDetail';
 import { useStoryApi } from '@/hooks/useStoryApi';
+import { useBacklogTaskApi } from '@/hooks/useBacklogTaskApi';
+import { createEpic, updateEpic } from '@/api/backlog';
 import type {
   StoryStatus,
   BacklogConfigResponse,
   StorySummary,
   CreateStoryRequest,
   StoryDetail,
+  BacklogTask,
+  CreateBacklogTaskRequest,
+  EpicResponse,
+  CreateEpicRequest,
 } from '@/types/backlog';
 import WelcomeScreen from './WelcomeScreen';
 import ConfigModal from './ConfigModal';
 import BacklogListView from './BacklogListView';
 import BacklogBoardView from './BacklogBoardView';
 import StoryFormModal from './StoryFormModal';
+import BacklogTaskFormModal from './BacklogTaskFormModal';
+import EpicFormModal from './EpicFormModal';
 import EpicManagerModal from './EpicManagerModal';
+import IssueTypeDropdown from './IssueTypeDropdown';
+import type { IssueKind } from './IssueTypeDropdown';
 
 interface BacklogModalProps {
   teamspaceId: string;
@@ -45,6 +56,18 @@ interface StoryFormState {
   story?: StorySummary;
 }
 
+interface TaskFormState {
+  mode: 'create' | 'edit';
+  defaultStatus?: StoryStatus;
+  task?: BacklogTask;
+}
+
+interface EpicFormState {
+  mode: 'create' | 'edit';
+  defaultStatus?: StoryStatus;
+  epic?: EpicResponse;
+}
+
 interface BacklogMainViewProps {
   teamspaceId: string;
   config: BacklogConfigResponse;
@@ -55,13 +78,22 @@ interface BacklogMainViewProps {
 function BacklogMainView({ teamspaceId, config, onConfigOpen, onClose }: BacklogMainViewProps) {
   const stories = useBacklogStore((s) => s.stories);
   const epics = useBacklogStore((s) => s.epics);
-  const { handleCreate, handleUpdate } = useStoryApi(teamspaceId);
+  const backlogTasks = useBacklogStore((s) => s.backlogTasks);
+  const applyEpicCreated = useBacklogStore((s) => s.applyEpicCreated);
+  const applyEpicUpdated = useBacklogStore((s) => s.applyEpicUpdated);
+
+  const { handleCreate: handleCreateStory, handleUpdate: handleUpdateStory } =
+    useStoryApi(teamspaceId);
+  const { handleCreate: handleCreateTask, handleUpdate: handleUpdateTask } =
+    useBacklogTaskApi(teamspaceId);
   const { teamspace } = useTeamspaceDetail(teamspaceId);
 
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [groupByEpic, setGroupByEpic] = useState(false);
   const [storyForm, setStoryForm] = useState<StoryFormState | null>(null);
+  const [taskForm, setTaskForm] = useState<TaskFormState | null>(null);
+  const [epicForm, setEpicForm] = useState<EpicFormState | null>(null);
   const [epicManagerOpen, setEpicManagerOpen] = useState(false);
 
   const STATUS_TABS: { label: string; value: StatusFilter }[] = [
@@ -71,21 +103,53 @@ function BacklogMainView({ teamspaceId, config, onConfigOpen, onClose }: Backlog
     { label: '완료', value: 'DONE' },
   ];
 
-  const handleAddStory = (defaultStatus?: StoryStatus) => {
-    setStoryForm({ mode: 'create', defaultStatus });
+  const handleAddIssue = (kind: IssueKind, defaultStatus?: StoryStatus) => {
+    if (kind === 'story') setStoryForm({ mode: 'create', defaultStatus });
+    else if (kind === 'task') setTaskForm({ mode: 'create', defaultStatus });
+    else if (kind === 'epic') setEpicForm({ mode: 'create', defaultStatus });
   };
 
   const handleEditStory = (story: StorySummary) => {
     setStoryForm({ mode: 'edit', story });
   };
 
-  const handleFormSave = async (
+  const handleEditTask = (task: BacklogTask) => {
+    setTaskForm({ mode: 'edit', task });
+  };
+
+  const handleEditEpic = (epic: EpicResponse) => {
+    setEpicForm({ mode: 'edit', epic });
+  };
+
+  const handleStorySave = async (
     data: CreateStoryRequest & { status?: StoryStatus }
   ): Promise<StoryDetail> => {
     if (storyForm?.mode === 'edit' && storyForm.story) {
-      return handleUpdate(storyForm.story.id, data);
+      return handleUpdateStory(storyForm.story.id, data);
     }
-    return handleCreate(data);
+    return handleCreateStory(data);
+  };
+
+  const handleTaskSave = async (
+    data: CreateBacklogTaskRequest & { status?: StoryStatus }
+  ): Promise<BacklogTask> => {
+    if (taskForm?.mode === 'edit' && taskForm.task) {
+      return handleUpdateTask(taskForm.task.id, data);
+    }
+    return handleCreateTask(data);
+  };
+
+  const handleEpicSave = async (
+    data: CreateEpicRequest & { status?: StoryStatus }
+  ): Promise<EpicResponse> => {
+    if (epicForm?.mode === 'edit' && epicForm.epic) {
+      const updated = await updateEpic(teamspaceId, epicForm.epic.id, data);
+      applyEpicUpdated(updated);
+      return updated;
+    }
+    const created = await createEpic(teamspaceId, data);
+    applyEpicCreated(created);
+    return created;
   };
 
   const members = teamspace?.members ?? [];
@@ -183,13 +247,8 @@ function BacklogMainView({ teamspaceId, config, onConfigOpen, onClose }: Backlog
           </button>
         </div>
 
-        {/* 이슈 추가 버튼 */}
-        <button
-          onClick={() => handleAddStory()}
-          className="flex items-center gap-1 px-3 py-1 rounded bg-primary text-white text-sm font-medium hover:bg-primary-dark transition-colors"
-        >
-          + 이슈 추가
-        </button>
+        {/* 이슈 추가 드롭다운 */}
+        <IssueTypeDropdown config={config} onSelect={(kind) => handleAddIssue(kind)} />
       </div>
 
       {/* 뷰 본문 */}
@@ -197,18 +256,23 @@ function BacklogMainView({ teamspaceId, config, onConfigOpen, onClose }: Backlog
         {viewMode === 'list' ? (
           <BacklogListView
             stories={stories}
+            backlogTasks={backlogTasks}
+            epics={config.epicEnabled ? epics : []}
             config={config}
             teamspaceId={teamspaceId}
             statusFilter={statusFilter}
             groupByEpic={groupByEpic}
             onEditStory={handleEditStory}
+            onEditTask={handleEditTask}
+            onEditEpic={handleEditEpic}
           />
         ) : (
           <BacklogBoardView
             teamspaceId={teamspaceId}
             config={config}
-            onAddStory={handleAddStory}
+            onAddIssue={handleAddIssue}
             onEditStory={handleEditStory}
+            onEditTask={handleEditTask}
           />
         )}
       </div>
@@ -236,9 +300,62 @@ function BacklogMainView({ teamspaceId, config, onConfigOpen, onClose }: Backlog
           config={config}
           epics={epics}
           members={members}
-          onSave={handleFormSave}
+          onSave={handleStorySave}
           onClose={() => setStoryForm(null)}
           onManageEpics={() => setEpicManagerOpen(true)}
+        />
+      )}
+
+      {/* 태스크 생성/수정 폼 모달 */}
+      {taskForm && (
+        <BacklogTaskFormModal
+          mode={taskForm.mode}
+          defaultStatus={taskForm.defaultStatus}
+          initialData={
+            taskForm.task
+              ? {
+                  id: taskForm.task.id,
+                  title: taskForm.task.title,
+                  priority: taskForm.task.priority,
+                  issueType: taskForm.task.issueType,
+                  sprint: taskForm.task.sprint,
+                  assigneeId: taskForm.task.assignee?.id ?? null,
+                  dueDate: taskForm.task.dueDate ?? undefined,
+                  status: taskForm.task.status,
+                }
+              : undefined
+          }
+          config={config}
+          members={members}
+          onSave={handleTaskSave}
+          onClose={() => setTaskForm(null)}
+        />
+      )}
+
+      {/* 에픽 생성/수정 폼 모달 */}
+      {epicForm && (
+        <EpicFormModal
+          mode={epicForm.mode}
+          defaultStatus={epicForm.defaultStatus}
+          initialData={
+            epicForm.epic
+              ? {
+                  id: epicForm.epic.id,
+                  name: epicForm.epic.name,
+                  color: epicForm.epic.color,
+                  description: epicForm.epic.description ?? undefined,
+                  priority: epicForm.epic.priority,
+                  issueType: epicForm.epic.issueType,
+                  assigneeId: epicForm.epic.assignee?.id ?? null,
+                  dueDate: epicForm.epic.dueDate ?? undefined,
+                  status: epicForm.epic.status,
+                }
+              : undefined
+          }
+          config={config}
+          members={members}
+          onSave={handleEpicSave}
+          onClose={() => setEpicForm(null)}
         />
       )}
 
@@ -247,6 +364,8 @@ function BacklogMainView({ teamspaceId, config, onConfigOpen, onClose }: Backlog
         <EpicManagerModal
           teamspaceId={teamspaceId}
           epics={epics}
+          config={config}
+          members={members}
           onClose={() => setEpicManagerOpen(false)}
         />
       )}
@@ -257,11 +376,13 @@ function BacklogMainView({ teamspaceId, config, onConfigOpen, onClose }: Backlog
 // ── 모달 컨테이너 ─────────────────────────────────────────────────
 
 export default function BacklogModal({ teamspaceId, onClose }: BacklogModalProps) {
-  const { isInitialized, config, reset } = useBacklogStore((s) => ({
-    isInitialized: s.isInitialized,
-    config: s.config,
-    reset: s.reset,
-  }));
+  const { isInitialized, config, reset } = useBacklogStore(
+    useShallow((s) => ({
+      isInitialized: s.isInitialized,
+      config: s.config,
+      reset: s.reset,
+    }))
+  );
 
   useBacklogSocket({ teamspaceId, enabled: true });
 

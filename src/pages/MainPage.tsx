@@ -55,11 +55,9 @@ export default function MainPage() {
       <MainSideBar
         isSideBarOpen={isSideBarOpen}
         toggleSideBar={() => setIsSideBarOpen((p) => !p)}
-        isBacklogOpen={isBacklogOpen}
-        onBacklogClick={() => setIsBacklogOpen(true)}
       />
       <div className="flex-1 flex flex-col overflow-hidden">
-        <MainHeaderBar />
+        <MainHeaderBar onBacklogClick={() => setIsBacklogOpen(true)} />
         <MainContent />
       </div>
 

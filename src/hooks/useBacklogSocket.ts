@@ -19,6 +19,8 @@ const VALID_BACKLOG_TYPES = new Set([
   'epic:created',
   'epic:updated',
   'epic:deleted',
+  'epic:status_changed',
+  'epic:reordered',
   'story:created',
   'story:updated',
   'story:status_changed',
@@ -29,6 +31,11 @@ const VALID_BACKLOG_TYPES = new Set([
   'task:completed',
   'task:reordered',
   'task:deleted',
+  'backlogtask:created',
+  'backlogtask:updated',
+  'backlogtask:status_changed',
+  'backlogtask:reordered',
+  'backlogtask:deleted',
 ]);
 
 function isBacklogServerMessage(msg: unknown): msg is BacklogServerMessage {
@@ -50,6 +57,8 @@ export function useBacklogSocket({
   const applyEpicCreated = useBacklogStore((s) => s.applyEpicCreated);
   const applyEpicUpdated = useBacklogStore((s) => s.applyEpicUpdated);
   const applyEpicDeleted = useBacklogStore((s) => s.applyEpicDeleted);
+  const applyEpicStatusChanged = useBacklogStore((s) => s.applyEpicStatusChanged);
+  const applyEpicReordered = useBacklogStore((s) => s.applyEpicReordered);
   const applyStoryCreated = useBacklogStore((s) => s.applyStoryCreated);
   const applyStoryUpdated = useBacklogStore((s) => s.applyStoryUpdated);
   const applyStoryStatusChanged = useBacklogStore((s) => s.applyStoryStatusChanged);
@@ -60,6 +69,11 @@ export function useBacklogSocket({
   const applyTaskCompleted = useBacklogStore((s) => s.applyTaskCompleted);
   const applyTaskReordered = useBacklogStore((s) => s.applyTaskReordered);
   const applyTaskDeleted = useBacklogStore((s) => s.applyTaskDeleted);
+  const applyBacklogtaskCreated = useBacklogStore((s) => s.applyBacklogtaskCreated);
+  const applyBacklogtaskUpdated = useBacklogStore((s) => s.applyBacklogtaskUpdated);
+  const applyBacklogtaskStatusChanged = useBacklogStore((s) => s.applyBacklogtaskStatusChanged);
+  const applyBacklogtaskReordered = useBacklogStore((s) => s.applyBacklogtaskReordered);
+  const applyBacklogtaskDeleted = useBacklogStore((s) => s.applyBacklogtaskDeleted);
 
   useEffect(() => {
     if (!enabled || !teamspaceId) return;
@@ -80,7 +94,7 @@ export function useBacklogSocket({
 
       switch (raw.type) {
         case 'backlog:init':
-          applyInit(raw.config, raw.epics, raw.stories);
+          applyInit(raw.config, raw.epics, raw.stories, raw.tasks ?? []);
           break;
         case 'backlog:config_updated':
           applyConfigUpdated(raw.config);
@@ -93,6 +107,12 @@ export function useBacklogSocket({
           break;
         case 'epic:deleted':
           applyEpicDeleted(raw.epicId);
+          break;
+        case 'epic:status_changed':
+          applyEpicStatusChanged(raw.epicId, raw.status);
+          break;
+        case 'epic:reordered':
+          applyEpicReordered(raw.orderedIds);
           break;
         case 'story:created':
           applyStoryCreated(raw.story);
@@ -124,6 +144,21 @@ export function useBacklogSocket({
         case 'task:deleted':
           applyTaskDeleted(raw.storyId, raw.taskId);
           break;
+        case 'backlogtask:created':
+          applyBacklogtaskCreated(raw.task);
+          break;
+        case 'backlogtask:updated':
+          applyBacklogtaskUpdated(raw.task);
+          break;
+        case 'backlogtask:status_changed':
+          applyBacklogtaskStatusChanged(raw.taskId, raw.status);
+          break;
+        case 'backlogtask:reordered':
+          applyBacklogtaskReordered(raw.orderedIds);
+          break;
+        case 'backlogtask:deleted':
+          applyBacklogtaskDeleted(raw.taskId);
+          break;
       }
     };
 
@@ -148,6 +183,8 @@ export function useBacklogSocket({
     applyEpicCreated,
     applyEpicUpdated,
     applyEpicDeleted,
+    applyEpicStatusChanged,
+    applyEpicReordered,
     applyStoryCreated,
     applyStoryUpdated,
     applyStoryStatusChanged,
@@ -158,6 +195,11 @@ export function useBacklogSocket({
     applyTaskCompleted,
     applyTaskReordered,
     applyTaskDeleted,
+    applyBacklogtaskCreated,
+    applyBacklogtaskUpdated,
+    applyBacklogtaskStatusChanged,
+    applyBacklogtaskReordered,
+    applyBacklogtaskDeleted,
   ]);
 
   return { connected, onlineEditorCount: 0 };
