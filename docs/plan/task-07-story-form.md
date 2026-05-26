@@ -228,6 +228,9 @@ export function toStorySummary(detail: StoryDetail): StorySummary {
 
 ## 작업 로그
 
-| 날짜 | 내용 |
-| ---- | ---- |
-| —    | —    |
+| 날짜       | 내용                                                                                                     |
+| ---------- | -------------------------------------------------------------------------------------------------------- |
+| 2026-05-26 | 작업 시작.                                                                                               |
+| 2026-05-26 | MoreMenu 미존재 → 태스크 행 수정/삭제 인라인 버튼으로 대체. 태스크 수정 인라인 input 전환 방식으로 구현. |
+| 2026-05-26 | BacklogMainView 내부에서 useStoryApi 직접 호출 (onAddStory/onEditStory props 드릴링 제거).               |
+| 2026-05-26 | eslint no-unused-vars 오류 수정 (toStorySummary destructuring). tsc & eslint 통과. 작업 완료.            |

@@ -47,7 +47,7 @@ REST API (직접 수행한 작업)
 | 04  | [Welcome 화면 & Config 모달 UI](task-04-welcome-config-ui.md) | `src/components/backlog/WelcomeScreen.tsx`, `ConfigModal.tsx`                    | ✅ 완료      |
 | 05  | [백로그 메인 모달 (목록 뷰)](task-05-list-view.md)            | `src/components/backlog/BacklogModal.tsx`, `BacklogListView.tsx`, `StoryRow.tsx` | ✅ 완료      |
 | 06  | [보드 뷰 (칸반)](task-06-board-view.md)                       | `src/components/backlog/BacklogBoardView.tsx`, `StoryCard.tsx`                   | ✅ 완료      |
-| 07  | [스토리 생성/수정 폼](task-07-story-form.md)                  | `src/components/backlog/StoryFormModal.tsx`, `TaskList.tsx`                      | ⬜ 미완료    |
+| 07  | [스토리 생성/수정 폼](task-07-story-form.md)                  | `src/components/backlog/StoryFormModal.tsx`, `TaskList.tsx`                      | ✅ 완료      |
 | 08  | [에픽 관리](task-08-epic-management.md)                       | `src/components/backlog/EpicManagerModal.tsx`                                    | ⬜ 미완료    |
 | 09  | [사이드바 & 라우팅 통합](task-09-sidebar-integration.md)      | `MainSideBar.tsx`, `MainPage.tsx`, `MainContent.tsx`                             | ✅ 완료      |
 | BE  | [백엔드 제안 사항](backend-proposal.md)                       | —                                                                                | 📋 검토 필요 |

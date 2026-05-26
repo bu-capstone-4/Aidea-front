@@ -2,11 +2,20 @@ import { useEffect, useCallback, useState } from 'react';
 import { MdClose, MdSettings, MdList, MdGridView } from 'react-icons/md';
 import { useBacklogSocket } from '@/hooks/useBacklogSocket';
 import { useBacklogStore } from '@/store/backlogStore';
-import type { StoryStatus, BacklogConfigResponse, StorySummary } from '@/types/backlog';
+import { useTeamspaceDetail } from '@/hooks/useTeamspaceDetail';
+import { useStoryApi } from '@/hooks/useStoryApi';
+import type {
+  StoryStatus,
+  BacklogConfigResponse,
+  StorySummary,
+  CreateStoryRequest,
+  StoryDetail,
+} from '@/types/backlog';
 import WelcomeScreen from './WelcomeScreen';
 import ConfigModal from './ConfigModal';
 import BacklogListView from './BacklogListView';
 import BacklogBoardView from './BacklogBoardView';
+import StoryFormModal from './StoryFormModal';
 
 interface BacklogModalProps {
   teamspaceId: string;
@@ -29,28 +38,29 @@ function isConfigEmpty(config: BacklogConfigResponse) {
 type ViewMode = 'list' | 'board';
 type StatusFilter = StoryStatus | 'all';
 
+interface StoryFormState {
+  mode: 'create' | 'edit';
+  defaultStatus?: StoryStatus;
+  story?: StorySummary;
+}
+
 interface BacklogMainViewProps {
   teamspaceId: string;
   config: BacklogConfigResponse;
   onConfigOpen: () => void;
   onClose: () => void;
-  onAddStory: (defaultStatus?: StoryStatus) => void;
-  onEditStory: (story: StorySummary) => void;
 }
 
-function BacklogMainView({
-  teamspaceId,
-  config,
-  onConfigOpen,
-  onClose,
-  onAddStory,
-  onEditStory,
-}: BacklogMainViewProps) {
+function BacklogMainView({ teamspaceId, config, onConfigOpen, onClose }: BacklogMainViewProps) {
   const stories = useBacklogStore((s) => s.stories);
+  const epics = useBacklogStore((s) => s.epics);
+  const { handleCreate, handleUpdate } = useStoryApi(teamspaceId);
+  const { teamspace } = useTeamspaceDetail(teamspaceId);
 
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [groupByEpic, setGroupByEpic] = useState(false);
+  const [storyForm, setStoryForm] = useState<StoryFormState | null>(null);
 
   const STATUS_TABS: { label: string; value: StatusFilter }[] = [
     { label: '전체', value: 'all' },
@@ -58,6 +68,25 @@ function BacklogMainView({
     { label: '진행 중', value: 'IN_PROGRESS' },
     { label: '완료', value: 'DONE' },
   ];
+
+  const handleAddStory = (defaultStatus?: StoryStatus) => {
+    setStoryForm({ mode: 'create', defaultStatus });
+  };
+
+  const handleEditStory = (story: StorySummary) => {
+    setStoryForm({ mode: 'edit', story });
+  };
+
+  const handleFormSave = async (
+    data: CreateStoryRequest & { status?: StoryStatus }
+  ): Promise<StoryDetail> => {
+    if (storyForm?.mode === 'edit' && storyForm.story) {
+      return handleUpdate(storyForm.story.id, data);
+    }
+    return handleCreate(data);
+  };
+
+  const members = teamspace?.members ?? [];
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
@@ -141,8 +170,11 @@ function BacklogMainView({
           </button>
         </div>
 
-        {/* 이슈 추가 버튼 (Task 07에서 연결) */}
-        <button className="flex items-center gap-1 px-3 py-1 rounded bg-primary text-white text-sm font-medium hover:bg-primary-dark transition-colors">
+        {/* 이슈 추가 버튼 */}
+        <button
+          onClick={() => handleAddStory()}
+          className="flex items-center gap-1 px-3 py-1 rounded bg-primary text-white text-sm font-medium hover:bg-primary-dark transition-colors"
+        >
           + 이슈 추가
         </button>
       </div>
@@ -156,17 +188,45 @@ function BacklogMainView({
             teamspaceId={teamspaceId}
             statusFilter={statusFilter}
             groupByEpic={groupByEpic}
-            onEditStory={onEditStory}
+            onEditStory={handleEditStory}
           />
         ) : (
           <BacklogBoardView
             teamspaceId={teamspaceId}
             config={config}
-            onAddStory={onAddStory}
-            onEditStory={onEditStory}
+            onAddStory={handleAddStory}
+            onEditStory={handleEditStory}
           />
         )}
       </div>
+
+      {/* 스토리 생성/수정 폼 모달 */}
+      {storyForm && (
+        <StoryFormModal
+          mode={storyForm.mode}
+          defaultStatus={storyForm.defaultStatus}
+          initialData={
+            storyForm.story
+              ? {
+                  id: storyForm.story.id,
+                  title: storyForm.story.title,
+                  priority: storyForm.story.priority,
+                  issueType: storyForm.story.issueType,
+                  sprint: storyForm.story.sprint,
+                  epicIds: storyForm.story.epics.map((e) => e.id),
+                  assigneeId: storyForm.story.assignee?.id ?? null,
+                  dueDate: storyForm.story.dueDate ?? undefined,
+                  status: storyForm.story.status,
+                }
+              : undefined
+          }
+          config={config}
+          epics={epics}
+          members={members}
+          onSave={handleFormSave}
+          onClose={() => setStoryForm(null)}
+        />
+      )}
     </div>
   );
 }
@@ -232,8 +292,6 @@ export default function BacklogModal({ teamspaceId, onClose }: BacklogModalProps
             config={config!}
             onConfigOpen={() => setShowConfig(true)}
             onClose={onClose}
-            onAddStory={() => {}}
-            onEditStory={() => {}}
           />
         </div>
       </div>

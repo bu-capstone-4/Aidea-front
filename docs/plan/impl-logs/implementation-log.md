@@ -27,6 +27,29 @@
 
 ### 2026-05-26
 
+**[Task 07]** 작업 완료. 스토리 생성/수정 폼 및 태스크 목록 완전 구현.
+
+내용:
+
+- `src/utils/backlog.ts`에 `toStorySummary` 추가 시 ESLint `no-unused-vars` 오류 발생 → `// eslint-disable-next-line` 주석으로 해결 (destructuring rest 패턴 특성상 불가피)
+- `MoreMenu` 컴포넌트 미존재 — 태스크 행 수정/삭제를 연필·X 아이콘 인라인 버튼으로 구현 (스펙 대안)
+- 태스크 수정 UI를 별도 모달 대신 인라인 input 전환 방식으로 구현 (단순성 우선)
+- `BacklogModal` 내 `BacklogMainViewProps`에서 `onAddStory`/`onEditStory`를 제거하고 `BacklogMainView` 내부에서 `useStoryApi` 직접 호출 (props 드릴링 최소화)
+- 담당자 목록은 `useTeamspaceDetail(teamspaceId)`로 `BacklogMainView` 내부에서 로드해 `StoryFormModal`에 prop 전달
+
+영향 범위:
+
+- `src/utils/backlog.ts` (수정 — toStorySummary 추가)
+- `src/hooks/useStoryApi.ts` (신규)
+- `src/hooks/useTaskApi.ts` (신규)
+- `src/components/backlog/StoryFormModal.tsx` (신규)
+- `src/components/backlog/StoryDetailPanel.tsx` (기존 스텁 → 완전 구현)
+- `src/components/backlog/BacklogModal.tsx` (수정 — StoryFormModal 연결)
+
+---
+
+### 2026-05-26
+
 **[Task 06]** 작업 완료. 보드 뷰 (칸반) 구현.
 
 내용:

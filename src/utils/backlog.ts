@@ -1,4 +1,10 @@
-import type { IssueType, StorySummary, EpicResponse } from '@/types/backlog';
+import type { IssueType, StorySummary, StoryDetail, EpicResponse } from '@/types/backlog';
+
+export function toStorySummary(detail: StoryDetail): StorySummary {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { body, closedAt, tasks, ...summary } = detail;
+  return summary;
+}
 
 export function formatIssueId(
   issueType: IssueType | null,
