@@ -9,6 +9,7 @@ import FeedbackModal from './FeedbackModal';
 import SplitView from './SplitView';
 import { useFeedbackStore } from '@/store/FeedbackStore';
 import useFeedback from '@/hooks/useFeedback';
+import { Helmet } from 'react-helmet-async';
 
 const CURSOR_COLORS = ['#1971c2', '#e03131', '#2f9e44', '#f08c00', '#7048e8'];
 
@@ -62,6 +63,9 @@ export default function MainContent() {
 
   return (
     <main className="flex-1 overflow-y-auto bg-white relative">
+      <Helmet>
+        <title>{getDocLabel(doc.type)} - Aidea</title>
+      </Helmet>
       {isSplitView && <SplitView title={getDocLabel(doc.type)} />}
       <div
         className={`${isSplitView ? 'hidden' : 'block'} max-w-180 mx-auto px-24 md:px-10 sm:px-5 pt-5`}
