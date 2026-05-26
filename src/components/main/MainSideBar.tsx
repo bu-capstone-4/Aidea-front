@@ -9,6 +9,7 @@ import {
   MdCode,
   MdTableChart,
   MdAdd,
+  MdList,
 } from 'react-icons/md';
 import UserAvatar from '../ui/UserAvatar';
 import Button from '../ui/Button';
@@ -34,9 +35,16 @@ const DOC_ICON: Record<DocumentType, ElementType> = {
 interface SideBarProps {
   isSideBarOpen: boolean;
   toggleSideBar: () => void;
+  isBacklogOpen: boolean;
+  onBacklogClick: () => void;
 }
 
-export default function MainSideBar({ isSideBarOpen, toggleSideBar }: SideBarProps) {
+export default function MainSideBar({
+  isSideBarOpen,
+  toggleSideBar,
+  isBacklogOpen,
+  onBacklogClick,
+}: SideBarProps) {
   const navigate = useNavigate();
   const { docId } = useParams();
   const { user } = useCurrentUser();
@@ -110,6 +118,20 @@ export default function MainSideBar({ isSideBarOpen, toggleSideBar }: SideBarPro
             </Button>
           );
         })}
+
+        <Button
+          variant="ghost"
+          size={isSideBarOpen ? 'sm' : 'icon'}
+          icon={<MdList size={18} className="shrink-0" />}
+          className={cn(
+            isSideBarOpen && 'w-full justify-start',
+            isBacklogOpen && 'bg-primary-light text-primary-dark'
+          )}
+          onClick={onBacklogClick}
+          disabled={!currentTeamspaceId}
+        >
+          백로그
+        </Button>
 
         <Button
           variant="ghost"

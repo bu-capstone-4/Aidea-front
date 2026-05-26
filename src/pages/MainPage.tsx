@@ -5,11 +5,13 @@ import { useTeamspaceStore } from '@/store/teamspaceStore';
 import MainSideBar from '@/components/main/MainSideBar';
 import MainHeaderBar from '@/components/main/MainHeaderBar';
 import MainContent from '@/components/main/MainContent';
+import BacklogModal from '@/components/backlog/BacklogModal';
 import { useTeamspaceSocket } from '@/hooks/useTeamspaceSocket';
 import type { TeamspaceSummary, TeamspaceDetail } from '@/types/api';
 
 export default function MainPage() {
   const [isSideBarOpen, setIsSideBarOpen] = useState(true);
+  const [isBacklogOpen, setIsBacklogOpen] = useState(false);
   const { docId } = useParams();
   const navigate = useNavigate();
   const { currentTeamspaceId, setCurrentTeamspaceId } = useTeamspaceStore();
@@ -53,11 +55,17 @@ export default function MainPage() {
       <MainSideBar
         isSideBarOpen={isSideBarOpen}
         toggleSideBar={() => setIsSideBarOpen((p) => !p)}
+        isBacklogOpen={isBacklogOpen}
+        onBacklogClick={() => setIsBacklogOpen(true)}
       />
       <div className="flex-1 flex flex-col overflow-hidden">
         <MainHeaderBar />
         <MainContent />
       </div>
+
+      {isBacklogOpen && currentTeamspaceId && (
+        <BacklogModal teamspaceId={currentTeamspaceId} onClose={() => setIsBacklogOpen(false)} />
+      )}
     </div>
   );
 }
