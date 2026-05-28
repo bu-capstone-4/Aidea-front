@@ -53,6 +53,7 @@ interface BacklogActions {
   applyBacklogtaskStatusChanged: (taskId: number, status: StoryStatus) => void;
   applyBacklogtaskReordered: (orderedIds: number[]) => void;
   applyBacklogtaskDeleted: (taskId: number) => void;
+  applyBacklogtaskStoryChanged: (taskId: number, storyId: number | null) => void;
 
   setExpandedStoryId: (id: number | null) => void;
 }
@@ -133,6 +134,9 @@ export const useBacklogStore = create<BacklogState & BacklogActions>()((set) => 
   applyStoryDeleted: (storyId) =>
     set((state) => ({
       stories: state.stories.filter((s) => s.id !== storyId),
+      backlogTasks: state.backlogTasks.map((t) =>
+        t.storyId === storyId ? { ...t, storyId: null } : t
+      ),
     })),
 
   setTasksForStory: (storyId, tasks) =>
@@ -239,6 +243,11 @@ export const useBacklogStore = create<BacklogState & BacklogActions>()((set) => 
   applyBacklogtaskDeleted: (taskId) =>
     set((state) => ({
       backlogTasks: state.backlogTasks.filter((t) => t.id !== taskId),
+    })),
+
+  applyBacklogtaskStoryChanged: (taskId, storyId) =>
+    set((state) => ({
+      backlogTasks: state.backlogTasks.map((t) => (t.id === taskId ? { ...t, storyId } : t)),
     })),
 
   setExpandedStoryId: (id) => set({ expandedStoryId: id }),

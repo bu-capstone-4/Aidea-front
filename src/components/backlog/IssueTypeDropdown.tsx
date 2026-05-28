@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { MdOutlineLibraryBooks, MdOutlineCheckBox, MdOutlineBookmarks } from 'react-icons/md';
+import { MdOutlineLibraryBooks, MdOutlineCheckBox } from 'react-icons/md';
 import type { BacklogConfigResponse } from '@/types/backlog';
 
 export type IssueKind = 'story' | 'task' | 'epic';
@@ -50,16 +50,6 @@ export default function IssueTypeDropdown({ config, onSelect }: IssueTypeDropdow
     icon: <MdOutlineCheckBox size={16} />,
     color: 'text-green-600',
   });
-
-  if (config.epicEnabled) {
-    options.push({
-      kind: 'epic',
-      label: '에픽',
-      description: '여러 스토리를 묶는 큰 작업 단위',
-      icon: <MdOutlineBookmarks size={16} />,
-      color: 'text-purple-600',
-    });
-  }
 
   const handleSelect = (kind: IssueKind) => {
     setOpen(false);

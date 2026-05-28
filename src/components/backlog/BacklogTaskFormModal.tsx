@@ -7,6 +7,7 @@ import type {
   BacklogConfigResponse,
   BacklogTask,
   CreateBacklogTaskRequest,
+  StorySummary,
 } from '@/types/backlog';
 import type { MemberInfo } from '@/types/api';
 import AssigneeSelect from './AssigneeSelect';
@@ -17,6 +18,7 @@ interface BacklogTaskFormModalProps {
   defaultStatus?: StoryStatus;
   config: BacklogConfigResponse;
   members: MemberInfo[];
+  stories: StorySummary[];
   onSave: (data: CreateBacklogTaskRequest & { status?: StoryStatus }) => Promise<BacklogTask>;
   onClose: () => void;
 }
@@ -46,6 +48,7 @@ export default function BacklogTaskFormModal({
   defaultStatus,
   config,
   members,
+  stories,
   onSave,
   onClose,
 }: BacklogTaskFormModalProps) {
@@ -57,6 +60,7 @@ export default function BacklogTaskFormModal({
     sprint: initialData?.sprint ?? '',
     assigneeId: initialData?.assigneeId ?? (null as number | null),
     dueDate: initialData?.dueDate ?? '',
+    storyId: initialData?.storyId ?? (null as number | null),
   });
 
   const [loading, setLoading] = useState(false);
@@ -80,6 +84,7 @@ export default function BacklogTaskFormModal({
         sprint: config.sprintEnabled ? form.sprint || null : undefined,
         assigneeId: form.assigneeId,
         dueDate: config.dueDateEnabled ? form.dueDate || null : undefined,
+        storyId: form.storyId,
       };
       await onSave(payload);
       onClose();
@@ -185,6 +190,24 @@ export default function BacklogTaskFormModal({
                 {PRIORITY_OPTIONS.map((o) => (
                   <option key={o.value} value={o.value}>
                     {o.label}
+                  </option>
+                ))}
+              </select>
+            </FormRow>
+          )}
+
+          {/* 상위 스토리 */}
+          {stories.length > 0 && (
+            <FormRow label="상위 스토리">
+              <select
+                value={form.storyId ?? ''}
+                onChange={(e) => set('storyId', e.target.value ? Number(e.target.value) : null)}
+                className="rounded border border-border px-2 py-1.5 text-sm outline-none focus:ring-1 focus:ring-primary bg-white max-w-[240px] truncate"
+              >
+                <option value="">없음</option>
+                {stories.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    #{s.number} {s.title}
                   </option>
                 ))}
               </select>

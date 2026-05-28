@@ -59,6 +59,7 @@ interface StoryFormState {
 interface TaskFormState {
   mode: 'create' | 'edit';
   defaultStatus?: StoryStatus;
+  defaultStoryId?: number;
   task?: BacklogTask;
 }
 
@@ -107,6 +108,10 @@ function BacklogMainView({ teamspaceId, config, onConfigOpen, onClose }: Backlog
     if (kind === 'story') setStoryForm({ mode: 'create', defaultStatus });
     else if (kind === 'task') setTaskForm({ mode: 'create', defaultStatus });
     else if (kind === 'epic') setEpicForm({ mode: 'create', defaultStatus });
+  };
+
+  const handleAddTaskForStory = (storyId: number) => {
+    setTaskForm({ mode: 'create', defaultStoryId: storyId });
   };
 
   const handleEditStory = (story: StorySummary) => {
@@ -263,6 +268,7 @@ function BacklogMainView({ teamspaceId, config, onConfigOpen, onClose }: Backlog
             onEditStory={handleEditStory}
             onEditTask={handleEditTask}
             onEditEpic={handleEditEpic}
+            onAddTaskForStory={handleAddTaskForStory}
           />
         ) : (
           <BacklogBoardView
@@ -320,11 +326,15 @@ function BacklogMainView({ teamspaceId, config, onConfigOpen, onClose }: Backlog
                   assigneeId: taskForm.task.assignee?.id ?? null,
                   dueDate: taskForm.task.dueDate ?? undefined,
                   status: taskForm.task.status,
+                  storyId: taskForm.task.storyId,
                 }
-              : undefined
+              : taskForm.defaultStoryId !== undefined
+                ? { storyId: taskForm.defaultStoryId }
+                : undefined
           }
           config={config}
           members={members}
+          stories={stories}
           onSave={handleTaskSave}
           onClose={() => setTaskForm(null)}
         />

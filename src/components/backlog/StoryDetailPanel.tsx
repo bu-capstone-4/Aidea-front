@@ -1,15 +1,21 @@
 import { useState, useRef, useEffect } from 'react';
-import { MdEdit, MdClose, MdCheck } from 'react-icons/md';
-import type { TaskResponse, BacklogConfigResponse } from '@/types/backlog';
+import { MdCheck, MdMoreVert } from 'react-icons/md';
+import { useShallow } from 'zustand/react/shallow';
+import type { TaskResponse, BacklogConfigResponse, BacklogTask } from '@/types/backlog';
 import { useTaskApi } from '@/hooks/useTaskApi';
+import { useBacklogTaskApi } from '@/hooks/useBacklogTaskApi';
+import { useBacklogStore } from '@/store/backlogStore';
 import UserAvatar from '@/components/ui/UserAvatar';
 import IssueTypeTag from './IssueTypeTag';
+import StatusBadge from './StatusBadge';
 
 interface StoryDetailPanelProps {
   storyId: number;
   teamspaceId: string;
   tasks: TaskResponse[] | undefined;
   config: BacklogConfigResponse;
+  onAddItemClick: () => void;
+  onEditLinkedTask: (task: BacklogTask) => void;
 }
 
 export default function StoryDetailPanel({
@@ -17,39 +23,38 @@ export default function StoryDetailPanel({
   teamspaceId,
   tasks,
   config,
+  onAddItemClick,
+  onEditLinkedTask,
 }: StoryDetailPanelProps) {
-  const { handleCreate, handleUpdate, handleToggle, handleDelete } = useTaskApi(teamspaceId);
+  const { handleUpdate, handleDelete } = useTaskApi(teamspaceId);
+  const { handleDelete: handleDeleteBacklogTask } = useBacklogTaskApi(teamspaceId);
 
-  const [newTaskTitle, setNewTaskTitle] = useState('');
-  const [addingTask, setAddingTask] = useState(false);
+  const linkedTasks = useBacklogStore(
+    useShallow((s) => s.backlogTasks.filter((t) => t.storyId === storyId))
+  );
+
   const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
   const [editingTitle, setEditingTitle] = useState('');
-  const newTaskInputRef = useRef<HTMLInputElement>(null);
+  const [menuOpenKey, setMenuOpenKey] = useState<string | null>(null);
   const editInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (addingTask) newTaskInputRef.current?.focus();
-  }, [addingTask]);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (editingTaskId !== null) editInputRef.current?.focus();
   }, [editingTaskId]);
 
-  const handleAddTask = async () => {
-    if (!newTaskTitle.trim()) return;
-    await handleCreate(storyId, { title: newTaskTitle.trim() });
-    setNewTaskTitle('');
-  };
-
-  const handleAddKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') handleAddTask();
-    if (e.key === 'Escape') {
-      setNewTaskTitle('');
-      setAddingTask(false);
+  useEffect(() => {
+    function onClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpenKey(null);
+      }
     }
-  };
+    if (menuOpenKey !== null) document.addEventListener('mousedown', onClickOutside);
+    return () => document.removeEventListener('mousedown', onClickOutside);
+  }, [menuOpenKey]);
 
   const startEdit = (task: TaskResponse) => {
+    setMenuOpenKey(null);
     setEditingTaskId(task.id);
     setEditingTitle(task.title);
   };
@@ -68,126 +73,192 @@ export default function StoryDetailPanel({
   };
 
   const confirmDelete = async (taskId: number, title: string) => {
+    setMenuOpenKey(null);
     if (!window.confirm(`"${title}" 태스크를 삭제하시겠습니까?`)) return;
     await handleDelete(storyId, taskId);
   };
 
+  const confirmDeleteBacklogTask = async (task: BacklogTask) => {
+    setMenuOpenKey(null);
+    if (!window.confirm(`"${task.title}" 태스크를 삭제하시겠습니까?`)) return;
+    await handleDeleteBacklogTask(task.id);
+  };
+
+  const toggleMenu = (key: string) => setMenuOpenKey((prev) => (prev === key ? null : key));
+
   return (
-    <div className="px-4 py-2 bg-surface border-b border-border">
+    <div className="border-t border-border/60 bg-surface/30">
       {tasks === undefined ? (
-        <p className="text-xs text-ink-muted py-1">태스크를 불러오는 중...</p>
+        <p className="text-xs text-ink-muted py-2 pl-14">태스크를 불러오는 중...</p>
       ) : (
         <>
           {tasks.length > 0 && (
             <ul className="flex flex-col">
-              {tasks.map((task) => (
-                <li
-                  key={task.id}
-                  className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-white group"
-                >
-                  <input
-                    type="checkbox"
-                    checked={task.isCompleted}
-                    onChange={() => handleToggle(storyId, task.id)}
-                    className="shrink-0 accent-primary cursor-pointer"
-                  />
-
-                  {config.feBeEnabled && task.issueType && (
-                    <IssueTypeTag issueType={task.issueType} number={0} />
-                  )}
-
-                  {editingTaskId === task.id ? (
-                    <input
-                      ref={editInputRef}
-                      value={editingTitle}
-                      onChange={(e) => setEditingTitle(e.target.value)}
-                      onBlur={() => commitEdit(task)}
-                      onKeyDown={(e) => handleEditKeyDown(e, task)}
-                      className="flex-1 text-sm outline-none border-b border-primary bg-transparent"
-                    />
-                  ) : (
-                    <span
-                      className={`flex-1 text-sm ${task.isCompleted ? 'line-through text-ink-muted' : 'text-ink'}`}
-                    >
-                      {task.title}
+              {tasks.map((task, index) => {
+                const menuKey = `task-${task.id}`;
+                const isMenuOpen = menuOpenKey === menuKey;
+                return (
+                  <li
+                    key={task.id}
+                    className="flex items-center gap-2.5 pl-10 pr-4 py-2 hover:bg-surface group border-b border-border/40 last:border-b-0"
+                  >
+                    <span className="w-4 text-xs text-ink-muted text-right shrink-0 select-none">
+                      {index + 1}
                     </span>
-                  )}
 
-                  <div className="ml-auto flex items-center gap-1 shrink-0">
-                    {task.assignee && (
-                      <UserAvatar
-                        name={task.assignee.name}
-                        imageUrl={task.assignee.profileImageUrl}
-                        size={20}
-                      />
+                    {config.feBeEnabled && task.issueType && (
+                      <IssueTypeTag issueType={task.issueType} number={0} />
                     )}
+
                     {editingTaskId === task.id ? (
-                      <button
-                        onClick={() => commitEdit(task)}
-                        className="text-green-500 hover:text-green-600 p-0.5 rounded"
-                        aria-label="저장"
-                      >
-                        <MdCheck size={14} />
-                      </button>
+                      <input
+                        ref={editInputRef}
+                        value={editingTitle}
+                        onChange={(e) => setEditingTitle(e.target.value)}
+                        onBlur={() => commitEdit(task)}
+                        onKeyDown={(e) => handleEditKeyDown(e, task)}
+                        className="flex-1 text-sm outline-none border-b border-primary bg-transparent"
+                      />
                     ) : (
-                      <button
-                        onClick={() => startEdit(task)}
-                        className="opacity-0 group-hover:opacity-100 text-ink-muted hover:text-ink p-0.5 rounded transition-all"
-                        aria-label="수정"
+                      <span
+                        className={`flex-1 text-sm truncate cursor-default ${
+                          task.isCompleted ? 'line-through text-ink-muted' : 'text-ink'
+                        }`}
                       >
-                        <MdEdit size={14} />
-                      </button>
+                        <span className="text-ink-muted font-medium mr-1">[Task]</span>
+                        {task.title}
+                      </span>
                     )}
-                    <button
-                      onClick={() => confirmDelete(task.id, task.title)}
-                      className="opacity-0 group-hover:opacity-100 text-ink-muted hover:text-red-500 p-0.5 rounded transition-all"
-                      aria-label="삭제"
-                    >
-                      <MdClose size={14} />
-                    </button>
-                  </div>
-                </li>
-              ))}
+
+                    <div className="flex items-center gap-2 shrink-0 ml-auto">
+                      {task.assignee && (
+                        <UserAvatar
+                          name={task.assignee.name}
+                          imageUrl={task.assignee.profileImageUrl}
+                          size={20}
+                        />
+                      )}
+
+                      {editingTaskId === task.id ? (
+                        <button
+                          onClick={() => commitEdit(task)}
+                          className="text-green-500 hover:text-green-600 p-0.5 rounded"
+                          aria-label="저장"
+                        >
+                          <MdCheck size={14} />
+                        </button>
+                      ) : (
+                        <div className="relative" ref={isMenuOpen ? menuRef : undefined}>
+                          <button
+                            onClick={() => toggleMenu(menuKey)}
+                            className="opacity-0 group-hover:opacity-100 text-ink-muted hover:text-ink transition-all p-0.5 rounded"
+                            aria-label="더보기"
+                          >
+                            <MdMoreVert size={16} />
+                          </button>
+                          {isMenuOpen && (
+                            <div className="absolute right-0 top-full mt-1 w-24 bg-white rounded-lg shadow-lg border border-border z-20 py-1">
+                              <button
+                                onClick={() => startEdit(task)}
+                                className="w-full px-3 py-1.5 text-left text-sm text-ink hover:bg-surface"
+                              >
+                                수정
+                              </button>
+                              <button
+                                onClick={() => confirmDelete(task.id, task.title)}
+                                className="w-full px-3 py-1.5 text-left text-sm text-red-500 hover:bg-red-50"
+                              >
+                                삭제
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           )}
 
-          {/* 태스크 추가 */}
-          {addingTask ? (
-            <div className="flex items-center gap-2 px-2 py-1.5">
-              <div className="w-3.5 shrink-0" />
-              <input
-                ref={newTaskInputRef}
-                value={newTaskTitle}
-                onChange={(e) => setNewTaskTitle(e.target.value)}
-                onKeyDown={handleAddKeyDown}
-                placeholder="태스크 추가..."
-                className="flex-1 text-sm outline-none border-b border-primary bg-transparent"
-              />
-              <button
-                onClick={handleAddTask}
-                className="text-xs text-primary hover:text-primary-dark font-medium shrink-0"
-              >
-                추가
-              </button>
-              <button
-                onClick={() => {
-                  setNewTaskTitle('');
-                  setAddingTask(false);
-                }}
-                className="text-ink-muted hover:text-ink shrink-0"
-                aria-label="취소"
-              >
-                <MdClose size={14} />
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={() => setAddingTask(true)}
-              className="flex items-center gap-1 px-2 py-1 text-xs text-ink-muted hover:text-ink transition-colors"
-            >
-              + 태스크 추가
-            </button>
+          {linkedTasks.length > 0 && (
+            <ul className="flex flex-col border-t border-border/40">
+              {linkedTasks.map((task: BacklogTask) => {
+                const menuKey = `bt-${task.id}`;
+                const isMenuOpen = menuOpenKey === menuKey;
+                return (
+                  <li
+                    key={menuKey}
+                    className="flex items-center gap-2.5 pl-10 pr-4 py-2 hover:bg-surface group border-b border-border/40 last:border-b-0"
+                  >
+                    {config.feBeEnabled && task.issueType ? (
+                      <IssueTypeTag issueType={task.issueType} number={task.number} />
+                    ) : (
+                      <span className="w-4 text-xs text-ink-muted text-right shrink-0 select-none">
+                        #{task.number}
+                      </span>
+                    )}
+
+                    <span
+                      className={`flex-1 text-sm truncate ${
+                        task.status === 'DONE' ? 'line-through text-ink-muted' : 'text-ink'
+                      }`}
+                    >
+                      <span className="text-ink-muted font-medium mr-1">[Task]</span>
+                      {task.title}
+                    </span>
+
+                    <div className="flex items-center gap-2 shrink-0 ml-auto">
+                      <StatusBadge status={task.status} />
+                      {task.assignee && (
+                        <UserAvatar
+                          name={task.assignee.name}
+                          imageUrl={task.assignee.profileImageUrl}
+                          size={20}
+                        />
+                      )}
+                      <div className="relative" ref={isMenuOpen ? menuRef : undefined}>
+                        <button
+                          onClick={() => toggleMenu(menuKey)}
+                          className="opacity-0 group-hover:opacity-100 text-ink-muted hover:text-ink transition-all p-0.5 rounded"
+                          aria-label="더보기"
+                        >
+                          <MdMoreVert size={16} />
+                        </button>
+                        {isMenuOpen && (
+                          <div className="absolute right-0 top-full mt-1 w-24 bg-white rounded-lg shadow-lg border border-border z-20 py-1">
+                            <button
+                              onClick={() => {
+                                setMenuOpenKey(null);
+                                onEditLinkedTask(task);
+                              }}
+                              className="w-full px-3 py-1.5 text-left text-sm text-ink hover:bg-surface"
+                            >
+                              수정
+                            </button>
+                            <button
+                              onClick={() => confirmDeleteBacklogTask(task)}
+                              className="w-full px-3 py-1.5 text-left text-sm text-red-500 hover:bg-red-50"
+                            >
+                              삭제
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
           )}
+
+          <button
+            onClick={onAddItemClick}
+            className="flex items-center gap-2 pl-14 pr-4 py-2 w-full text-left text-xs text-ink-muted hover:text-primary hover:bg-surface/50 transition-colors"
+          >
+            <span className="text-base leading-none">+</span>
+            <span>Add item</span>
+          </button>
         </>
       )}
     </div>

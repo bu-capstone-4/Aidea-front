@@ -36,6 +36,7 @@ const VALID_BACKLOG_TYPES = new Set([
   'backlogtask:status_changed',
   'backlogtask:reordered',
   'backlogtask:deleted',
+  'backlogtask:story_changed',
 ]);
 
 function isBacklogServerMessage(msg: unknown): msg is BacklogServerMessage {
@@ -74,6 +75,7 @@ export function useBacklogSocket({
   const applyBacklogtaskStatusChanged = useBacklogStore((s) => s.applyBacklogtaskStatusChanged);
   const applyBacklogtaskReordered = useBacklogStore((s) => s.applyBacklogtaskReordered);
   const applyBacklogtaskDeleted = useBacklogStore((s) => s.applyBacklogtaskDeleted);
+  const applyBacklogtaskStoryChanged = useBacklogStore((s) => s.applyBacklogtaskStoryChanged);
 
   useEffect(() => {
     if (!enabled || !teamspaceId) return;
@@ -159,6 +161,9 @@ export function useBacklogSocket({
         case 'backlogtask:deleted':
           applyBacklogtaskDeleted(raw.taskId);
           break;
+        case 'backlogtask:story_changed':
+          applyBacklogtaskStoryChanged(raw.taskId, raw.storyId);
+          break;
       }
     };
 
@@ -200,6 +205,7 @@ export function useBacklogSocket({
     applyBacklogtaskStatusChanged,
     applyBacklogtaskReordered,
     applyBacklogtaskDeleted,
+    applyBacklogtaskStoryChanged,
   ]);
 
   return { connected, onlineEditorCount: 0 };

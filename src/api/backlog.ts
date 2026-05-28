@@ -288,3 +288,15 @@ export async function reorderBacklogTasks(
 export async function deleteBacklogTask(teamspaceId: string, taskId: number): Promise<void> {
   await apiClient.delete(`/api/teamspaces/${teamspaceId}/tasks/${taskId}`);
 }
+
+export async function updateBacklogTaskStory(
+  teamspaceId: string,
+  taskId: number,
+  storyId: number | null
+): Promise<BacklogTask> {
+  const res = await apiClient.patch<GlobalResponse<BacklogTask>>(
+    `/api/teamspaces/${teamspaceId}/tasks/${taskId}/story`,
+    { storyId }
+  );
+  return res.data.data;
+}

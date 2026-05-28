@@ -78,6 +78,7 @@ export interface StoryDetail extends StorySummary {
   body: string | null;
   closedAt: string | null;
   tasks: TaskResponse[];
+  linkedTasks: BacklogTask[];
 }
 
 export interface StoryStatusResponse {
@@ -115,6 +116,7 @@ export interface BacklogTask {
   reporter: BacklogUser;
   dueDate: string | null;
   position: number;
+  storyId: number | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -126,6 +128,7 @@ export interface CreateBacklogTaskRequest {
   sprint?: string | null;
   assigneeId?: number | null;
   dueDate?: string | null;
+  storyId?: number | null;
 }
 
 export interface CreateEpicRequest {
@@ -266,6 +269,12 @@ export interface BacklogtaskDeletedEvent {
   actorId: string;
   taskId: number;
 }
+export interface BacklogtaskStoryChangedEvent {
+  type: 'backlogtask:story_changed';
+  actorId: string;
+  taskId: number;
+  storyId: number | null;
+}
 
 export type BacklogSocketErrorCode =
   | 'INSUFFICIENT_PERMISSION'
@@ -304,4 +313,5 @@ export type BacklogServerMessage =
   | BacklogtaskStatusChangedEvent
   | BacklogtaskReorderedEvent
   | BacklogtaskDeletedEvent
+  | BacklogtaskStoryChangedEvent
   | BacklogSocketErrorEvent;

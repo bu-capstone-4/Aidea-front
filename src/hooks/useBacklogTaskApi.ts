@@ -3,6 +3,7 @@ import {
   createBacklogTask,
   updateBacklogTask,
   updateBacklogTaskStatus,
+  updateBacklogTaskStory,
   deleteBacklogTask,
 } from '@/api/backlog';
 import type { BacklogTask, CreateBacklogTaskRequest, StoryStatus } from '@/types/backlog';
@@ -12,6 +13,7 @@ export function useBacklogTaskApi(teamspaceId: string) {
   const applyBacklogtaskUpdated = useBacklogStore((s) => s.applyBacklogtaskUpdated);
   const applyBacklogtaskStatusChanged = useBacklogStore((s) => s.applyBacklogtaskStatusChanged);
   const applyBacklogtaskDeleted = useBacklogStore((s) => s.applyBacklogtaskDeleted);
+  const applyBacklogtaskStoryChanged = useBacklogStore((s) => s.applyBacklogtaskStoryChanged);
 
   const handleCreate = async (data: CreateBacklogTaskRequest): Promise<BacklogTask> => {
     const task = await createBacklogTask(teamspaceId, data);
@@ -38,5 +40,11 @@ export function useBacklogTaskApi(teamspaceId: string) {
     applyBacklogtaskDeleted(taskId);
   };
 
-  return { handleCreate, handleUpdate, handleStatusChange, handleDelete };
+  const handleStoryLink = async (taskId: number, storyId: number | null): Promise<BacklogTask> => {
+    const task = await updateBacklogTaskStory(teamspaceId, taskId, storyId);
+    applyBacklogtaskStoryChanged(taskId, storyId);
+    return task;
+  };
+
+  return { handleCreate, handleUpdate, handleStatusChange, handleDelete, handleStoryLink };
 }
