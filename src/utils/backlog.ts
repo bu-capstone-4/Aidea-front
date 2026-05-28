@@ -1,5 +1,17 @@
 import type { IssueType, StorySummary, StoryDetail, EpicResponse } from '@/types/backlog';
 
+export function normalizeDueDate(raw: unknown): string | null {
+  if (raw == null) return null;
+  if (Array.isArray(raw)) {
+    const [year, month, day] = raw as [number, number, number];
+    return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  }
+  if (raw instanceof Date) return raw.toISOString().split('T')[0];
+  if (typeof raw === 'number') return new Date(raw).toISOString().split('T')[0];
+  const s = String(raw);
+  return s.split('T')[0] || null;
+}
+
 export function toStorySummary(detail: StoryDetail): StorySummary {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { body, closedAt, tasks, ...summary } = detail;

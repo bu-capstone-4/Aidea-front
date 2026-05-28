@@ -12,6 +12,22 @@ import { useToastStore } from '@/store/toastStore';
 import StoryRow from './StoryRow';
 import NoParentSection from './NoParentSection';
 
+export interface ColWidths {
+  assignees: string;
+  status: string;
+  priority: string;
+  sprint: string;
+  dueDate: string;
+}
+
+const COL_WIDTHS: ColWidths = {
+  assignees: 'w-15',
+  status: 'w-20',
+  priority: 'w-16',
+  sprint: 'w-20',
+  dueDate: 'w-16',
+};
+
 interface BacklogListViewProps {
   stories: StorySummary[];
   backlogTasks: BacklogTask[];
@@ -19,7 +35,6 @@ interface BacklogListViewProps {
   config: BacklogConfigResponse;
   teamspaceId: string;
   statusFilter: StoryStatus | 'all';
-  groupByEpic: boolean;
   onEditStory: (story: StorySummary) => void;
   onEditTask: (task: BacklogTask) => void;
   onEditEpic: (epic: EpicResponse) => void;
@@ -32,7 +47,6 @@ export default function BacklogListView({
   config,
   teamspaceId,
   statusFilter,
-  groupByEpic,
   onEditStory,
   onEditTask,
   onAddTaskForStory,
@@ -49,13 +63,12 @@ export default function BacklogListView({
   }, [stories, statusFilter]);
 
   const displayedStories = useMemo(() => {
-    if (!groupByEpic) return filteredStories;
     return [...filteredStories].sort((a, b) => {
       const aEpicId = a.epics[0]?.id ?? Infinity;
       const bEpicId = b.epics[0]?.id ?? Infinity;
       return aEpicId - bEpicId;
     });
-  }, [filteredStories, groupByEpic]);
+  }, [filteredStories]);
 
   const filteredBacklogTasks = useMemo(() => {
     const sorted = [...backlogTasks]
@@ -103,6 +116,33 @@ export default function BacklogListView({
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
+      {/* Table column header */}
+      <div className="flex items-center border-b border-border bg-surface shrink-0 text-xs font-semibold text-ink-muted select-none">
+        <div className="flex-1 px-4 py-2">Title</div>
+        <div className={`${COL_WIDTHS.assignees} px-3 py-2 border-l border-border text-center`}>
+          담당자
+        </div>
+        <div className={`${COL_WIDTHS.status} px-3 py-2 border-l border-border text-center`}>
+          상태
+        </div>
+        {config.priorityEnabled && (
+          <div className={`${COL_WIDTHS.priority} px-3 py-2 border-l border-border text-center`}>
+            중요도
+          </div>
+        )}
+        {config.sprintEnabled && (
+          <div className={`${COL_WIDTHS.sprint} px-3 py-2 border-l border-border text-center`}>
+            스프린트
+          </div>
+        )}
+        {config.dueDateEnabled && (
+          <div className={`${COL_WIDTHS.dueDate} px-3 py-2 border-l border-border text-center`}>
+            마감일
+          </div>
+        )}
+        <div className="w-8" />
+      </div>
+
       <div className="flex-1 overflow-y-auto">
         {isEmpty ? (
           <div className="flex items-center justify-center h-32 text-sm text-ink-muted">
@@ -116,6 +156,7 @@ export default function BacklogListView({
                 story={story}
                 config={config}
                 teamspaceId={teamspaceId}
+                colWidths={COL_WIDTHS}
                 isExpanded={expandedStoryId === story.id}
                 onExpandToggle={() => handleExpandToggle(story.id)}
                 onEditClick={() => onEditStory(story)}
@@ -128,6 +169,7 @@ export default function BacklogListView({
             <NoParentSection
               tasks={filteredBacklogTasks}
               config={config}
+              colWidths={COL_WIDTHS}
               onEditClick={onEditTask}
               onDeleteClick={handleDeleteTask}
             />
@@ -141,12 +183,6 @@ export default function BacklogListView({
           총 {counts.total}개 이슈 · 진행 중 {counts.inProgress}개 · 할 일 {counts.open}개 · 완료{' '}
           {counts.done}개
         </span>
-        <button
-          onClick={() => addToast({ type: 'info', message: '준비 중입니다.' })}
-          className="text-xs text-ink-muted hover:text-ink transition-colors"
-        >
-          ↑ GitHub 이슈로 내보내기
-        </button>
       </div>
     </div>
   );

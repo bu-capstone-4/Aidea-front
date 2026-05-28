@@ -142,27 +142,6 @@ export default function EpicManagerModal({ teamspaceId, epics, onClose }: EpicMa
 
         {/* 본문 */}
         <div className="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-3">
-          {/* 에픽 추가 버튼 */}
-          {!creatingForm && (
-            <button
-              onClick={handleOpenCreate}
-              className="flex items-center gap-1.5 text-sm text-primary font-medium hover:text-primary-dark transition-colors w-fit"
-            >
-              + 에픽 추가
-            </button>
-          )}
-
-          {/* 생성 인라인 폼 */}
-          {creatingForm && (
-            <EpicInlineForm
-              form={creatingForm}
-              onChange={setCreatingForm}
-              onSave={handleCreate}
-              onCancel={() => setCreatingForm(null)}
-              saving={saving}
-            />
-          )}
-
           {/* 에픽 목록 */}
           {epics.length === 0 && !creatingForm && (
             <p className="text-sm text-ink-muted py-2">아직 에픽이 없습니다.</p>
@@ -222,6 +201,27 @@ export default function EpicManagerModal({ teamspaceId, epics, onClose }: EpicMa
               )}
             </div>
           ))}
+
+          {/* 생성 인라인 폼 */}
+          {creatingForm && (
+            <EpicInlineForm
+              form={creatingForm}
+              onChange={setCreatingForm}
+              onSave={handleCreate}
+              onCancel={() => setCreatingForm(null)}
+              saving={saving}
+            />
+          )}
+
+          {/* 에픽 추가 버튼 */}
+          {!creatingForm && (
+            <button
+              onClick={handleOpenCreate}
+              className="flex items-center gap-1.5 text-sm text-primary font-medium hover:text-primary-dark transition-colors w-fit"
+            >
+              + 에픽 추가
+            </button>
+          )}
         </div>
 
         {/* 푸터 */}

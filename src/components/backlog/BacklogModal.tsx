@@ -18,8 +18,10 @@ import type {
   EpicResponse,
   CreateEpicRequest,
 } from '@/types/backlog';
+import { normalizeDueDate } from '@/utils/backlog';
 import WelcomeScreen from './WelcomeScreen';
 import ConfigModal from './ConfigModal';
+import DraftConfigModal from './DraftConfigModal';
 import BacklogListView from './BacklogListView';
 import BacklogBoardView from './BacklogBoardView';
 import StoryFormModal from './StoryFormModal';
@@ -91,7 +93,6 @@ function BacklogMainView({ teamspaceId, config, onConfigOpen, onClose }: Backlog
 
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
-  const [groupByEpic, setGroupByEpic] = useState(false);
   const [storyForm, setStoryForm] = useState<StoryFormState | null>(null);
   const [taskForm, setTaskForm] = useState<TaskFormState | null>(null);
   const [epicForm, setEpicForm] = useState<EpicFormState | null>(null);
@@ -205,16 +206,6 @@ function BacklogMainView({ teamspaceId, config, onConfigOpen, onClose }: Backlog
         {config.epicEnabled && (
           <>
             <button
-              onClick={() => setGroupByEpic((v) => !v)}
-              className={`flex items-center gap-1 px-3 py-1 rounded border text-sm transition-colors ${
-                groupByEpic
-                  ? 'border-primary text-primary bg-primary/5'
-                  : 'border-border text-ink-muted hover:text-ink'
-              }`}
-            >
-              그룹: 에픽 {groupByEpic ? '▲' : '▼'}
-            </button>
-            <button
               onClick={() => setEpicManagerOpen(true)}
               className="flex items-center gap-1 px-2 py-1 rounded border border-border text-sm text-ink-muted hover:text-ink transition-colors"
               aria-label="에픽 관리"
@@ -255,7 +246,7 @@ function BacklogMainView({ teamspaceId, config, onConfigOpen, onClose }: Backlog
       </div>
 
       {/* 뷰 본문 */}
-      <div className="flex-1 min-h-0">
+      <div className="flex flex-col flex-1 min-h-0">
         {viewMode === 'list' ? (
           <BacklogListView
             stories={stories}
@@ -264,7 +255,6 @@ function BacklogMainView({ teamspaceId, config, onConfigOpen, onClose }: Backlog
             config={config}
             teamspaceId={teamspaceId}
             statusFilter={statusFilter}
-            groupByEpic={groupByEpic}
             onEditStory={handleEditStory}
             onEditTask={handleEditTask}
             onEditEpic={handleEditEpic}
@@ -296,7 +286,7 @@ function BacklogMainView({ teamspaceId, config, onConfigOpen, onClose }: Backlog
                   sprint: storyForm.story.sprint,
                   epicIds: storyForm.story.epics.map((e) => e.id),
                   assigneeId: storyForm.story.assignee?.id ?? null,
-                  dueDate: storyForm.story.dueDate ?? undefined,
+                  dueDate: normalizeDueDate(storyForm.story.dueDate) ?? undefined,
                   status: storyForm.story.status,
                 }
               : undefined
@@ -324,7 +314,7 @@ function BacklogMainView({ teamspaceId, config, onConfigOpen, onClose }: Backlog
                   issueType: taskForm.task.issueType,
                   sprint: taskForm.task.sprint,
                   assigneeId: taskForm.task.assignee?.id ?? null,
-                  dueDate: taskForm.task.dueDate ?? undefined,
+                  dueDate: normalizeDueDate(taskForm.task.dueDate) ?? undefined,
                   status: taskForm.task.status,
                   storyId: taskForm.task.storyId,
                 }
@@ -355,7 +345,7 @@ function BacklogMainView({ teamspaceId, config, onConfigOpen, onClose }: Backlog
                   priority: epicForm.epic.priority,
                   issueType: epicForm.epic.issueType,
                   assigneeId: epicForm.epic.assignee?.id ?? null,
-                  dueDate: epicForm.epic.dueDate ?? undefined,
+                  dueDate: normalizeDueDate(epicForm.epic.dueDate) ?? undefined,
                   status: epicForm.epic.status,
                 }
               : undefined
@@ -394,12 +384,13 @@ export default function BacklogModal({ teamspaceId, onClose }: BacklogModalProps
 
   useBacklogSocket({ teamspaceId, enabled: true });
 
-  const [showConfig, setShowConfig] = useState(false);
+  const [configMode, setConfigMode] = useState<null | 'draft' | 'settings'>(null);
 
   const storeScreen =
     !isInitialized || !config ? 'loading' : isConfigEmpty(config) ? 'welcome' : 'main';
 
-  const screen = showConfig ? 'config' : storeScreen;
+  const screen =
+    configMode === 'settings' ? 'config' : configMode === 'draft' ? 'draft' : storeScreen;
 
   useEffect(() => {
     return () => {
@@ -420,7 +411,19 @@ export default function BacklogModal({ teamspaceId, onClose }: BacklogModalProps
   }, [handleKeyDown]);
 
   if (screen === 'welcome') {
-    return <WelcomeScreen onStart={() => setShowConfig(true)} onClose={onClose} />;
+    return <WelcomeScreen onStart={() => setConfigMode('draft')} onClose={onClose} />;
+  }
+
+  if (screen === 'draft') {
+    return (
+      <DraftConfigModal
+        initialConfig={config ?? undefined}
+        teamspaceId={teamspaceId}
+        onSaved={() => setConfigMode(null)}
+        onClose={onClose}
+        onBack={() => setConfigMode(null)}
+      />
+    );
   }
 
   if (screen === 'config') {
@@ -428,9 +431,8 @@ export default function BacklogModal({ teamspaceId, onClose }: BacklogModalProps
       <ConfigModal
         initialConfig={config ?? undefined}
         teamspaceId={teamspaceId}
-        onSaved={() => setShowConfig(false)}
         onClose={onClose}
-        onBack={() => setShowConfig(false)}
+        onBack={() => setConfigMode(null)}
       />
     );
   }
@@ -442,7 +444,7 @@ export default function BacklogModal({ teamspaceId, onClose }: BacklogModalProps
           <BacklogMainView
             teamspaceId={teamspaceId}
             config={config!}
-            onConfigOpen={() => setShowConfig(true)}
+            onConfigOpen={() => setConfigMode('settings')}
             onClose={onClose}
           />
         </div>

@@ -221,14 +221,50 @@ export const useBacklogStore = create<BacklogState & BacklogActions>()((set) => 
     set((state) => ({ backlogTasks: [...state.backlogTasks, task] })),
 
   applyBacklogtaskUpdated: (task) =>
-    set((state) => ({
-      backlogTasks: state.backlogTasks.map((t) => (t.id === task.id ? task : t)),
-    })),
+    set((state) => {
+      const oldTask = state.backlogTasks.find((t) => t.id === task.id);
+      const storyId = task.storyId ?? oldTask?.storyId ?? null;
+      const wasCompleted = oldTask?.status === 'DONE';
+      const isNowCompleted = task.status === 'DONE';
+
+      const updatedBacklogTasks = state.backlogTasks.map((t) => (t.id === task.id ? task : t));
+
+      let updatedStories = state.stories;
+      if (storyId != null && wasCompleted !== isNowCompleted) {
+        const delta = isNowCompleted ? 1 : -1;
+        updatedStories = state.stories.map((s) =>
+          s.id === storyId
+            ? { ...s, completedTaskCount: Math.max(0, s.completedTaskCount + delta) }
+            : s
+        );
+      }
+
+      return { backlogTasks: updatedBacklogTasks, stories: updatedStories };
+    }),
 
   applyBacklogtaskStatusChanged: (taskId, status) =>
-    set((state) => ({
-      backlogTasks: state.backlogTasks.map((t) => (t.id === taskId ? { ...t, status } : t)),
-    })),
+    set((state) => {
+      const task = state.backlogTasks.find((t) => t.id === taskId);
+      const storyId = task?.storyId ?? null;
+      const wasCompleted = task?.status === 'DONE';
+      const isNowCompleted = status === 'DONE';
+
+      const updatedBacklogTasks = state.backlogTasks.map((t) =>
+        t.id === taskId ? { ...t, status } : t
+      );
+
+      let updatedStories = state.stories;
+      if (storyId != null && wasCompleted !== isNowCompleted) {
+        const delta = isNowCompleted ? 1 : -1;
+        updatedStories = state.stories.map((s) =>
+          s.id === storyId
+            ? { ...s, completedTaskCount: Math.max(0, s.completedTaskCount + delta) }
+            : s
+        );
+      }
+
+      return { backlogTasks: updatedBacklogTasks, stories: updatedStories };
+    }),
 
   applyBacklogtaskReordered: (orderedIds) =>
     set((state) => {

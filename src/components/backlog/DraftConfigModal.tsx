@@ -14,20 +14,23 @@ interface ConfigSettings {
   dueDateEnabled: boolean;
 }
 
-interface ConfigModalProps {
+interface DraftConfigModalProps {
   initialConfig?: BacklogConfigResponse;
   teamspaceId: string;
+  onSaved: () => void;
   onClose: () => void;
   onBack?: () => void;
 }
 
-export default function ConfigModal({
+export default function DraftConfigModal({
   initialConfig,
   teamspaceId,
+  onSaved,
   onClose,
   onBack,
-}: ConfigModalProps) {
+}: DraftConfigModalProps) {
   const applyConfigUpdated = useBacklogStore((s) => s.applyConfigUpdated);
+  const [loading, setLoading] = useState(false);
   const [settings, setSettings] = useState<ConfigSettings>({
     feBeEnabled: initialConfig?.feBeEnabled ?? false,
     epicEnabled: initialConfig?.epicEnabled ?? false,
@@ -37,14 +40,17 @@ export default function ConfigModal({
     dueDateEnabled: initialConfig?.dueDateEnabled ?? false,
   });
 
-  const toggle = async (key: keyof ConfigSettings) => {
-    const newSettings = { ...settings, [key]: !settings[key] };
-    setSettings(newSettings);
+  const toggle = (key: keyof ConfigSettings) =>
+    setSettings((prev) => ({ ...prev, [key]: !prev[key] }));
+
+  const handleSave = async () => {
+    setLoading(true);
     try {
-      const config = await saveBacklogConfig(teamspaceId, newSettings);
+      const config = await saveBacklogConfig(teamspaceId, settings);
       applyConfigUpdated(config);
-    } catch {
-      setSettings(settings);
+      onSaved();
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -64,7 +70,7 @@ export default function ConfigModal({
               </button>
             )}
             <div>
-              <h2 className="font-bold text-lg text-ink">백로그 설정</h2>
+              <h2 className="font-bold text-lg text-ink">백로그 초안 생성</h2>
               <p className="text-ink-muted text-sm">팀에 맞는 백로그 구성을 선택해주세요.</p>
             </div>
           </div>
@@ -130,6 +136,23 @@ export default function ConfigModal({
               </SettingRow>
             </div>
           </section>
+
+          {/* 버튼 */}
+          <div className="flex justify-end gap-2 pt-2">
+            <button
+              onClick={onClose}
+              className="h-9 px-4 rounded-md border border-border text-ink text-sm font-semibold hover:bg-surface transition-colors"
+            >
+              취소
+            </button>
+            <button
+              onClick={handleSave}
+              disabled={loading}
+              className="h-9 px-4 rounded-md bg-primary text-white text-sm font-semibold hover:bg-primary-dark transition-colors disabled:opacity-60"
+            >
+              {loading ? '저장 중...' : '만들기 →'}
+            </button>
+          </div>
         </div>
       </div>
     </div>
