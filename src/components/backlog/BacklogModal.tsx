@@ -3,7 +3,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { MdClose, MdSettings, MdList, MdGridView, MdTune } from 'react-icons/md';
 import { useBacklogSocket } from '@/hooks/useBacklogSocket';
 import { useBacklogStore } from '@/store/backlogStore';
-import { useTeamspaceDetail } from '@/hooks/useTeamspaceDetail';
+import { useTeamspaceMembers } from '@/hooks/useTeamspaceMembers';
 import { useStoryApi } from '@/hooks/useStoryApi';
 import { useBacklogTaskApi } from '@/hooks/useBacklogTaskApi';
 import { createEpic, updateEpic } from '@/api/backlog';
@@ -86,7 +86,7 @@ function BacklogMainView({ teamspaceId, config, onConfigOpen, onClose }: Backlog
     useStoryApi(teamspaceId);
   const { handleCreate: handleCreateTask, handleUpdate: handleUpdateTask } =
     useBacklogTaskApi(teamspaceId);
-  const { teamspace } = useTeamspaceDetail(teamspaceId);
+  const members = useTeamspaceMembers(teamspaceId);
 
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
@@ -151,8 +151,6 @@ function BacklogMainView({ teamspaceId, config, onConfigOpen, onClose }: Backlog
     applyEpicCreated(created);
     return created;
   };
-
-  const members = teamspace?.members ?? [];
 
   return (
     <div className="flex flex-col h-full overflow-hidden">

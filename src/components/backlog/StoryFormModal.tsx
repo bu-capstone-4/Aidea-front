@@ -10,7 +10,7 @@ import type {
   CreateStoryRequest,
 } from '@/types/backlog';
 import type { MemberInfo } from '@/types/api';
-import UserAvatar from '@/components/ui/UserAvatar';
+import AssigneeSelect from './AssigneeSelect';
 
 interface StoryFormModalProps {
   mode: 'create' | 'edit';
@@ -118,7 +118,6 @@ export default function StoryFormModal({
     }
   };
 
-  const activeMembers = members.filter((m) => m.status === 'ACTIVE' && m.userId !== null);
   const selectedEpicNames = epics
     .filter((e) => form.epicIds.includes(e.id))
     .map((e) => e.name)
@@ -273,29 +272,11 @@ export default function StoryFormModal({
 
           {/* 담당자 */}
           <FormRow label="담당자">
-            <select
-              value={form.assigneeId ?? ''}
-              onChange={(e) => set('assigneeId', e.target.value ? Number(e.target.value) : null)}
-              className="rounded border border-border px-2 py-1.5 text-sm outline-none focus:ring-1 focus:ring-primary bg-white min-w-[140px]"
-            >
-              <option value="">미배정</option>
-              {activeMembers.map((m) => (
-                <option key={m.userId} value={m.userId!}>
-                  {m.name ?? m.email}
-                </option>
-              ))}
-            </select>
-            {form.assigneeId &&
-              (() => {
-                const member = activeMembers.find((m) => m.userId === form.assigneeId);
-                return member ? (
-                  <UserAvatar
-                    name={member.name ?? member.email}
-                    imageUrl={member.profileImageUrl}
-                    size={24}
-                  />
-                ) : null;
-              })()}
+            <AssigneeSelect
+              value={form.assigneeId}
+              members={members}
+              onChange={(id) => set('assigneeId', id)}
+            />
           </FormRow>
 
           {/* 스프린트 (sprintEnabled) */}
