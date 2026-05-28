@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { MdClose, MdEdit, MdDelete, MdCheck } from 'react-icons/md';
+import { useShallow } from 'zustand/react/shallow';
 import type { EpicResponse, BacklogConfigResponse } from '@/types/backlog';
 import { createEpic, updateEpic, deleteEpic } from '@/api/backlog';
 import { useBacklogStore } from '@/store/backlogStore';
@@ -43,11 +44,13 @@ const defaultForm = (): EpicFormState => ({
 });
 
 export default function EpicManagerModal({ teamspaceId, epics, onClose }: EpicManagerModalProps) {
-  const { applyEpicCreated, applyEpicUpdated, applyEpicDeleted } = useBacklogStore((s) => ({
-    applyEpicCreated: s.applyEpicCreated,
-    applyEpicUpdated: s.applyEpicUpdated,
-    applyEpicDeleted: s.applyEpicDeleted,
-  }));
+  const { applyEpicCreated, applyEpicUpdated, applyEpicDeleted } = useBacklogStore(
+    useShallow((s) => ({
+      applyEpicCreated: s.applyEpicCreated,
+      applyEpicUpdated: s.applyEpicUpdated,
+      applyEpicDeleted: s.applyEpicDeleted,
+    }))
+  );
   const addToast = useToastStore((s) => s.addToast);
 
   const [creatingForm, setCreatingForm] = useState<EpicFormState | null>(null);
