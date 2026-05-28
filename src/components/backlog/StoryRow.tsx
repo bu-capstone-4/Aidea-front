@@ -55,6 +55,15 @@ export default function StoryRow({
     return () => document.removeEventListener('mousedown', onClickOutside);
   }, [menuOpen]);
 
+  useEffect(() => {
+    if (isExpanded && tasks === undefined) {
+      setLoadingTasks(true);
+      getStoryDetail(teamspaceId, story.id)
+        .then((detail) => setTasksForStory(story.id, detail.tasks))
+        .finally(() => setLoadingTasks(false));
+    }
+  }, [isExpanded, tasks, teamspaceId, story.id, setTasksForStory]);
+
   const handleExpand = async () => {
     onExpandToggle();
     if (!isExpanded && tasks === undefined) {
@@ -68,10 +77,12 @@ export default function StoryRow({
     }
   };
 
-  // TaskResponse 서브태스크 (서버 제공값) + BacklogTask 링크드 태스크 (스토어 실시간값) 합산
+  const subTaskTotal = tasks !== undefined ? tasks.length : story.taskCount;
+  const subTaskCompleted =
+    tasks !== undefined ? tasks.filter((t) => t.isCompleted).length : story.completedTaskCount;
   const linkedCompleted = linkedBacklogTasks.filter((t) => t.status === 'DONE').length;
-  const totalCount = story.taskCount + linkedBacklogTasks.length;
-  const completedCount = story.completedTaskCount + linkedCompleted;
+  const totalCount = subTaskTotal + linkedBacklogTasks.length;
+  const completedCount = subTaskCompleted + linkedCompleted;
   const progressPct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
   const isDone = story.status === 'DONE';

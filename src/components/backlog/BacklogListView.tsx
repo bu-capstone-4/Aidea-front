@@ -51,7 +51,7 @@ export default function BacklogListView({
   onEditTask,
   onAddTaskForStory,
 }: BacklogListViewProps) {
-  const [expandedStoryId, setExpandedStoryId] = useState<number | null>(null);
+  const [collapsedStoryIds, setCollapsedStoryIds] = useState<Set<number>>(new Set());
   const applyStoryDeleted = useBacklogStore((s) => s.applyStoryDeleted);
   const applyBacklogtaskDeleted = useBacklogStore((s) => s.applyBacklogtaskDeleted);
   const addToast = useToastStore((s) => s.addToast);
@@ -89,7 +89,12 @@ export default function BacklogListView({
   }, [stories, backlogTasks]);
 
   const handleExpandToggle = (storyId: number) => {
-    setExpandedStoryId((prev) => (prev === storyId ? null : storyId));
+    setCollapsedStoryIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(storyId)) next.delete(storyId);
+      else next.add(storyId);
+      return next;
+    });
   };
 
   const handleDeleteStory = async (story: StorySummary) => {
@@ -157,7 +162,7 @@ export default function BacklogListView({
                 config={config}
                 teamspaceId={teamspaceId}
                 colWidths={COL_WIDTHS}
-                isExpanded={expandedStoryId === story.id}
+                isExpanded={!collapsedStoryIds.has(story.id)}
                 onExpandToggle={() => handleExpandToggle(story.id)}
                 onEditClick={() => onEditStory(story)}
                 onDeleteClick={() => handleDeleteStory(story)}
