@@ -123,7 +123,7 @@ export default function BacklogListView({
     <div className="flex flex-col flex-1 min-h-0">
       {/* Table column header */}
       <div className="flex items-center border-b border-border bg-surface shrink-0 text-xs font-semibold text-ink-muted select-none">
-        <div className="flex-1 px-4 py-2">Title</div>
+        <div className="flex-1 px-4 py-2">제목</div>
         <div className={`${COL_WIDTHS.assignees} px-3 py-2 border-l border-border text-center`}>
           담당자
         </div>

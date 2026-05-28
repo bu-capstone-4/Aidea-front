@@ -177,7 +177,7 @@ export default function StoryDetailPanel({
 
                     {/* Assignees column */}
                     <div
-                      className={`${colWidths.assignees} px-3 border-l border-border/60 flex items-center justify-center shrink-0 self-stretch`}
+                      className={`${colWidths.assignees} px-3 flex items-center justify-center shrink-0 self-stretch`}
                     >
                       {task.assignee && (
                         <UserAvatar
@@ -190,7 +190,7 @@ export default function StoryDetailPanel({
 
                     {/* Status column */}
                     <div
-                      className={`${colWidths.status} px-3 border-l border-border/60 flex items-center justify-center shrink-0 self-stretch`}
+                      className={`${colWidths.status} px-3  flex items-center justify-center shrink-0 self-stretch`}
                     >
                       {task.isCompleted ? (
                         <span className="inline-flex items-center rounded px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700">
@@ -205,23 +205,17 @@ export default function StoryDetailPanel({
 
                     {/* Priority column - TaskResponse has no priority */}
                     {config.priorityEnabled && (
-                      <div
-                        className={`${colWidths.priority} px-3 border-l border-border/60 shrink-0 self-stretch`}
-                      />
+                      <div className={`${colWidths.priority} px-3  shrink-0 self-stretch`} />
                     )}
 
                     {/* Sprint column - TaskResponse has no sprint */}
                     {config.sprintEnabled && (
-                      <div
-                        className={`${colWidths.sprint} px-3 border-l border-border/60 shrink-0 self-stretch`}
-                      />
+                      <div className={`${colWidths.sprint} px-3  shrink-0 self-stretch`} />
                     )}
 
                     {/* DueDate column - TaskResponse has no dueDate */}
                     {config.dueDateEnabled && (
-                      <div
-                        className={`${colWidths.dueDate} px-3 border-l border-border/60 shrink-0 self-stretch`}
-                      />
+                      <div className={`${colWidths.dueDate} px-3  shrink-0 self-stretch`} />
                     )}
 
                     {/* More menu */}
@@ -302,7 +296,7 @@ export default function StoryDetailPanel({
 
                     {/* Assignees column */}
                     <div
-                      className={`${colWidths.assignees} px-3 border-l border-border/60 flex items-center justify-center shrink-0 self-stretch`}
+                      className={`${colWidths.assignees} px-3  flex items-center justify-center shrink-0 self-stretch`}
                     >
                       {task.assignee && (
                         <UserAvatar
@@ -315,7 +309,7 @@ export default function StoryDetailPanel({
 
                     {/* Status column */}
                     <div
-                      className={`${colWidths.status} px-3 border-l border-border/60 flex items-center justify-center shrink-0 self-stretch`}
+                      className={`${colWidths.status} px-3  flex items-center justify-center shrink-0 self-stretch`}
                     >
                       <StatusBadge status={task.status} />
                     </div>
@@ -323,7 +317,7 @@ export default function StoryDetailPanel({
                     {/* Priority column */}
                     {config.priorityEnabled && (
                       <div
-                        className={`${colWidths.priority} px-3 border-l border-border/60 flex items-center justify-center shrink-0 self-stretch`}
+                        className={`${colWidths.priority} px-3  flex items-center justify-center shrink-0 self-stretch`}
                       >
                         {task.priority ? (
                           <span className={`text-xs font-medium ${PRIORITY_CLASS[task.priority]}`}>
@@ -338,7 +332,7 @@ export default function StoryDetailPanel({
                     {/* Sprint column */}
                     {config.sprintEnabled && (
                       <div
-                        className={`${colWidths.sprint} px-3 border-l border-border/60 flex items-center justify-center shrink-0 self-stretch`}
+                        className={`${colWidths.sprint} px-3  flex items-center justify-center shrink-0 self-stretch`}
                       >
                         {task.sprint ? (
                           <span className="text-xs text-ink truncate">{task.sprint}</span>
@@ -351,7 +345,7 @@ export default function StoryDetailPanel({
                     {/* DueDate column */}
                     {config.dueDateEnabled && (
                       <div
-                        className={`${colWidths.dueDate} px-3 border-l border-border/60 flex items-center justify-center shrink-0 self-stretch`}
+                        className={`${colWidths.dueDate} px-3  flex items-center justify-center shrink-0 self-stretch`}
                       >
                         {task.dueDate ? (
                           <span className="text-xs text-ink">{formatDueDate(task.dueDate)}</span>

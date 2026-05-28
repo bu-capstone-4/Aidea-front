@@ -95,7 +95,7 @@ function TaskRow({ task, index, config, colWidths, onEditClick, onDeleteClick }:
 
       {/* Assignees column */}
       <div
-        className={`${colWidths.assignees} px-3 border-l border-border/60 flex items-center justify-center shrink-0 self-stretch`}
+        className={`${colWidths.assignees} px-3 flex items-center justify-center shrink-0 self-stretch`}
       >
         {task.assignee && (
           <UserAvatar
@@ -108,7 +108,7 @@ function TaskRow({ task, index, config, colWidths, onEditClick, onDeleteClick }:
 
       {/* Status column */}
       <div
-        className={`${colWidths.status} px-3 border-l border-border/60 flex items-center justify-center shrink-0 self-stretch`}
+        className={`${colWidths.status} px-3 flex items-center justify-center shrink-0 self-stretch`}
       >
         <StatusBadge status={task.status} />
       </div>
@@ -116,7 +116,7 @@ function TaskRow({ task, index, config, colWidths, onEditClick, onDeleteClick }:
       {/* Priority column */}
       {config.priorityEnabled && (
         <div
-          className={`${colWidths.priority} px-3 border-l border-border/60 flex items-center justify-center shrink-0 self-stretch`}
+          className={`${colWidths.priority} px-3 flex items-center justify-center shrink-0 self-stretch`}
         >
           {task.priority ? (
             <span className={`text-xs font-medium ${PRIORITY_CLASS[task.priority]}`}>
@@ -131,7 +131,7 @@ function TaskRow({ task, index, config, colWidths, onEditClick, onDeleteClick }:
       {/* Sprint column */}
       {config.sprintEnabled && (
         <div
-          className={`${colWidths.sprint} px-3 border-l border-border/60 flex items-center justify-center shrink-0 self-stretch`}
+          className={`${colWidths.sprint} px-3 flex items-center justify-center shrink-0 self-stretch`}
         >
           {task.sprint ? (
             <span className="text-xs text-ink truncate">{task.sprint}</span>
@@ -144,7 +144,7 @@ function TaskRow({ task, index, config, colWidths, onEditClick, onDeleteClick }:
       {/* DueDate column */}
       {config.dueDateEnabled && (
         <div
-          className={`${colWidths.dueDate} px-3 border-l border-border/60 flex items-center justify-center shrink-0 self-stretch`}
+          className={`${colWidths.dueDate} px-3 flex items-center justify-center shrink-0 self-stretch`}
         >
           {task.dueDate ? (
             <span className="text-xs text-ink">{formatDueDate(task.dueDate)}</span>

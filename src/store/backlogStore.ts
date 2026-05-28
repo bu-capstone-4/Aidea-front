@@ -78,7 +78,11 @@ export const useBacklogStore = create<BacklogState & BacklogActions>()((set) => 
 
   applyConfigUpdated: (config) => set({ config }),
 
-  applyEpicCreated: (epic) => set((state) => ({ epics: [...state.epics, epic] })),
+  applyEpicCreated: (epic) =>
+    set((state) => {
+      if (state.epics.some((e) => e.id === epic.id)) return state;
+      return { epics: [...state.epics, epic] };
+    }),
 
   applyEpicUpdated: (epic) =>
     set((state) => ({
@@ -109,7 +113,11 @@ export const useBacklogStore = create<BacklogState & BacklogActions>()((set) => 
       return { epics: reordered };
     }),
 
-  applyStoryCreated: (story) => set((state) => ({ stories: [...state.stories, story] })),
+  applyStoryCreated: (story) =>
+    set((state) => {
+      if (state.stories.some((s) => s.id === story.id)) return state;
+      return { stories: [...state.stories, story] };
+    }),
 
   applyStoryUpdated: (story) =>
     set((state) => ({
@@ -218,7 +226,10 @@ export const useBacklogStore = create<BacklogState & BacklogActions>()((set) => 
     }),
 
   applyBacklogtaskCreated: (task) =>
-    set((state) => ({ backlogTasks: [...state.backlogTasks, task] })),
+    set((state) => {
+      if (state.backlogTasks.some((t) => t.id === task.id)) return state;
+      return { backlogTasks: [...state.backlogTasks, task] };
+    }),
 
   applyBacklogtaskUpdated: (task) =>
     set((state) => {
