@@ -1,4 +1,5 @@
-﻿import type { BlockNoteEditor } from '@blocknote/core';
+import type { BlockNoteEditor } from '@blocknote/core';
+import DOMPurify from 'dompurify';
 import html2pdf from 'html2pdf.js';
 
 export type ExportFormat = 'md' | 'pdf';
@@ -55,10 +56,10 @@ function escapeHtml(value: string) {
 }
 
 function buildMarkdown({ title, editor }: ExportDocumentOptions) {
-  const safeTitle = title?.trim() || '문서';
+  const safeTitle = title?.trim() || '\uBB38\uC11C';
   const content = editor.blocksToMarkdownLossy(editor.document).trim();
 
-  return `# ${safeTitle}\n\n${content || '내용이 없습니다.'}\n`;
+  return `# ${safeTitle}\n\n${content || '\uB0B4\uC6A9\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.'}\n`;
 }
 
 export function exportDocumentAsMarkdown(options: ExportDocumentOptions) {
@@ -71,8 +72,10 @@ export function exportDocumentAsMarkdown(options: ExportDocumentOptions) {
 }
 
 export function exportDocumentAsPdf({ title, editor }: ExportDocumentOptions) {
-  const safeTitle = title?.trim() || '문서';
-  const content = editor.blocksToHTMLLossy(editor.document).trim();
+  const safeTitle = title?.trim() || '\uBB38\uC11C';
+  const rawHtml = editor.blocksToFullHTML(editor.document).trim();
+  const parsedHtml = new DOMParser().parseFromString(rawHtml, 'text/html').body.innerHTML.trim();
+  const content = DOMPurify.sanitize(parsedHtml, { USE_PROFILES: { html: true } }).trim();
   const container = document.createElement('section');
 
   container.className = 'aidea-pdf-export';
@@ -80,31 +83,81 @@ export function exportDocumentAsPdf({ title, editor }: ExportDocumentOptions) {
     <style>
       .aidea-pdf-export {
         width: 720px;
-        padding: 48px;
+        padding: 44px 48px;
         background: #ffffff;
         color: #1a1a1a;
         font-family: Inter, "Noto Sans KR", Arial, sans-serif;
         font-size: 15px;
-        line-height: 1.75;
+        line-height: 1.6;
       }
-      .aidea-pdf-export h1 {
-        margin: 0 0 28px;
+      .aidea-pdf-export .aidea-pdf-title {
+        margin: 0 0 32px;
         font-size: 30px;
-        line-height: 1.3;
+        line-height: 1.25;
+        font-weight: 500;
+        letter-spacing: 0;
         page-break-after: avoid;
       }
-      .aidea-pdf-export h2,
-      .aidea-pdf-export h3 {
-        margin: 24px 0 10px;
+      .aidea-pdf-export h1:not(.aidea-pdf-title) {
+        margin: 22px 0 14px;
+        font-size: 28px;
+        line-height: 1.35;
+        font-weight: 700;
+        page-break-after: avoid;
+      }
+      .aidea-pdf-export h2 {
+        margin: 18px 0 10px;
+        font-size: 22px;
+        line-height: 1.4;
+        page-break-after: avoid;
+      }
+      .aidea-pdf-export h3,
+      .aidea-pdf-export h4,
+      .aidea-pdf-export h5,
+      .aidea-pdf-export h6 {
+        margin: 14px 0 8px;
+        font-size: 17px;
+        line-height: 1.45;
         page-break-after: avoid;
       }
       .aidea-pdf-export p {
-        margin: 8px 0;
+        margin: 6px 0;
       }
       .aidea-pdf-export ul,
       .aidea-pdf-export ol {
-        margin: 8px 0 8px 24px;
+        margin: 6px 0 6px 22px;
         padding: 0;
+      }
+      .aidea-pdf-export li {
+        margin: 4px 0;
+      }
+      .aidea-pdf-export li:has(input[type='checkbox']),
+      .aidea-pdf-export [data-content-type='checkListItem'],
+      .aidea-pdf-export [data-type='checkListItem'] {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .aidea-pdf-export input[type='checkbox'] {
+        flex: 0 0 auto;
+        width: 14px;
+        height: 14px;
+        margin: 0;
+        vertical-align: middle;
+      }
+      .aidea-pdf-export input[type='checkbox'] {
+        flex: 0 0 auto;
+        idth: 14px;
+        height: 14px;
+        margin: 0;
+        position: relative;
+        top: 7px;
+      } p,
+
+      .aidea-pdf-export [data-content-type='checkListItem'] p,
+      .aidea-pdf-export [data-type='checkListItem'] p {
+        display: inline;
+        margin: 0;
       }
       .aidea-pdf-export blockquote {
         margin: 12px 0;
@@ -132,8 +185,8 @@ export function exportDocumentAsPdf({ title, editor }: ExportDocumentOptions) {
         padding: 8px;
       }
     </style>
-    <h1>${escapeHtml(safeTitle)}</h1>
-    ${content || '<p>내용이 없습니다.</p>'}
+    <h1 class="aidea-pdf-title">${escapeHtml(safeTitle)}</h1>
+    ${content || '<p>\uB0B4\uC6A9\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.</p>'}
   `;
 
   document.body.appendChild(container);
