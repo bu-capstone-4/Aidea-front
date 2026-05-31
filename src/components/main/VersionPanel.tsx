@@ -4,12 +4,14 @@ import { useCreateBlockNote } from '@blocknote/react';
 import { BlockNoteView } from '@blocknote/mantine';
 import Button from '../ui/Button';
 import * as Y from 'yjs';
+import { useFeedbackStore } from '@/store/FeedbackStore';
 
 interface VersionPanelProps {
   panelTitle: string;
   content?: Y.Doc | null;
   markdownContent?: string | null;
   aiMark?: boolean;
+  editable?: boolean;
   onSelect: () => void;
 }
 
@@ -18,9 +20,11 @@ export default function VersionPanel({
   content,
   markdownContent,
   aiMark,
+  editable,
   onSelect,
 }: VersionPanelProps) {
   const [fallbackDoc] = useState(() => new Y.Doc());
+  const { status } = useFeedbackStore();
 
   const docEditor = useCreateBlockNote({
     collaboration: {
@@ -57,19 +61,20 @@ export default function VersionPanel({
 
       <div className="flex-1 p-6 overflow-y-auto">
         <div className="whitespace-pre-wrap leading-relaxed group-hover:text-gray-800 transition-colors">
-          <BlockNoteView editor={activeEditor} theme="light" editable={false} />
+          <BlockNoteView editor={activeEditor} theme="light" editable={editable ?? false} />
         </div>
       </div>
-
-      <div className="p-4 border-t border-gray-100 group-hover:border-blue-100 bg-white transition-colors">
-        <Button
-          variant="primary"
-          onClick={onSelect}
-          className="w-full py-3.5 rounded-lg bg-gray-100 text-gray-500 font-semibold shadow-sm hover:bg-blue-500 hover:text-white transition-all cursor-pointer group-hover:bg-blue-50 group-hover:text-blue-600"
-        >
-          이 버전 선택
-        </Button>
-      </div>
+      {status === 'DONE' && (
+        <div className="p-4 border-t border-gray-100 group-hover:border-blue-100 bg-white transition-colors">
+          <Button
+            variant="primary"
+            onClick={onSelect}
+            className="w-full py-3.5 rounded-lg bg-gray-100 text-gray-500 font-semibold shadow-sm hover:bg-blue-500 hover:text-white transition-all cursor-pointer group-hover:bg-blue-50 group-hover:text-blue-600"
+          >
+            이 버전 선택
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

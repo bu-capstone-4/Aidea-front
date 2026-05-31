@@ -33,6 +33,7 @@ export const useFeedbackStore = create<FeedbackState>()((set) => ({
   setYdoc: (doc) => set({ ydoc: doc }),
   setPending: (docId, feedId) =>
     set({
+      isSplitView: true,
       documentId: docId,
       feedbackId: feedId,
       status: 'PENDING',
@@ -68,6 +69,7 @@ export const useFeedbackStore = create<FeedbackState>()((set) => ({
 
   setQuestioning: (questions) =>
     set({
+      isSplitView: true,
       questions: questions,
       status: 'QUESTIONING',
     }),
