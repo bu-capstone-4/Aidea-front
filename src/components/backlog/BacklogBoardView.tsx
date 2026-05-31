@@ -45,6 +45,7 @@ function TaskCard({
 
   const hasBottomRow =
     !!task.assignee ||
+    (config.feBeEnabled && !!task.issueType) ||
     (config.priorityEnabled && !!task.priority) ||
     (config.sprintEnabled && !!task.sprint) ||
     (config.dueDateEnabled && !!formattedDueDate);
@@ -63,13 +64,8 @@ function TaskCard({
       }`}
       onClick={onEdit}
     >
-      {/* 이슈타입 태그 + 제목 + 삭제 버튼 */}
+      {/* 제목 + 삭제 버튼 */}
       <div className="flex items-start gap-1.5">
-        {config.feBeEnabled && task.issueType && (
-          <div className="shrink-0 mt-0.5">
-            <IssueTypeTag issueType={task.issueType} number={task.number} />
-          </div>
-        )}
         <span className="text-xs text-ink leading-snug line-clamp-2 flex-1">{task.title}</span>
         <button
           onClick={(e) => {
@@ -87,6 +83,9 @@ function TaskCard({
       {hasBottomRow && (
         <div className="flex items-center justify-between gap-1">
           <div className="flex items-center gap-1 flex-wrap min-w-0">
+            {config.feBeEnabled && task.issueType && (
+              <IssueTypeTag issueType={task.issueType} number={task.number} />
+            )}
             {config.priorityEnabled && task.priority && <PriorityBadge priority={task.priority} />}
             {config.sprintEnabled && task.sprint && (
               <span className="text-xs bg-gray-100 text-gray-500 rounded px-1.5 py-0.5 whitespace-nowrap">
