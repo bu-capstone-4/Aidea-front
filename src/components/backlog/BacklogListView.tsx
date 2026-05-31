@@ -115,6 +115,11 @@ export default function BacklogListView({
         <div className={`${COL_WIDTHS.status} px-3 py-2 border-l border-border text-center`}>
           상태
         </div>
+        {config.feBeEnabled && (
+          <div className={`${COL_WIDTHS.issueType} px-3 py-2 border-l border-border text-center`}>
+            이슈 타입
+          </div>
+        )}
         {config.priorityEnabled && (
           <div className={`${COL_WIDTHS.priority} px-3 py-2 border-l border-border text-center`}>
             중요도

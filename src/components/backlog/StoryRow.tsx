@@ -134,6 +134,9 @@ export default function StoryRow({
         {/* Status column - empty placeholder */}
         <div className={`${colWidths.status} px-3 py-2.5 shrink-0`} />
 
+        {/* IssueType column - empty placeholder */}
+        {config.feBeEnabled && <div className={`${colWidths.issueType} px-3 py-2.5 shrink-0`} />}
+
         {/* Priority column - empty placeholder */}
         {config.priorityEnabled && <div className={`${colWidths.priority} px-3 py-2.5 shrink-0`} />}
 

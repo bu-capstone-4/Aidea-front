@@ -96,7 +96,7 @@ export default function AssigneeSelect({ value, members, onChange }: AssigneeSel
               className={`flex items-center gap-2 w-full px-3 py-1.5 text-sm text-left hover:bg-surface transition-colors ${value === null ? 'bg-primary/5 text-primary font-medium' : 'text-ink-muted'}`}
             >
               <span className="w-5 h-5 rounded-full border border-dashed border-border flex items-center justify-center shrink-0 text-xs text-ink-muted">
-                —
+                -
               </span>
               <span>미배정</span>
             </button>

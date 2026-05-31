@@ -67,10 +67,6 @@ function TaskRow({ task, index, config, colWidths, onEditClick, onDeleteClick }:
           {index + 1}
         </span>
 
-        {config.feBeEnabled && task.issueType && (
-          <IssueTypeTag issueType={task.issueType} number={task.number} />
-        )}
-
         <span
           className={`flex-1 text-sm truncate ${
             task.status === 'DONE' ? 'line-through text-ink-muted' : 'text-ink'
@@ -85,13 +81,15 @@ function TaskRow({ task, index, config, colWidths, onEditClick, onDeleteClick }:
       <div
         className={`${colWidths.assignees} px-3 flex items-center justify-center shrink-0 self-stretch`}
       >
-        {task.assignee && (
+        {task.assignee ? (
           <UserAvatar
             name={task.assignee.name}
             imageUrl={task.assignee.profileImageUrl}
             githubLogin={task.assignee.githubLogin}
             size={20}
           />
+        ) : (
+          <span className="text-xs text-ink-muted">-</span>
         )}
       </div>
 
@@ -101,6 +99,19 @@ function TaskRow({ task, index, config, colWidths, onEditClick, onDeleteClick }:
       >
         <StatusBadge status={task.status} />
       </div>
+
+      {/* IssueType column */}
+      {config.feBeEnabled && (
+        <div
+          className={`${colWidths.issueType} px-3 flex items-center justify-center shrink-0 self-stretch`}
+        >
+          {task.issueType ? (
+            <IssueTypeTag issueType={task.issueType} number={task.number} />
+          ) : (
+            <span className="text-xs text-ink-muted">-</span>
+          )}
+        </div>
+      )}
 
       {/* Priority column */}
       {config.priorityEnabled && (

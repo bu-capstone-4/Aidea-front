@@ -138,10 +138,6 @@ export default function StoryDetailPanel({
                         {index + 1}
                       </span>
 
-                      {config.feBeEnabled && task.issueType && (
-                        <IssueTypeTag issueType={task.issueType} number={0} />
-                      )}
-
                       {editingTaskId === task.id ? (
                         <input
                           ref={editInputRef}
@@ -167,13 +163,15 @@ export default function StoryDetailPanel({
                     <div
                       className={`${colWidths.assignees} px-3 flex items-center justify-center shrink-0 self-stretch`}
                     >
-                      {task.assignee && (
+                      {task.assignee ? (
                         <UserAvatar
                           name={task.assignee.name}
                           imageUrl={task.assignee.profileImageUrl}
                           githubLogin={task.assignee.githubLogin}
                           size={20}
                         />
+                      ) : (
+                        <span className="text-xs text-ink-muted">-</span>
                       )}
                     </div>
 
@@ -191,6 +189,19 @@ export default function StoryDetailPanel({
                         </span>
                       )}
                     </div>
+
+                    {/* IssueType column */}
+                    {config.feBeEnabled && (
+                      <div
+                        className={`${colWidths.issueType} px-3 flex items-center justify-center shrink-0 self-stretch`}
+                      >
+                        {task.issueType ? (
+                          <IssueTypeTag issueType={task.issueType} number={0} />
+                        ) : (
+                          <span className="text-xs text-ink-muted">-</span>
+                        )}
+                      </div>
+                    )}
 
                     {/* Priority column - TaskResponse has no priority */}
                     {config.priorityEnabled && (
@@ -265,13 +276,9 @@ export default function StoryDetailPanel({
                   >
                     {/* Title column */}
                     <div className="flex-1 flex items-center gap-2.5 pl-10 pr-3 py-2 min-w-0 overflow-hidden">
-                      {config.feBeEnabled && task.issueType ? (
-                        <IssueTypeTag issueType={task.issueType} number={task.number} />
-                      ) : (
-                        <span className="w-4 text-xs text-ink-muted text-right shrink-0 select-none">
-                          #{task.number}
-                        </span>
-                      )}
+                      <span className="w-4 text-xs text-ink-muted text-right shrink-0 select-none">
+                        #{task.number}
+                      </span>
 
                       <span
                         className={`flex-1 text-sm truncate ${
@@ -287,13 +294,15 @@ export default function StoryDetailPanel({
                     <div
                       className={`${colWidths.assignees} px-3  flex items-center justify-center shrink-0 self-stretch`}
                     >
-                      {task.assignee && (
+                      {task.assignee ? (
                         <UserAvatar
                           name={task.assignee.name}
                           imageUrl={task.assignee.profileImageUrl}
                           githubLogin={task.assignee.githubLogin}
                           size={20}
                         />
+                      ) : (
+                        <span className="text-xs text-ink-muted">-</span>
                       )}
                     </div>
 
@@ -303,6 +312,19 @@ export default function StoryDetailPanel({
                     >
                       <StatusBadge status={task.status} />
                     </div>
+
+                    {/* IssueType column */}
+                    {config.feBeEnabled && (
+                      <div
+                        className={`${colWidths.issueType} px-3 flex items-center justify-center shrink-0 self-stretch`}
+                      >
+                        {task.issueType ? (
+                          <IssueTypeTag issueType={task.issueType} number={task.number} />
+                        ) : (
+                          <span className="text-xs text-ink-muted">-</span>
+                        )}
+                      </div>
+                    )}
 
                     {/* Priority column */}
                     {config.priorityEnabled && (

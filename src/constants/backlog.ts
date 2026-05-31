@@ -114,6 +114,7 @@ export const DND_KEY = 'application/backlog-task-id';
 export interface ColWidths {
   assignees: string;
   status: string;
+  issueType: string;
   priority: string;
   sprint: string;
   dueDate: string;
@@ -122,6 +123,7 @@ export interface ColWidths {
 export const COL_WIDTHS: ColWidths = {
   assignees: 'w-15',
   status: 'w-20',
+  issueType: 'w-24',
   priority: 'w-16',
   sprint: 'w-20',
   dueDate: 'w-16',

@@ -11,6 +11,9 @@ import { useBacklogStore } from '@/store/backlogStore';
 import { useToastStore } from '@/store/toastStore';
 import { BOARD_COLUMNS, DND_KEY } from '@/constants/backlog';
 import type { IssueKind } from './IssueTypeDropdown';
+import IssueTypeTag from './IssueTypeTag';
+import PriorityBadge from './PriorityBadge';
+import UserAvatar from '@/components/ui/UserAvatar';
 
 interface BacklogBoardViewProps {
   teamspaceId: string;
@@ -33,6 +36,19 @@ function TaskCard({
 }) {
   const [dragging, setDragging] = useState(false);
 
+  const formattedDueDate = task.dueDate
+    ? new Date(task.dueDate).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })
+    : null;
+
+  const isOverdue =
+    task.dueDate != null && task.status !== 'DONE' && new Date(task.dueDate) < new Date();
+
+  const hasBottomRow =
+    !!task.assignee ||
+    (config.priorityEnabled && !!task.priority) ||
+    (config.sprintEnabled && !!task.sprint) ||
+    (config.dueDateEnabled && !!formattedDueDate);
+
   return (
     <div
       draggable
@@ -42,52 +58,59 @@ function TaskCard({
         setDragging(true);
       }}
       onDragEnd={() => setDragging(false)}
-      className={`bg-white rounded-md border border-border p-2.5 flex flex-col gap-1.5 shadow-sm hover:shadow-md transition-shadow cursor-grab group ${
+      className={`bg-white rounded-md border border-border p-2.5 flex flex-col gap-2 shadow-sm hover:shadow-md transition-shadow cursor-grab group ${
         dragging ? 'opacity-40' : ''
       }`}
       onClick={onEdit}
     >
+      {/* 이슈타입 태그 + 제목 + 삭제 버튼 */}
       <div className="flex items-start gap-1.5">
-        <span className="text-xs text-ink leading-snug line-clamp-2 flex-1">
-          <span className="text-ink-muted">[Task] </span>
-          {task.title}
-        </span>
+        {config.feBeEnabled && task.issueType && (
+          <div className="shrink-0 mt-0.5">
+            <IssueTypeTag issueType={task.issueType} number={task.number} />
+          </div>
+        )}
+        <span className="text-xs text-ink leading-snug line-clamp-2 flex-1">{task.title}</span>
         <button
           onClick={(e) => {
             e.stopPropagation();
             onDelete();
           }}
-          className="opacity-0 group-hover:opacity-100 text-ink-muted hover:text-red-500 transition-all text-xs shrink-0"
+          className="opacity-0 group-hover:opacity-100 text-ink-muted hover:text-red-500 transition-all text-xs shrink-0 mt-0.5"
           aria-label="삭제"
         >
           ✕
         </button>
       </div>
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1">
-          {config.feBeEnabled && task.issueType && (
-            <span
-              className={`text-xs font-semibold px-1.5 py-0.5 rounded ${
-                task.issueType === 'FE'
-                  ? 'bg-blue-50 text-blue-600'
-                  : 'bg-purple-50 text-purple-600'
-              }`}
-            >
-              {task.issueType}
-            </span>
+
+      {/* 필드 뱃지 + 담당자 */}
+      {hasBottomRow && (
+        <div className="flex items-center justify-between gap-1">
+          <div className="flex items-center gap-1 flex-wrap min-w-0">
+            {config.priorityEnabled && task.priority && <PriorityBadge priority={task.priority} />}
+            {config.sprintEnabled && task.sprint && (
+              <span className="text-xs bg-gray-100 text-gray-500 rounded px-1.5 py-0.5 whitespace-nowrap">
+                {task.sprint}
+              </span>
+            )}
+            {config.dueDateEnabled && formattedDueDate && (
+              <span
+                className={`text-xs whitespace-nowrap ${isOverdue ? 'text-red-500' : 'text-ink-muted'}`}
+              >
+                {formattedDueDate}
+              </span>
+            )}
+          </div>
+          {task.assignee && (
+            <UserAvatar
+              name={task.assignee.name}
+              imageUrl={task.assignee.profileImageUrl}
+              githubLogin={task.assignee.githubLogin}
+              size={20}
+            />
           )}
         </div>
-        {task.assignee && (
-          <img
-            src={task.assignee.profileImageUrl ?? undefined}
-            alt={task.assignee.name}
-            className="w-5 h-5 rounded-full object-cover border border-border"
-            onError={(e) => {
-              (e.target as HTMLImageElement).style.display = 'none';
-            }}
-          />
-        )}
-      </div>
+      )}
     </div>
   );
 }

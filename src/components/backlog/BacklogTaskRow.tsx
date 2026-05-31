@@ -72,13 +72,6 @@ export default function BacklogTaskRow({
         <StatusBadge status={task.status} />
       </div>
 
-      {/* 이슈 타입 태그 */}
-      {config.feBeEnabled && task.issueType && (
-        <div className="shrink-0">
-          <IssueTypeTag issueType={task.issueType} number={task.number} />
-        </div>
-      )}
-
       {/* 제목 */}
       <div className="flex-1 min-w-0 flex items-center gap-2">
         <span
@@ -88,15 +81,28 @@ export default function BacklogTaskRow({
         </span>
       </div>
 
+      {/* 이슈 타입 필드 */}
+      {config.feBeEnabled && (
+        <div className="w-24 shrink-0 flex items-center justify-center">
+          {task.issueType ? (
+            <IssueTypeTag issueType={task.issueType} number={task.number} />
+          ) : (
+            <span className="text-xs text-ink-muted">-</span>
+          )}
+        </div>
+      )}
+
       {/* 담당자 */}
       <div className="w-8 shrink-0">
-        {task.assignee && (
+        {task.assignee ? (
           <UserAvatar
             name={task.assignee.name}
             imageUrl={task.assignee.profileImageUrl}
             githubLogin={task.assignee.githubLogin}
             size={28}
           />
+        ) : (
+          '-'
         )}
       </div>
 
@@ -109,12 +115,12 @@ export default function BacklogTaskRow({
 
       {/* 마감일 */}
       {config.dueDateEnabled && (
-        <div className="w-20 shrink-0 text-xs text-ink-muted">{formattedDueDate ?? '—'}</div>
+        <div className="w-20 shrink-0 text-xs text-ink-muted">{formattedDueDate ?? '-'}</div>
       )}
 
       {/* 스프린트 */}
       {config.sprintEnabled && (
-        <div className="w-20 shrink-0 text-xs text-ink-muted truncate">{task.sprint ?? '—'}</div>
+        <div className="w-20 shrink-0 text-xs text-ink-muted truncate">{task.sprint ?? '-'}</div>
       )}
 
       {/* 더보기 메뉴 */}
