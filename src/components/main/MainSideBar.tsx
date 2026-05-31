@@ -134,7 +134,7 @@ export default function MainSideBar({ isSideBarOpen, toggleSideBar }: SideBarPro
       {/* 사이드바 하단 유저 프로필 */}
       <div className={cn('pb-1 flex', !isSideBarOpen && 'justify-center')}>
         <div className="p-4 text-lg flex items-center gap-3">
-          <UserAvatar name={user?.name ?? ''} />
+          <UserAvatar name={user?.name ?? ''} imageUrl={user?.profileImageUrl} />
           {isSideBarOpen && <div className="font-medium text-gray-800">{user?.name ?? ''}</div>}
         </div>
       </div>

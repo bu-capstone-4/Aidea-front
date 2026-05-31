@@ -4,8 +4,13 @@ import type {
   FeedbackErrorCode,
   TeamspaceSocketErrorCode,
 } from '@/types/socket';
+import type { BacklogSocketErrorCode } from '@/types/backlog';
 
-type KnownSocketErrorCode = DocumentSocketErrorCode | FeedbackErrorCode | TeamspaceSocketErrorCode;
+type KnownSocketErrorCode =
+  | DocumentSocketErrorCode
+  | FeedbackErrorCode
+  | TeamspaceSocketErrorCode
+  | BacklogSocketErrorCode;
 
 // 세션 종료가 필요한 치명적 코드
 const FATAL_CODES = new Set<string>(['UNAUTHORIZED', 'SESSION_EXPIRED']);

@@ -21,7 +21,7 @@ export interface MemberInfo {
   userId: number | null;
   name: string | null;
   email: string;
-  role: 'OWNER' | 'MEMBER';
+  role: 'OWNER' | 'MEMBER' | 'VIEWER';
   status: 'ACTIVE' | 'PENDING';
   profileImageUrl: string | null;
 }

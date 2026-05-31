@@ -26,7 +26,7 @@ interface UseCollabEditorOptions {
 export function useCollabEditor({ docId, user, token, editable }: UseCollabEditorOptions) {
   const [{ doc, provider }] = useState(() => {
     const doc = new Y.Doc();
-    // connect: false — 실제 WS 연결 없음. BlockNote collaboration 타입 요구사항을 위한 더미.
+    // connect: false - 실제 WS 연결 없음. BlockNote collaboration 타입 요구사항을 위한 더미.
     const provider = new WebsocketProvider(import.meta.env.VITE_WS_BASE_URL as string, docId, doc, {
       connect: false,
     });

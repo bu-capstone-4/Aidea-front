@@ -13,7 +13,7 @@ export const apiClient = axios.create({
   withCredentials: true,
 });
 
-// 인터셉터 없는 인스턴스 — refresh 전용으로만 사용
+// 인터셉터 없는 인스턴스 - refresh 전용으로만 사용
 const basicClient = axios.create({
   baseURL,
   withCredentials: true,
@@ -64,7 +64,7 @@ apiClient.interceptors.response.use(
     isRefreshing = true;
 
     try {
-      // basicClient 사용 — 인터셉터 재진입 없이 refresh 호출
+      // basicClient 사용 - 인터셉터 재진입 없이 refresh 호출
       await basicClient.post('/api/auth/refresh');
       flushQueue();
       return apiClient(originalRequest);
