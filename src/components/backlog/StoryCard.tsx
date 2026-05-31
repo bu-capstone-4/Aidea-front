@@ -6,6 +6,7 @@ import { useBacklogStore } from '@/store/backlogStore';
 import UserAvatar from '@/components/ui/UserAvatar';
 import IssueTypeTag from './IssueTypeTag';
 import EpicBadge from './EpicBadge';
+import { STATUS_MENU_ITEMS } from '@/constants/backlog';
 import PriorityBadge from './PriorityBadge';
 
 interface StoryCardProps {
@@ -15,12 +16,6 @@ interface StoryCardProps {
   onEdit: () => void;
   onDelete: () => void;
 }
-
-const STATUS_MENU_ITEMS: { label: string; value: StoryStatus }[] = [
-  { label: '할 일로 변경', value: 'OPEN' },
-  { label: '진행 중으로 변경', value: 'IN_PROGRESS' },
-  { label: '완료로 변경', value: 'DONE' },
-];
 
 export default function StoryCard({
   story,

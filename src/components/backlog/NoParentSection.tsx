@@ -1,23 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { MdChevronRight, MdExpandMore, MdMoreVert } from 'react-icons/md';
-import type { BacklogTask, BacklogConfigResponse, Priority } from '@/types/backlog';
+import type { BacklogTask, BacklogConfigResponse } from '@/types/backlog';
+import { PRIORITY_LABEL, PRIORITY_TEXT_CLASS } from '@/constants/backlog';
+import type { ColWidths } from '@/constants/backlog';
 import UserAvatar from '@/components/ui/UserAvatar';
 import IssueTypeTag from './IssueTypeTag';
 import StatusBadge from './StatusBadge';
-import type { ColWidths } from './BacklogListView';
-
-const PRIORITY_LABEL: Record<Priority, string> = {
-  LOW: '낮음',
-  MEDIUM: '보통',
-  HIGH: '높음',
-  URGENT: '긴급',
-};
-const PRIORITY_CLASS: Record<Priority, string> = {
-  LOW: 'text-blue-500',
-  MEDIUM: 'text-yellow-500',
-  HIGH: 'text-orange-500',
-  URGENT: 'text-red-500',
-};
 
 function formatDueDate(dueDate: string): string {
   const raw = dueDate as unknown;
@@ -119,7 +107,7 @@ function TaskRow({ task, index, config, colWidths, onEditClick, onDeleteClick }:
           className={`${colWidths.priority} px-3 flex items-center justify-center shrink-0 self-stretch`}
         >
           {task.priority ? (
-            <span className={`text-xs font-medium ${PRIORITY_CLASS[task.priority]}`}>
+            <span className={`text-xs font-medium ${PRIORITY_TEXT_CLASS[task.priority]}`}>
               {PRIORITY_LABEL[task.priority]}
             </span>
           ) : (

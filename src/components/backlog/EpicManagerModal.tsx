@@ -6,22 +6,8 @@ import { createEpic, updateEpic, deleteEpic } from '@/api/backlog';
 import { useBacklogStore } from '@/store/backlogStore';
 import { useToastStore } from '@/store/toastStore';
 import type { MemberInfo } from '@/types/api';
+import { EPIC_COLORS } from '@/constants/backlog';
 import StatusBadge from './StatusBadge';
-
-const EPIC_COLORS = [
-  '#6366f1',
-  '#8b5cf6',
-  '#ec4899',
-  '#ef4444',
-  '#f97316',
-  '#eab308',
-  '#22c55e',
-  '#14b8a6',
-  '#3b82f6',
-  '#06b6d4',
-  '#78716c',
-  '#6b7280',
-];
 
 export interface EpicManagerModalProps {
   teamspaceId: string;

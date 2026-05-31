@@ -9,24 +9,9 @@ import type {
 import { deleteStory, deleteBacklogTask } from '@/api/backlog';
 import { useBacklogStore } from '@/store/backlogStore';
 import { useToastStore } from '@/store/toastStore';
+import { COL_WIDTHS } from '@/constants/backlog';
 import StoryRow from './StoryRow';
 import NoParentSection from './NoParentSection';
-
-export interface ColWidths {
-  assignees: string;
-  status: string;
-  priority: string;
-  sprint: string;
-  dueDate: string;
-}
-
-const COL_WIDTHS: ColWidths = {
-  assignees: 'w-15',
-  status: 'w-20',
-  priority: 'w-16',
-  sprint: 'w-20',
-  dueDate: 'w-16',
-};
 
 interface BacklogListViewProps {
   stories: StorySummary[];

@@ -19,6 +19,8 @@ import type {
   CreateEpicRequest,
 } from '@/types/backlog';
 import { normalizeDueDate } from '@/utils/backlog';
+import { STATUS_TABS } from '@/constants/backlog';
+import type { StatusFilter } from '@/constants/backlog';
 import WelcomeScreen from './WelcomeScreen';
 import ConfigModal from './ConfigModal';
 import DraftConfigModal from './DraftConfigModal';
@@ -50,7 +52,6 @@ function isConfigEmpty(config: BacklogConfigResponse) {
 // ── 메인 뷰 ──────────────────────────────────────────────────────
 
 type ViewMode = 'list' | 'board';
-type StatusFilter = StoryStatus | 'all';
 
 interface StoryFormState {
   mode: 'create' | 'edit';
@@ -97,13 +98,6 @@ function BacklogMainView({ teamspaceId, config, onConfigOpen, onClose }: Backlog
   const [taskForm, setTaskForm] = useState<TaskFormState | null>(null);
   const [epicForm, setEpicForm] = useState<EpicFormState | null>(null);
   const [epicManagerOpen, setEpicManagerOpen] = useState(false);
-
-  const STATUS_TABS: { label: string; value: StatusFilter }[] = [
-    { label: '전체', value: 'all' },
-    { label: '할 일', value: 'OPEN' },
-    { label: '진행 중', value: 'IN_PROGRESS' },
-    { label: '완료', value: 'DONE' },
-  ];
 
   const handleAddIssue = (kind: IssueKind, defaultStatus?: StoryStatus) => {
     if (kind === 'story') setStoryForm({ mode: 'create', defaultStatus });

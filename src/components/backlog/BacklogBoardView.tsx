@@ -9,6 +9,7 @@ import type {
 import { deleteStory, deleteBacklogTask, updateBacklogTaskStatus } from '@/api/backlog';
 import { useBacklogStore } from '@/store/backlogStore';
 import { useToastStore } from '@/store/toastStore';
+import { BOARD_COLUMNS, DND_KEY } from '@/constants/backlog';
 import type { IssueKind } from './IssueTypeDropdown';
 
 interface BacklogBoardViewProps {
@@ -18,14 +19,6 @@ interface BacklogBoardViewProps {
   onEditStory: (story: StorySummary) => void;
   onEditTask: (task: BacklogTask) => void;
 }
-
-const COLUMNS: { label: string; status: StoryStatus; dotClass: string }[] = [
-  { label: '할 일', status: 'OPEN', dotClass: 'bg-gray-400' },
-  { label: '진행 중', status: 'IN_PROGRESS', dotClass: 'bg-primary' },
-  { label: '완료', status: 'DONE', dotClass: 'bg-green-500' },
-];
-
-const DND_KEY = 'application/backlog-task-id';
 
 function TaskCard({
   task,
@@ -273,7 +266,7 @@ function StorySection({
 
       {!collapsed && (
         <div className="grid grid-cols-3 divide-x divide-border bg-white">
-          {COLUMNS.map((col) => (
+          {BOARD_COLUMNS.map((col) => (
             <DropColumn
               key={col.status}
               tasks={tasksByStatus[col.status]}
@@ -352,7 +345,7 @@ function NoParentSection({
 
       {!collapsed && (
         <div className="grid grid-cols-3 divide-x divide-border bg-white">
-          {COLUMNS.map((col) => (
+          {BOARD_COLUMNS.map((col) => (
             <DropColumn
               key={col.status}
               tasks={tasksByStatus[col.status]}
@@ -452,7 +445,7 @@ export default function BacklogBoardView({
     <div className="flex flex-col h-full overflow-hidden">
       {/* 컬럼 헤더 */}
       <div className="grid grid-cols-3 divide-x divide-border border-b border-border bg-surface shrink-0">
-        {COLUMNS.map((col) => (
+        {BOARD_COLUMNS.map((col) => (
           <div key={col.status} className="flex items-center gap-2 px-4 py-3">
             <span className={`w-2.5 h-2.5 rounded-full shrink-0 ${col.dotClass}`} />
             <span className="text-sm font-semibold text-ink">{col.label}</span>

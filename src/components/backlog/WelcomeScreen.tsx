@@ -1,11 +1,10 @@
 import { MdClose, MdList } from 'react-icons/md';
+import { FEATURE_BADGES } from '@/constants/backlog';
 
 interface WelcomeScreenProps {
   onStart: () => void;
   onClose: () => void;
 }
-
-const FEATURE_BADGES = ['이슈 관리', '담당자 배정', '스프린트', '실시간 협업'];
 
 export default function WelcomeScreen({ onStart, onClose }: WelcomeScreenProps) {
   return (

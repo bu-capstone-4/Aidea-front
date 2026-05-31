@@ -9,6 +9,12 @@ import type {
   CreateEpicRequest,
 } from '@/types/backlog';
 import type { MemberInfo } from '@/types/api';
+import {
+  EPIC_COLORS,
+  STATUS_OPTIONS,
+  PRIORITY_OPTIONS,
+  ISSUE_TYPE_OPTIONS,
+} from '@/constants/backlog';
 import AssigneeSelect from './AssigneeSelect';
 
 interface EpicFormModalProps {
@@ -20,40 +26,6 @@ interface EpicFormModalProps {
   onSave: (data: CreateEpicRequest & { status?: StoryStatus }) => Promise<EpicResponse>;
   onClose: () => void;
 }
-
-const EPIC_COLORS = [
-  '#6366f1',
-  '#8b5cf6',
-  '#ec4899',
-  '#f97316',
-  '#eab308',
-  '#22c55e',
-  '#14b8a6',
-  '#3b82f6',
-  '#06b6d4',
-  '#64748b',
-  '#ef4444',
-  '#84cc16',
-];
-
-const STATUS_OPTIONS: { value: StoryStatus; label: string }[] = [
-  { value: 'OPEN', label: '할 일' },
-  { value: 'IN_PROGRESS', label: '진행 중' },
-  { value: 'DONE', label: '완료' },
-  { value: 'CLOSED', label: '종료' },
-];
-
-const PRIORITY_OPTIONS: { value: Priority; label: string }[] = [
-  { value: 'LOW', label: '낮음' },
-  { value: 'MEDIUM', label: '보통' },
-  { value: 'HIGH', label: '높음' },
-  { value: 'URGENT', label: '긴급' },
-];
-
-const ISSUE_TYPE_OPTIONS: { value: IssueType; label: string }[] = [
-  { value: 'FE', label: 'FE' },
-  { value: 'BE', label: 'BE' },
-];
 
 export default function EpicFormModal({
   mode,

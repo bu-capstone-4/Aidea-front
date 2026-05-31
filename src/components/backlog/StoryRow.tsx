@@ -6,7 +6,7 @@ import { getStoryDetail } from '@/api/backlog';
 import { useBacklogStore } from '@/store/backlogStore';
 import EpicBadge from './EpicBadge';
 import StoryDetailPanel from './StoryDetailPanel';
-import type { ColWidths } from './BacklogListView';
+import type { ColWidths } from '@/constants/backlog';
 
 interface StoryRowProps {
   story: StorySummary;
