@@ -89,6 +89,7 @@ function TaskRow({ task, index, config, colWidths, onEditClick, onDeleteClick }:
           <UserAvatar
             name={task.assignee.name}
             imageUrl={task.assignee.profileImageUrl}
+            githubLogin={task.assignee.githubLogin}
             size={20}
           />
         )}

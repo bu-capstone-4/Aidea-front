@@ -125,6 +125,7 @@ export default function StoryCard({
           <UserAvatar
             name={story.assignee.name}
             imageUrl={story.assignee.profileImageUrl}
+            githubLogin={story.assignee.githubLogin}
             size={24}
           />
         ) : (

@@ -106,6 +106,7 @@ export default function EpicRow({
           <UserAvatar
             name={epic.assignee.name}
             imageUrl={epic.assignee.profileImageUrl}
+            githubLogin={epic.assignee.githubLogin}
             size={28}
           />
         )}

@@ -171,6 +171,7 @@ export default function StoryDetailPanel({
                         <UserAvatar
                           name={task.assignee.name}
                           imageUrl={task.assignee.profileImageUrl}
+                          githubLogin={task.assignee.githubLogin}
                           size={20}
                         />
                       )}
@@ -290,6 +291,7 @@ export default function StoryDetailPanel({
                         <UserAvatar
                           name={task.assignee.name}
                           imageUrl={task.assignee.profileImageUrl}
+                          githubLogin={task.assignee.githubLogin}
                           size={20}
                         />
                       )}

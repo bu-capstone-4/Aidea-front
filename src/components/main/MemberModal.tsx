@@ -60,7 +60,7 @@ export default function MemberModal({ isMemberModalOpen, toggleMemberModal }: Me
           {members.map((member) => (
             <div key={member.email} className="flex justify-between items-center">
               <div className="flex gap-3 items-center">
-                <UserAvatar name={member.name ?? member.email} />
+                <UserAvatar name={member.name ?? member.email} imageUrl={member.profileImageUrl} />
                 <div>
                   <div className="font-medium text-sm">
                     {member.status === 'PENDING' ? '초대 대기 중' : member.name}
