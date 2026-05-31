@@ -10,6 +10,8 @@ import SplitView from './SplitView';
 import { useFeedbackStore } from '@/store/FeedbackStore';
 import useFeedback from '@/hooks/useFeedback';
 import { Helmet } from 'react-helmet-async';
+import { useTeamspaceStore } from '@/store/teamspaceStore';
+import { useTeamspaceDetail } from '@/hooks/useTeamspaceDetail';
 
 const CURSOR_COLORS = ['#1971c2', '#e03131', '#2f9e44', '#f08c00', '#7048e8'];
 
@@ -23,6 +25,8 @@ export default function MainContent() {
   const isSplitView = useFeedbackStore((state) => state.isSplitView);
   const status = useFeedbackStore((state) => state.status);
   const feedbackId = useFeedbackStore((state) => state.feedbackId);
+  const { currentTeamspaceId } = useTeamspaceStore();
+  const { teamspace } = useTeamspaceDetail(currentTeamspaceId);
 
   const resetFeedback = useFeedbackStore((state) => state.resetFeedback);
   const { startPolling, stopPolling } = useFeedback();
@@ -64,7 +68,7 @@ export default function MainContent() {
   return (
     <main className="flex-1 overflow-y-auto bg-white relative">
       <Helmet>
-        <title>{getDocLabel(doc.type)} - Aidea</title>
+        <title>{`${getDocLabel(doc.type)} - ${teamspace?.name ?? 'Aidea'}`}</title>
       </Helmet>
       {isSplitView && <SplitView title={getDocLabel(doc.type)} />}
       <div
