@@ -143,12 +143,24 @@ export interface CreateEpicRequest {
 
 // ── WebSocket 이벤트 타입 ──────────────────────────────────────
 
+export interface BacklogOnlineEditor {
+  id: string;
+  name: string;
+  profileImageUrl: string | null;
+}
+
 export interface BacklogInitEvent {
   type: 'backlog:init';
   config: BacklogConfigResponse;
   epics: EpicResponse[];
   stories: StorySummary[];
   tasks: BacklogTask[];
+  onlineEditors?: BacklogOnlineEditor[];
+}
+
+export interface BacklogPresenceEvent {
+  type: 'backlog:presence';
+  onlineEditors: BacklogOnlineEditor[];
 }
 
 export interface BacklogConfigUpdatedEvent {
@@ -292,6 +304,7 @@ export interface BacklogSocketErrorEvent {
 
 export type BacklogServerMessage =
   | BacklogInitEvent
+  | BacklogPresenceEvent
   | BacklogConfigUpdatedEvent
   | EpicCreatedEvent
   | EpicUpdatedEvent

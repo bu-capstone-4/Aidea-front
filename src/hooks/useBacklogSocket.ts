@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useBacklogStore } from '@/store/backlogStore';
 import { handleSocketError } from '@/shared/socketErrorHandler';
-import type { BacklogServerMessage } from '@/types/backlog';
+import type { BacklogServerMessage, BacklogOnlineEditor } from '@/types/backlog';
 
 interface UseBacklogSocketOptions {
   teamspaceId: string | null;
@@ -10,11 +10,12 @@ interface UseBacklogSocketOptions {
 
 interface UseBacklogSocketResult {
   connected: boolean;
-  onlineEditorCount: number;
+  onlineEditors: BacklogOnlineEditor[];
 }
 
 const VALID_BACKLOG_TYPES = new Set([
   'backlog:init',
+  'backlog:presence',
   'backlog:config_updated',
   'epic:created',
   'epic:updated',
@@ -52,6 +53,7 @@ export function useBacklogSocket({
 }: UseBacklogSocketOptions): UseBacklogSocketResult {
   const wsRef = useRef<WebSocket | null>(null);
   const [connected, setConnected] = useState(false);
+  const [onlineEditors, setOnlineEditors] = useState<BacklogOnlineEditor[]>([]);
 
   const applyInit = useBacklogStore((s) => s.applyInit);
   const applyConfigUpdated = useBacklogStore((s) => s.applyConfigUpdated);
@@ -97,6 +99,10 @@ export function useBacklogSocket({
       switch (raw.type) {
         case 'backlog:init':
           applyInit(raw.config, raw.epics, raw.stories, raw.tasks ?? []);
+          setOnlineEditors(raw.onlineEditors ?? []);
+          break;
+        case 'backlog:presence':
+          setOnlineEditors(raw.onlineEditors);
           break;
         case 'backlog:config_updated':
           applyConfigUpdated(raw.config);
@@ -169,6 +175,7 @@ export function useBacklogSocket({
 
     ws.onclose = () => {
       setConnected(false);
+      setOnlineEditors([]);
       wsRef.current = null;
     };
 
@@ -208,5 +215,5 @@ export function useBacklogSocket({
     applyBacklogtaskStoryChanged,
   ]);
 
-  return { connected, onlineEditorCount: 0 };
+  return { connected, onlineEditors };
 }

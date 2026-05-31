@@ -6,6 +6,7 @@ import { useBacklogStore } from '@/store/backlogStore';
 import { useTeamspaceMembers } from '@/hooks/useTeamspaceMembers';
 import { useStoryApi } from '@/hooks/useStoryApi';
 import { useBacklogTaskApi } from '@/hooks/useBacklogTaskApi';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { createEpic, updateEpic } from '@/api/backlog';
 import type {
   StoryStatus,
@@ -17,10 +18,13 @@ import type {
   CreateBacklogTaskRequest,
   EpicResponse,
   CreateEpicRequest,
+  BacklogOnlineEditor,
 } from '@/types/backlog';
+import type { ActiveMember } from '@/types/teamspaceSocket';
 import { normalizeDueDate } from '@/utils/backlog';
 import { STATUS_TABS } from '@/constants/backlog';
 import type { StatusFilter } from '@/constants/backlog';
+import OnlineMemberStack from '@/components/ui/OnlineMemberStack';
 import WelcomeScreen from './WelcomeScreen';
 import ConfigModal from './ConfigModal';
 import DraftConfigModal from './DraftConfigModal';
@@ -32,6 +36,18 @@ import EpicFormModal from './EpicFormModal';
 import EpicManagerModal from './EpicManagerModal';
 import IssueTypeDropdown from './IssueTypeDropdown';
 import type { IssueKind } from './IssueTypeDropdown';
+
+const BACKLOG_DOC_ID = '__backlog__';
+
+function toActiveMembers(editors: BacklogOnlineEditor[]): ActiveMember[] {
+  return editors.map((e) => ({
+    userId: parseInt(e.id, 10),
+    name: e.name,
+    profileImageUrl: e.profileImageUrl,
+    role: 'MEMBER' as const,
+    currentDocumentId: BACKLOG_DOC_ID,
+  }));
+}
 
 interface BacklogModalProps {
   teamspaceId: string;
@@ -75,11 +91,18 @@ interface EpicFormState {
 interface BacklogMainViewProps {
   teamspaceId: string;
   config: BacklogConfigResponse;
+  onlineEditors: BacklogOnlineEditor[];
   onConfigOpen: () => void;
   onClose: () => void;
 }
 
-function BacklogMainView({ teamspaceId, config, onConfigOpen, onClose }: BacklogMainViewProps) {
+function BacklogMainView({
+  teamspaceId,
+  config,
+  onlineEditors,
+  onConfigOpen,
+  onClose,
+}: BacklogMainViewProps) {
   const stories = useBacklogStore((s) => s.stories);
   const epics = useBacklogStore((s) => s.epics);
   const backlogTasks = useBacklogStore((s) => s.backlogTasks);
@@ -91,6 +114,7 @@ function BacklogMainView({ teamspaceId, config, onConfigOpen, onClose }: Backlog
   const { handleCreate: handleCreateTask, handleUpdate: handleUpdateTask } =
     useBacklogTaskApi(teamspaceId);
   const members = useTeamspaceMembers(teamspaceId);
+  const { user } = useCurrentUser();
 
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
@@ -157,7 +181,12 @@ function BacklogMainView({ teamspaceId, config, onConfigOpen, onClose }: Backlog
       {/* 헤더 */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
         <h2 className="text-xl font-bold text-ink">백로그</h2>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          <OnlineMemberStack
+            members={toActiveMembers(onlineEditors)}
+            currentDocumentId={BACKLOG_DOC_ID}
+            currentUserId={user?.id}
+          />
           <button
             onClick={onConfigOpen}
             className="p-1.5 rounded text-ink-muted hover:text-ink hover:bg-surface transition-colors"
@@ -376,7 +405,7 @@ export default function BacklogModal({ teamspaceId, onClose }: BacklogModalProps
     }))
   );
 
-  useBacklogSocket({ teamspaceId, enabled: true });
+  const { onlineEditors } = useBacklogSocket({ teamspaceId, enabled: true });
 
   const [configMode, setConfigMode] = useState<null | 'draft' | 'settings'>(null);
 
@@ -438,6 +467,7 @@ export default function BacklogModal({ teamspaceId, onClose }: BacklogModalProps
           <BacklogMainView
             teamspaceId={teamspaceId}
             config={config!}
+            onlineEditors={onlineEditors}
             onConfigOpen={() => setConfigMode('settings')}
             onClose={onClose}
           />
