@@ -24,6 +24,7 @@ export interface MemberInfo {
   role: 'OWNER' | 'MEMBER' | 'VIEWER';
   status: 'ACTIVE' | 'PENDING';
   profileImageUrl: string | null;
+  invitationId: string | null;
 }
 
 export interface DocumentSummary {
@@ -37,13 +38,13 @@ export interface DocumentSummary {
 
 export interface DocumentDetail extends DocumentSummary {
   teamspaceId: string;
+  createdAt: string;
   yjsBinary: string;
 }
 
 export interface TeamspaceSummary {
   teamspaceId: string;
   name: string;
-  memberCount: number;
   createdAt: string;
 }
 
@@ -51,7 +52,6 @@ export interface TeamspaceDetail {
   teamspaceId: string;
   name: string;
   documents: DocumentSummary[];
-  members: MemberInfo[];
   createdAt: string;
 }
 

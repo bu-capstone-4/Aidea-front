@@ -42,7 +42,7 @@ export interface EpicResponse {
   completedStoryCount: number;
   createdAt: string;
   updatedAt: string;
-  createdBy: BacklogUser;
+  closedAt: string | null;
 }
 
 export interface StorySummary {
@@ -94,6 +94,7 @@ export interface ReorderResponse {
 export interface CreateStoryRequest {
   title: string;
   body?: string;
+  status?: StoryStatus;
   priority?: Priority | null;
   issueType?: IssueType | null;
   sprint?: string | null;
@@ -113,7 +114,7 @@ export interface BacklogTask {
   issueType: IssueType | null;
   sprint: string | null;
   assignee: BacklogUser | null;
-  reporter: BacklogUser;
+  reporter: BacklogUser | null;
   dueDate: string | null;
   position: number;
   storyId: number | null;
@@ -123,6 +124,7 @@ export interface BacklogTask {
 
 export interface CreateBacklogTaskRequest {
   title: string;
+  status?: StoryStatus;
   priority?: Priority | null;
   issueType?: IssueType | null;
   sprint?: string | null;

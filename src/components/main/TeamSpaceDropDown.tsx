@@ -5,6 +5,7 @@ import TeamSpaceAvatar from '@/components/ui/TeamSpaceAvatar';
 import Button from '@/components/ui/Button';
 import { useTeamspaces } from '@/hooks/useTeamspaces';
 import { useTeamspaceDetail } from '@/hooks/useTeamspaceDetail';
+import { useTeamspaceMembers } from '@/hooks/useTeamspaceMembers';
 import { useTeamspaceStore } from '@/store/teamspaceStore';
 import { useAuth } from '@/shared/useAuth';
 import { apiClient } from '@/shared/apiClient';
@@ -19,6 +20,7 @@ export default function TeamSpaceDropDown() {
   const { currentTeamspaceId, setCurrentTeamspaceId } = useTeamspaceStore();
   const { teamspaces } = useTeamspaces();
   const { teamspace } = useTeamspaceDetail(currentTeamspaceId);
+  const members = useTeamspaceMembers(currentTeamspaceId);
 
   const handleCreateTeamspace = () => {
     setIsDropDownOpen(false);
@@ -53,9 +55,7 @@ export default function TeamSpaceDropDown() {
           {/* 현재 팀 스페이스 */}
           <div className="p-2 border-b border-gray-100 mb-1">
             <div className="text-xl font-bold truncate">{teamspace?.name}</div>
-            <div className="text-xs text-gray-500 mb-2">
-              멤버 {teamspace?.members?.length ?? 0}명
-            </div>
+            <div className="text-xs text-gray-500 mb-2">멤버 {members.length}명</div>
             <Button
               variant="ghost"
               size="sm"

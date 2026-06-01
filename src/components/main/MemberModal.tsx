@@ -35,9 +35,15 @@ export default function MemberModal({ isMemberModalOpen, toggleMemberModal }: Me
     fetchMembers();
   };
 
-  const handleRemove = async (memberId: string) => {
+  const handleRemoveMember = async (memberId: string) => {
     if (!currentTeamspaceId) return;
     await apiClient.delete(`/api/teamspaces/${currentTeamspaceId}/members/${memberId}`);
+    fetchMembers();
+  };
+
+  const handleCancelInvitation = async (invitationId: string) => {
+    if (!currentTeamspaceId) return;
+    await apiClient.delete(`/api/teamspaces/${currentTeamspaceId}/invitations/${invitationId}`);
     fetchMembers();
   };
 
@@ -72,8 +78,12 @@ export default function MemberModal({ isMemberModalOpen, toggleMemberModal }: Me
                 </div>
               </div>
 
-              {member.status === 'PENDING' && (
-                <Button variant="secondary" size="sm" onClick={() => handleRemove(member.email)}>
+              {member.status === 'PENDING' && member.invitationId && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => handleCancelInvitation(member.invitationId!)}
+                >
                   초대 취소
                 </Button>
               )}
@@ -82,7 +92,7 @@ export default function MemberModal({ isMemberModalOpen, toggleMemberModal }: Me
                   variant="secondary"
                   size="sm"
                   className="text-red-500"
-                  onClick={() => handleRemove(String(member.userId))}
+                  onClick={() => handleRemoveMember(String(member.userId))}
                 >
                   추방
                 </Button>
