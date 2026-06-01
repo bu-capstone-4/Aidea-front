@@ -1,4 +1,4 @@
-import type { DocumentType, FeedbackStatus, Question } from '@/types/document';
+import type { FeedbackStatus, Question } from '@/types/document';
 
 // ─── 공통 ─────────────────────────────────────────────────────────────────────
 
@@ -117,22 +117,24 @@ export type TeamspaceSocketErrorCode =
 export interface TeamspaceInitEvent {
   event: 'teamspace:init';
   data: {
-    teamspace: { id: string; name: string; status: 'CREATING' | 'CREATED' };
+    teamspace: { id: string; name: string };
     onlineMembers: ActiveMember[];
   };
 }
 
-export interface TeamspaceReadyEvent {
-  event: 'teamspace:ready';
+export interface DraftReadyEvent {
+  event: 'draft:ready';
   data: {
-    status: 'CREATED';
-    documents: {
-      id: string;
-      type: DocumentType;
-      title: string;
-      yjsBinary: string | null;
-      updatedAt: string;
-    }[];
+    documentId: string;
+    draftId: string;
+    content: string;
+  };
+}
+
+export interface DraftErrorEvent {
+  event: 'draft:error';
+  data: {
+    documentId: string;
   };
 }
 
@@ -149,7 +151,8 @@ export interface TeamspaceSocketErrorEvent {
 
 export type TeamspaceServerMessage =
   | TeamspaceInitEvent
-  | TeamspaceReadyEvent
+  | DraftReadyEvent
+  | DraftErrorEvent
   | MemberUpdateEvent
   | TeamspaceSocketErrorEvent;
 

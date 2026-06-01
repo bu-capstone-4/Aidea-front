@@ -1,6 +1,5 @@
 import type { DocumentType, TeamRole } from '@/types/document';
 
-export type TeamspaceStatus = 'CREATING' | 'CREATED';
 export type MemberRole = TeamRole;
 
 export interface ActiveMember {
@@ -14,7 +13,6 @@ export interface ActiveMember {
 export interface TeamspaceSocketMeta {
   id: string;
   name: string;
-  status: TeamspaceStatus;
 }
 
 export interface DocumentReady {
@@ -33,11 +31,19 @@ export interface TeamspaceInitEvent {
   };
 }
 
-export interface TeamspaceReadyEvent {
-  event: 'teamspace:ready';
+export interface DraftReadyEvent {
+  event: 'draft:ready';
   data: {
-    status: 'CREATED';
-    documents: DocumentReady[];
+    documentId: string;
+    draftId: string;
+    content: string;
+  };
+}
+
+export interface DraftErrorEvent {
+  event: 'draft:error';
+  data: {
+    documentId: string;
   };
 }
 
@@ -48,7 +54,11 @@ export interface MemberUpdateEvent {
   };
 }
 
-export type TeamspaceServerMessage = TeamspaceInitEvent | TeamspaceReadyEvent | MemberUpdateEvent;
+export type TeamspaceServerMessage =
+  | TeamspaceInitEvent
+  | DraftReadyEvent
+  | DraftErrorEvent
+  | MemberUpdateEvent;
 
 export interface MemberFocusRequest {
   event: 'member:focus';

@@ -1,6 +1,6 @@
 import type { DocumentType, FeedbackStatus } from '@/types/document';
 
-export type TeamspaceStatus = 'CREATING' | 'CREATED';
+export type DocumentAiStatus = 'IDLE' | 'DRAFT' | 'FEEDBACK_IN_PROGRESS';
 
 export interface UserResponse {
   id: number;
@@ -32,6 +32,7 @@ export interface DocumentSummary {
   title: string;
   updatedAt: string;
   updatedBy: string | null;
+  aiStatus: DocumentAiStatus;
 }
 
 export interface DocumentDetail extends DocumentSummary {
@@ -43,14 +44,12 @@ export interface TeamspaceSummary {
   teamspaceId: string;
   name: string;
   memberCount: number;
-  status: TeamspaceStatus;
   createdAt: string;
 }
 
 export interface TeamspaceDetail {
   teamspaceId: string;
   name: string;
-  status: TeamspaceStatus;
   documents: DocumentSummary[];
   members: MemberInfo[];
   createdAt: string;

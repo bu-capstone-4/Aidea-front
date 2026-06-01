@@ -20,7 +20,12 @@ function buildMemberFocusMessage(documentId: string | null): string {
 function isTeamspaceServerMessage(message: unknown): message is TeamspaceServerMessage {
   if (!message || typeof message !== 'object') return false;
   const event = (message as { event?: unknown }).event;
-  return event === 'teamspace:init' || event === 'teamspace:ready' || event === 'member:update';
+  return (
+    event === 'teamspace:init' ||
+    event === 'draft:ready' ||
+    event === 'draft:error' ||
+    event === 'member:update'
+  );
 }
 
 export function useTeamspaceSocket({
@@ -31,7 +36,7 @@ export function useTeamspaceSocket({
   const wsRef = useRef<WebSocket | null>(null);
   const documentIdRef = useRef<string | null>(documentId);
   const setOnlineMembers = useTeamspaceStore((state) => state.setOnlineMembers);
-  const setTeamspaceStatus = useTeamspaceStore((state) => state.setTeamspaceStatus);
+  const setDocumentAiStatus = useTeamspaceStore((state) => state.setDocumentAiStatus);
   const clearTeamspacePresence = useTeamspaceStore((state) => state.clearTeamspacePresence);
 
   useEffect(() => {
@@ -53,13 +58,17 @@ export function useTeamspaceSocket({
       if (!isTeamspaceServerMessage(message)) return;
 
       if (message.event === 'teamspace:init') {
-        setTeamspaceStatus(message.data.teamspace.status);
         setOnlineMembers(message.data.onlineMembers);
         return;
       }
 
-      if (message.event === 'teamspace:ready') {
-        setTeamspaceStatus(message.data.status);
+      if (message.event === 'draft:ready') {
+        setDocumentAiStatus(message.data.documentId, 'IDLE');
+        return;
+      }
+
+      if (message.event === 'draft:error') {
+        setDocumentAiStatus(message.data.documentId, 'IDLE');
         return;
       }
 
@@ -78,7 +87,7 @@ export function useTeamspaceSocket({
       clearTeamspacePresence();
       wsRef.current = null;
     };
-  }, [clearTeamspacePresence, enabled, setOnlineMembers, setTeamspaceStatus, teamspaceId]);
+  }, [clearTeamspacePresence, enabled, setDocumentAiStatus, setOnlineMembers, teamspaceId]);
 
   useEffect(() => {
     const ws = wsRef.current;
