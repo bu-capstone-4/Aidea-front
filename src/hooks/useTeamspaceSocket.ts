@@ -37,6 +37,7 @@ export function useTeamspaceSocket({
   const documentIdRef = useRef<string | null>(documentId);
   const setOnlineMembers = useTeamspaceStore((state) => state.setOnlineMembers);
   const setDocumentAiStatus = useTeamspaceStore((state) => state.setDocumentAiStatus);
+  const setPendingDraft = useTeamspaceStore((state) => state.setPendingDraft);
   const clearTeamspacePresence = useTeamspaceStore((state) => state.clearTeamspacePresence);
 
   useEffect(() => {
@@ -64,6 +65,7 @@ export function useTeamspaceSocket({
 
       if (message.event === 'draft:ready') {
         setDocumentAiStatus(message.data.documentId, 'IDLE');
+        setPendingDraft({ documentId: message.data.documentId, content: message.data.content });
         return;
       }
 

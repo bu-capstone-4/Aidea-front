@@ -6,6 +6,7 @@ import { ko } from '@blocknote/core/locales';
 import { handleSocketError } from '@/shared/socketErrorHandler';
 import type { DocumentServerMessage } from '@/types/socket';
 import { useFeedbackStore } from '@/store/FeedbackStore';
+import { useTeamspaceStore } from '@/store/teamspaceStore';
 import { restoreFeedbackState } from '@/hooks/useFeedback';
 
 function base64ToUint8Array(b64: string): Uint8Array {
@@ -157,6 +158,18 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
       return Promise.resolve();
     };
   }, [editor]);
+
+  const pendingDraft = useTeamspaceStore((state) => state.pendingDraft);
+  const setPendingDraft = useTeamspaceStore((state) => state.setPendingDraft);
+
+  useEffect(() => {
+    if (!pendingDraft || pendingDraft.documentId !== docId) return;
+    if (!applyMarkdownRef.current || !initializedRef.current) return;
+
+    applyMarkdownRef.current(pendingDraft.content).then(() => {
+      setPendingDraft(null);
+    });
+  }, [pendingDraft, docId, setPendingDraft]);
 
   return { editor, doc, provider, connected };
 }
