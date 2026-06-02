@@ -6,7 +6,6 @@ import { ko } from '@blocknote/core/locales';
 import { handleSocketError } from '@/shared/socketErrorHandler';
 import type { DocumentServerMessage } from '@/types/socket';
 import { useFeedbackStore } from '@/store/FeedbackStore';
-import { useTeamspaceStore } from '@/store/teamspaceStore';
 import { restoreFeedbackState } from '@/hooks/useFeedback';
 
 function base64ToUint8Array(b64: string): Uint8Array {
@@ -14,7 +13,12 @@ function base64ToUint8Array(b64: string): Uint8Array {
 }
 
 function uint8ArrayToBase64(arr: Uint8Array): string {
-  return btoa(String.fromCharCode(...arr));
+  let binary = '';
+  const chunkSize = 8192;
+  for (let i = 0; i < arr.length; i += chunkSize) {
+    binary += String.fromCharCode(...arr.subarray(i, i + chunkSize));
+  }
+  return btoa(binary);
 }
 
 interface UseCollabEditorOptions {
@@ -37,6 +41,7 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
   const [connected, setConnected] = useState(false);
   const initializedRef = useRef(false);
   const applyMarkdownRef = useRef<((md: string) => Promise<void>) | null>(null);
+  const pendingDraftRef = useRef<string | null>(null);
   const { setYdoc } = useFeedbackStore();
 
   useEffect(() => {
@@ -67,9 +72,23 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
         for (const b64 of msg.updates) {
           Y.applyUpdate(doc, base64ToUint8Array(b64), 'remote');
         }
+        provider.emit('sync', [true]);
         initializedRef.current = true;
         if (msg.activeFeedback) {
           restoreFeedbackState(docId, msg.activeFeedback.feedbackId, msg.activeFeedback);
+        }
+        if (
+          editable &&
+          msg.updates.length === 0 &&
+          msg.activeDraft?.status === 'DONE' &&
+          msg.activeDraft?.content
+        ) {
+          const draftContent = msg.activeDraft.content;
+          if (applyMarkdownRef.current) {
+            applyMarkdownRef.current(draftContent);
+          } else {
+            pendingDraftRef.current = draftContent;
+          }
         }
         return;
       }
@@ -139,7 +158,7 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
       doc.off('update', handleUpdate);
       ws.close(1000);
     };
-  }, [docId, token, doc]);
+  }, [docId, token, doc, provider, editable]);
 
   const editor = useCreateBlockNote({
     collaboration: {
@@ -157,19 +176,12 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
       editor.replaceBlocks(editor.document, blocks);
       return Promise.resolve();
     };
+    if (pendingDraftRef.current) {
+      const draft = pendingDraftRef.current;
+      pendingDraftRef.current = null;
+      applyMarkdownRef.current(draft);
+    }
   }, [editor]);
-
-  const pendingDraft = useTeamspaceStore((state) => state.pendingDraft);
-  const setPendingDraft = useTeamspaceStore((state) => state.setPendingDraft);
-
-  useEffect(() => {
-    if (!pendingDraft || pendingDraft.documentId !== docId) return;
-    if (!applyMarkdownRef.current || !initializedRef.current) return;
-
-    applyMarkdownRef.current(pendingDraft.content).then(() => {
-      setPendingDraft(null);
-    });
-  }, [pendingDraft, docId, setPendingDraft]);
 
   return { editor, doc, provider, connected };
 }

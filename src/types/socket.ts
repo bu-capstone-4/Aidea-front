@@ -38,10 +38,17 @@ export interface ActiveFeedbackInfo {
   questions?: Question[] | null;
 }
 
+export interface ActiveDraftInfo {
+  draftId: string;
+  status: 'PENDING' | 'PROCESSING' | 'DONE' | 'ERROR';
+  content?: string | null;
+}
+
 export interface DocInitEvent {
   type: 'doc:init';
   updates: string[];
   activeFeedback?: ActiveFeedbackInfo | null;
+  activeDraft?: ActiveDraftInfo | null;
 }
 
 export interface DocUpdateEvent {
