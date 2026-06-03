@@ -1,10 +1,13 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { HiDotsHorizontal } from 'react-icons/hi';
 import { useNavigate } from 'react-router';
 import MemberModal from './MemberModal';
 import TeamSpaceAvatar from '@/components/ui/TeamSpaceAvatar';
 import Button from '@/components/ui/Button';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 import { useTeamspaces } from '@/hooks/useTeamspaces';
 import { useTeamspaceDetail } from '@/hooks/useTeamspaceDetail';
+import { useTeamspaceMembers } from '@/hooks/useTeamspaceMembers';
 import { useTeamspaceStore } from '@/store/teamspaceStore';
 import { useAuth } from '@/shared/useAuth';
 import { apiClient } from '@/shared/apiClient';
@@ -13,12 +16,27 @@ import type { TeamspaceDetail } from '@/types/api';
 export default function TeamSpaceDropDown() {
   const [isDropDownOpen, setIsDropDownOpen] = useState(false);
   const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
+  const [hoveredTsId, setHoveredTsId] = useState<string | null>(null);
+  const [openMenuTsId, setOpenMenuTsId] = useState<string | null>(null);
+  const [deleteTargetTsId, setDeleteTargetTsId] = useState<string | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { logout } = useAuth();
 
   const { currentTeamspaceId, setCurrentTeamspaceId } = useTeamspaceStore();
-  const { teamspaces } = useTeamspaces();
+  const { teamspaces, refetch: refetchTeamspaces } = useTeamspaces();
   const { teamspace } = useTeamspaceDetail(currentTeamspaceId);
+  const members = useTeamspaceMembers(currentTeamspaceId);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpenMenuTsId(null);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleCreateTeamspace = () => {
     setIsDropDownOpen(false);
@@ -33,6 +51,16 @@ export default function TeamSpaceDropDown() {
       navigate(`/main/${ts.documents[0].id}`);
     }
     setIsDropDownOpen(false);
+  };
+
+  const handleDeleteTeamspace = async (tsId: string) => {
+    await apiClient.delete(`/api/teamspaces/${tsId}`);
+    setOpenMenuTsId(null);
+    if (tsId === currentTeamspaceId) {
+      setCurrentTeamspaceId(null);
+      navigate('/');
+    }
+    refetchTeamspaces?.();
   };
 
   return (
@@ -53,9 +81,7 @@ export default function TeamSpaceDropDown() {
           {/* 현재 팀 스페이스 */}
           <div className="p-2 border-b border-gray-100 mb-1">
             <div className="text-xl font-bold truncate">{teamspace?.name}</div>
-            <div className="text-xs text-gray-500 mb-2">
-              멤버 {teamspace?.members?.length ?? 0}명
-            </div>
+            <div className="text-xs text-gray-500 mb-2">멤버 {members.length}명</div>
             <Button
               variant="ghost"
               size="sm"
@@ -74,28 +100,64 @@ export default function TeamSpaceDropDown() {
             <div className="text-[11px] font-semibold text-gray-400 px-2 py-1 uppercase tracking-wider">
               팀 스페이스
             </div>
-            <div className="flex flex-col gap-0.5">
+            <div className="flex flex-col gap-0.5 max-h-48 overflow-y-auto">
               {teamspaces.map((ts) => {
                 const isCurrent = ts.teamspaceId === currentTeamspaceId;
+                const isHovered = hoveredTsId === ts.teamspaceId;
+                const isMenuOpen = openMenuTsId === ts.teamspaceId;
                 return (
-                  <Button
+                  <div
                     key={ts.teamspaceId}
-                    size="sm"
-                    className={
-                      isCurrent
-                        ? 'w-full justify-start bg-primary-light text-primary-dark hover:bg-primary-light/80 pl-2'
-                        : 'w-full justify-start pl-2'
-                    }
-                    variant={isCurrent ? 'primary' : 'ghost'}
-                    onClick={() => handleSwitchTeamspace(ts.teamspaceId)}
+                    className="relative flex items-center"
+                    onMouseEnter={() => setHoveredTsId(ts.teamspaceId)}
+                    onMouseLeave={() => setHoveredTsId(null)}
                   >
-                    <TeamSpaceAvatar
-                      name={ts.name}
+                    <Button
                       size="sm"
-                      className="size-5 text-xs rounded-lg"
-                    />
-                    {ts.name}
-                  </Button>
+                      className={
+                        isCurrent
+                          ? 'w-full justify-start bg-primary-light text-primary-dark hover:bg-primary-light/80 pl-2 pr-7'
+                          : 'w-full justify-start pl-2 pr-7'
+                      }
+                      variant={isCurrent ? 'primary' : 'ghost'}
+                      onClick={() => handleSwitchTeamspace(ts.teamspaceId)}
+                    >
+                      <TeamSpaceAvatar
+                        name={ts.name}
+                        size="sm"
+                        className="size-5 text-xs rounded-lg"
+                      />
+                      <span className="truncate">{ts.name}</span>
+                    </Button>
+                    {(isHovered || isMenuOpen) && (
+                      <button
+                        className="absolute right-1 flex items-center justify-center w-5 h-5 rounded hover:bg-gray-200 text-gray-500 text-xs"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setOpenMenuTsId(isMenuOpen ? null : ts.teamspaceId);
+                        }}
+                      >
+                        <HiDotsHorizontal />
+                      </button>
+                    )}
+                    {isMenuOpen && (
+                      <div
+                        ref={menuRef}
+                        className="absolute right-0 top-full mt-0.5 w-28 bg-white rounded-lg shadow-lg border border-gray-100 z-50 py-1"
+                      >
+                        <button
+                          className="w-full text-left px-3 py-1.5 text-sm text-red-500 hover:bg-red-50"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteTargetTsId(ts.teamspaceId);
+                            setOpenMenuTsId(null);
+                          }}
+                        >
+                          삭제
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 );
               })}
             </div>
@@ -126,6 +188,15 @@ export default function TeamSpaceDropDown() {
       <MemberModal
         isMemberModalOpen={isMemberModalOpen}
         toggleMemberModal={() => setIsMemberModalOpen(false)}
+      />
+
+      <ConfirmModal
+        isOpen={deleteTargetTsId !== null}
+        title="팀스페이스 삭제"
+        message="정말로 이 팀스페이스를 삭제하시겠습니까?"
+        confirmLabel="삭제"
+        onConfirm={() => deleteTargetTsId && handleDeleteTeamspace(deleteTargetTsId)}
+        onClose={() => setDeleteTargetTsId(null)}
       />
     </div>
   );

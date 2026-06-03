@@ -15,12 +15,12 @@ import AssigneeSelect from './AssigneeSelect';
 
 interface StoryFormModalProps {
   mode: 'create' | 'edit';
-  initialData?: Partial<CreateStoryRequest & { status: StoryStatus }> & { id?: number };
+  initialData?: Partial<CreateStoryRequest> & { id?: number };
   defaultStatus?: StoryStatus;
   config: BacklogConfigResponse;
   epics: EpicResponse[];
   members: MemberInfo[];
-  onSave: (data: CreateStoryRequest & { status?: StoryStatus }) => Promise<StoryDetail>;
+  onSave: (data: CreateStoryRequest) => Promise<StoryDetail>;
   onClose: () => void;
   onManageEpics?: () => void;
 }
@@ -82,7 +82,7 @@ export default function StoryFormModal({
     }
     setLoading(true);
     try {
-      const payload: CreateStoryRequest & { status?: StoryStatus } = {
+      const payload: CreateStoryRequest = {
         title: form.title.trim(),
         body: form.body || undefined,
         status: form.status,

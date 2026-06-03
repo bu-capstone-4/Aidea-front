@@ -74,8 +74,8 @@ export async function updateEpicStatus(
   teamspaceId: string,
   epicId: number,
   status: StoryStatus
-): Promise<{ id: number; status: StoryStatus }> {
-  const res = await apiClient.patch<GlobalResponse<{ id: number; status: StoryStatus }>>(
+): Promise<EpicResponse> {
+  const res = await apiClient.patch<GlobalResponse<EpicResponse>>(
     `/api/teamspaces/${teamspaceId}/epics/${epicId}/status`,
     { status }
   );
@@ -266,8 +266,8 @@ export async function updateBacklogTaskStatus(
   teamspaceId: string,
   taskId: number,
   status: StoryStatus
-): Promise<{ id: number; status: StoryStatus }> {
-  const res = await apiClient.patch<GlobalResponse<{ id: number; status: StoryStatus }>>(
+): Promise<BacklogTask> {
+  const res = await apiClient.patch<GlobalResponse<BacklogTask>>(
     `/api/teamspaces/${teamspaceId}/tasks/${taskId}/status`,
     { status }
   );

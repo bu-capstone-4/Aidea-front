@@ -15,12 +15,12 @@ import AssigneeSelect from './AssigneeSelect';
 
 interface BacklogTaskFormModalProps {
   mode: 'create' | 'edit';
-  initialData?: Partial<CreateBacklogTaskRequest & { status: StoryStatus }> & { id?: number };
+  initialData?: Partial<CreateBacklogTaskRequest> & { id?: number };
   defaultStatus?: StoryStatus;
   config: BacklogConfigResponse;
   members: MemberInfo[];
   stories: StorySummary[];
-  onSave: (data: CreateBacklogTaskRequest & { status?: StoryStatus }) => Promise<BacklogTask>;
+  onSave: (data: CreateBacklogTaskRequest) => Promise<BacklogTask>;
   onClose: () => void;
 }
 
@@ -58,7 +58,7 @@ export default function BacklogTaskFormModal({
     }
     setLoading(true);
     try {
-      const payload: CreateBacklogTaskRequest & { status?: StoryStatus } = {
+      const payload: CreateBacklogTaskRequest = {
         title: form.title.trim(),
         status: form.status,
         priority: config.priorityEnabled ? form.priority : undefined,

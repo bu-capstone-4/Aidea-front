@@ -1,4 +1,4 @@
-import type { DocumentType, FeedbackStatus, Question } from '@/types/document';
+import type { FeedbackStatus, Question } from '@/types/document';
 
 // ─── 공통 ─────────────────────────────────────────────────────────────────────
 
@@ -38,15 +38,37 @@ export interface ActiveFeedbackInfo {
   questions?: Question[] | null;
 }
 
+export interface ActiveDraftInfo {
+  draftId: string;
+  status: 'PENDING' | 'PROCESSING' | 'DONE' | 'ERROR';
+  content?: string | null;
+}
+
 export interface DocInitEvent {
   type: 'doc:init';
   updates: string[];
   activeFeedback?: ActiveFeedbackInfo | null;
+  activeDraft?: ActiveDraftInfo | null;
 }
 
 export interface DocUpdateEvent {
   type: 'doc:update';
   update: string;
+}
+
+export interface DocAwarenessEvent {
+  type: 'doc:awareness';
+  update: string; // base64
+}
+
+export interface DocAwarenessInitEvent {
+  type: 'doc:awareness:init';
+  states: string[]; // base64[]
+}
+
+export interface DocAwarenessRemoveEvent {
+  type: 'doc:awareness:remove';
+  yjsClientId: number;
 }
 
 export interface FeedbackStartedEvent {
@@ -87,6 +109,9 @@ export interface DocumentSocketErrorEvent {
 export type DocumentServerMessage =
   | DocInitEvent
   | DocUpdateEvent
+  | DocAwarenessEvent
+  | DocAwarenessInitEvent
+  | DocAwarenessRemoveEvent
   | FeedbackStartedEvent
   | FeedbackQuestioningEvent
   | FeedbackReadyEvent
@@ -102,7 +127,13 @@ export interface DocUpdateRequest {
   clientId?: string;
 }
 
-export type DocumentClientMessage = DocUpdateRequest;
+export interface DocAwarenessRequest {
+  type: 'doc:awareness';
+  yjsClientId: number;
+  update: string; // base64
+}
+
+export type DocumentClientMessage = DocUpdateRequest | DocAwarenessRequest;
 
 // ─── 팀스페이스 소켓 에러 코드 ───────────────────────────────────────────────
 
@@ -117,22 +148,24 @@ export type TeamspaceSocketErrorCode =
 export interface TeamspaceInitEvent {
   event: 'teamspace:init';
   data: {
-    teamspace: { id: string; name: string; status: 'CREATING' | 'CREATED' };
+    teamspace: { id: string; name: string };
     onlineMembers: ActiveMember[];
   };
 }
 
-export interface TeamspaceReadyEvent {
-  event: 'teamspace:ready';
+export interface DraftReadyEvent {
+  event: 'draft:ready';
   data: {
-    status: 'CREATED';
-    documents: {
-      id: string;
-      type: DocumentType;
-      title: string;
-      yjsBinary: string | null;
-      updatedAt: string;
-    }[];
+    documentId: string;
+    draftId: string;
+    content: string;
+  };
+}
+
+export interface DraftErrorEvent {
+  event: 'draft:error';
+  data: {
+    documentId: string;
   };
 }
 
@@ -149,7 +182,8 @@ export interface TeamspaceSocketErrorEvent {
 
 export type TeamspaceServerMessage =
   | TeamspaceInitEvent
-  | TeamspaceReadyEvent
+  | DraftReadyEvent
+  | DraftErrorEvent
   | MemberUpdateEvent
   | TeamspaceSocketErrorEvent;
 
