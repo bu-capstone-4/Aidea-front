@@ -40,7 +40,7 @@ export default function MainSideBar({ isSideBarOpen, toggleSideBar }: SideBarPro
   const navigate = useNavigate();
   const { docId } = useParams();
   const { user } = useCurrentUser();
-  const { currentTeamspaceId, onlineMembers, documentAiStatuses } = useTeamspaceStore();
+  const { currentTeamspaceId, documentAiStatuses } = useTeamspaceStore();
   const { teamspace, refetch } = useTeamspaceDetail(currentTeamspaceId);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -85,9 +85,6 @@ export default function MainSideBar({ isSideBarOpen, toggleSideBar }: SideBarPro
       <div className={cn('flex flex-col p-2 space-y-1', !isSideBarOpen && 'items-center')}>
         {teamspace?.documents.map((doc) => {
           const Icon = DOC_ICON[doc.type] ?? MdDescription;
-          const viewerCount = onlineMembers.filter(
-            (member) => member.currentDocumentId === doc.id
-          ).length;
           const isDrafting = documentAiStatuses[doc.id] === 'DRAFT';
 
           return (
@@ -108,11 +105,6 @@ export default function MainSideBar({ isSideBarOpen, toggleSideBar }: SideBarPro
                   {isDrafting && (
                     <span className="rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-700">
                       AI 초안 생성 중
-                    </span>
-                  )}
-                  {viewerCount > 0 && (
-                    <span className="rounded-full bg-primary-light px-1.5 py-0.5 text-[10px] font-bold text-primary-dark">
-                      {viewerCount}
                     </span>
                   )}
                 </span>

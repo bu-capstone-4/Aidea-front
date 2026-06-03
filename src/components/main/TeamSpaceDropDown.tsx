@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router';
 import MemberModal from './MemberModal';
 import TeamSpaceAvatar from '@/components/ui/TeamSpaceAvatar';
 import Button from '@/components/ui/Button';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 import { useTeamspaces } from '@/hooks/useTeamspaces';
 import { useTeamspaceDetail } from '@/hooks/useTeamspaceDetail';
 import { useTeamspaceMembers } from '@/hooks/useTeamspaceMembers';
@@ -17,6 +18,7 @@ export default function TeamSpaceDropDown() {
   const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
   const [hoveredTsId, setHoveredTsId] = useState<string | null>(null);
   const [openMenuTsId, setOpenMenuTsId] = useState<string | null>(null);
+  const [deleteTargetTsId, setDeleteTargetTsId] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { logout } = useAuth();
@@ -51,9 +53,7 @@ export default function TeamSpaceDropDown() {
     setIsDropDownOpen(false);
   };
 
-  const handleDeleteTeamspace = async (e: React.MouseEvent, tsId: string) => {
-    e.stopPropagation();
-    if (!window.confirm('팀스페이스를 삭제하시겠습니까?')) return;
+  const handleDeleteTeamspace = async (tsId: string) => {
     await apiClient.delete(`/api/teamspaces/${tsId}`);
     setOpenMenuTsId(null);
     if (tsId === currentTeamspaceId) {
@@ -147,7 +147,11 @@ export default function TeamSpaceDropDown() {
                       >
                         <button
                           className="w-full text-left px-3 py-1.5 text-sm text-red-500 hover:bg-red-50"
-                          onClick={(e) => handleDeleteTeamspace(e, ts.teamspaceId)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteTargetTsId(ts.teamspaceId);
+                            setOpenMenuTsId(null);
+                          }}
                         >
                           삭제
                         </button>
@@ -184,6 +188,15 @@ export default function TeamSpaceDropDown() {
       <MemberModal
         isMemberModalOpen={isMemberModalOpen}
         toggleMemberModal={() => setIsMemberModalOpen(false)}
+      />
+
+      <ConfirmModal
+        isOpen={deleteTargetTsId !== null}
+        title="팀스페이스 삭제"
+        message="정말로 이 팀스페이스를 삭제하시겠습니까?"
+        confirmLabel="삭제"
+        onConfirm={() => deleteTargetTsId && handleDeleteTeamspace(deleteTargetTsId)}
+        onClose={() => setDeleteTargetTsId(null)}
       />
     </div>
   );
