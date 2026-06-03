@@ -56,6 +56,21 @@ export interface DocUpdateEvent {
   update: string;
 }
 
+export interface DocAwarenessEvent {
+  type: 'doc:awareness';
+  update: string; // base64
+}
+
+export interface DocAwarenessInitEvent {
+  type: 'doc:awareness:init';
+  states: string[]; // base64[]
+}
+
+export interface DocAwarenessRemoveEvent {
+  type: 'doc:awareness:remove';
+  yjsClientId: number;
+}
+
 export interface FeedbackStartedEvent {
   type: 'feedback:started';
   feedbackId: string;
@@ -94,6 +109,9 @@ export interface DocumentSocketErrorEvent {
 export type DocumentServerMessage =
   | DocInitEvent
   | DocUpdateEvent
+  | DocAwarenessEvent
+  | DocAwarenessInitEvent
+  | DocAwarenessRemoveEvent
   | FeedbackStartedEvent
   | FeedbackQuestioningEvent
   | FeedbackReadyEvent
@@ -109,7 +127,13 @@ export interface DocUpdateRequest {
   clientId?: string;
 }
 
-export type DocumentClientMessage = DocUpdateRequest;
+export interface DocAwarenessRequest {
+  type: 'doc:awareness';
+  yjsClientId: number;
+  update: string; // base64
+}
+
+export type DocumentClientMessage = DocUpdateRequest | DocAwarenessRequest;
 
 // ─── 팀스페이스 소켓 에러 코드 ───────────────────────────────────────────────
 
