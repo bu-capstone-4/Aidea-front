@@ -18,13 +18,22 @@ export interface TokenResponse {
 }
 
 export interface MemberInfo {
-  userId: number | null;
-  name: string | null;
+  userId: number;
+  name: string;
   email: string;
   role: 'OWNER' | 'MEMBER' | 'VIEWER';
-  status: 'ACTIVE' | 'PENDING';
   profileImageUrl: string | null;
-  invitationId: string | null;
+}
+
+export interface PendingInvitation {
+  invitationId: string;
+  email: string;
+}
+
+export interface InviteResponse {
+  invitationId: string;
+  email: string;
+  role: 'OWNER' | 'MEMBER' | 'VIEWER';
 }
 
 export interface DocumentSummary {
@@ -58,12 +67,4 @@ export interface TeamspaceDetail {
 export interface FeedbackResponse {
   feedbackId: string;
   status: FeedbackStatus;
-}
-
-export interface Invitation {
-  invitationId: string;
-  teamspaceId: string;
-  email: string;
-  token: string;
-  status: 'PENDING';
 }

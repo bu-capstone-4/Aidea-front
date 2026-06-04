@@ -8,9 +8,8 @@ interface AvatarStackProps {
 }
 
 export default function AvatarStack({ members, max = 5, size = 32 }: AvatarStackProps) {
-  const active = members.filter((m) => m.status === 'ACTIVE');
-  const visible = active.slice(0, max);
-  const overflow = active.length - visible.length;
+  const visible = members.slice(0, max);
+  const overflow = members.length - visible.length;
 
   return (
     <div className="flex items-center">
