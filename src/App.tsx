@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Navigate, Route, Routes, useSearchParams } from 'react-router';
+import { Navigate, Route, Routes, useSearchParams, useNavigate } from 'react-router';
 import { useAuth } from '@/shared/useAuth';
 import { useAuthStore } from '@/store/authStore';
 import { useToastStore } from '@/store/toastStore';
@@ -7,6 +7,7 @@ import { apiClient } from '@/shared/apiClient';
 import LandingPage from '@/pages/LandingPage';
 import MainPage from '@/pages/MainPage';
 import CreatePage from '@/pages/CreatePage';
+import InvitePage from '@/pages/InvitePage';
 import ToastContainer from '@/components/ui/ToastContainer';
 
 const ACCEPT_ERROR_MESSAGES: Record<string, string> = {
@@ -34,6 +35,7 @@ function AuthInitializer({ children }: { children: React.ReactNode }) {
 function RootRoute() {
   const { isAuthenticated, isLoading } = useAuth();
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const errorCode = searchParams.get('error');
@@ -50,6 +52,23 @@ function RootRoute() {
       { replace: true }
     );
   }, []);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const token = localStorage.getItem('pending_invite_token');
+    if (!token) return;
+
+    localStorage.removeItem('pending_invite_token');
+    apiClient
+      .post('/api/invitations/accept', { token })
+      .then((res) => {
+        const { docId } = res.data.data as { docId: string };
+        if (docId) navigate(`/main/${docId}`, { replace: true });
+      })
+      .catch(() => {
+        // 에러 toast는 apiClient 인터셉터 처리
+      });
+  }, [isAuthenticated]);
 
   if (isLoading) return null;
   if (!isAuthenticated) return <LandingPage />;
@@ -85,6 +104,8 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        <Route path="/invite" element={<InvitePage />} />
       </Routes>
       <ToastContainer />
     </AuthInitializer>

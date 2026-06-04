@@ -8,6 +8,8 @@ const INVITATION_ERROR_MESSAGES: Record<string, string> = {
   INSUFFICIENT_PERMISSION: '초대 권한이 없습니다.',
   NOT_TEAMSPACE_OWNER: '일괄 초대는 OWNER만 가능합니다.',
   INVITATION_001: '초대는 최대 8명까지 가능합니다.',
+  INVITATION_EXPIRED: '초대 링크가 만료되었습니다. 초대를 다시 요청하세요.',
+  INVITATION_NOT_FOUND: '유효하지 않은 초대입니다.',
 };
 
 // 목 모드(VITE_USE_REAL_AUTH !== 'true')에서는 빈 baseURL → MSW가 동일 오리진 요청을 인터셉트
