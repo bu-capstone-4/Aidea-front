@@ -41,7 +41,7 @@ export function restoreFeedbackState(
   }
 }
 
-// ── 폴링 상태 (모듈 레벨 — 동시에 하나만 실행) ───────────────────
+// ── 폴링 상태 (모듈 레벨 - 동시에 하나만 실행) ───────────────────
 
 let _pollingIntervalId: ReturnType<typeof setInterval> | null = null;
 let _pollingStartTime: number | null = null;
@@ -49,7 +49,7 @@ let _pollingStartTime: number | null = null;
 const POLL_INTERVAL_MS = 4_000;
 const MAX_POLL_DURATION_MS = 3 * 60 * 1_000;
 
-// ── API 함수 (모듈 레벨 — 안정적 참조 보장) ───────────────────────
+// ── API 함수 (모듈 레벨 - 안정적 참조 보장) ───────────────────────
 
 async function getFeedbackStatusRaw(feedbackId: string) {
   const res = await apiClient.get(`/api/feedbacks/${feedbackId}`);
@@ -108,7 +108,7 @@ export default function useFeedback() {
       // feedbackId는 WebSocket feedback:started 이벤트로 수신
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 409) {
-        // 이미 진행 중인 피드백 있음 — doc:init에서 이미 상태 복원됨
+        // 이미 진행 중인 피드백 있음 - doc:init에서 이미 상태 복원됨
       } else {
         console.error(error);
       }

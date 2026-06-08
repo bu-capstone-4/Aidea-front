@@ -25,6 +25,7 @@ export default function CreateTeamSpace({ onClose }: CreateTeamSpaceProps) {
   const [step, setStep] = useState<1 | 2>(1);
   const [form, setForm] = useState<TeamSpaceForm>(initialForm);
   const [teamspaceId, setTeamspaceId] = useState<string | null>(null);
+  const [firstDocId, setFirstDocId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const navigate = useNavigate();
@@ -55,9 +56,12 @@ export default function CreateTeamSpace({ onClose }: CreateTeamSpaceProps) {
       const response = await apiClient.post('/api/teamspaces', {
         name: form.teamName.trim(),
         idea: form.idea.trim(),
+        documentTypes: form.selectedDocs,
       });
 
-      setTeamspaceId(response.data.data.teamspaceId);
+      const { teamspaceId: tsId, documents } = response.data.data;
+      setTeamspaceId(tsId);
+      setFirstDocId(documents?.[0]?.id ?? null);
       setStep(2);
     } catch {
       // 서버 에러는 apiClient 인터셉터가 toast로 처리
@@ -84,16 +88,9 @@ export default function CreateTeamSpace({ onClose }: CreateTeamSpaceProps) {
     try {
       setErrorMessage(null);
 
-      await Promise.all(
-        form.selectedDocs.map((type) => apiClient.post('/api/documents', { teamspaceId, type }))
-      );
-
       if (emails.length > 0) {
         await apiClient.post(`/api/teamspaces/${teamspaceId}/invitations`, { emails });
       }
-
-      const detailResponse = await apiClient.get(`/api/teamspaces/${teamspaceId}`);
-      const firstDocId = detailResponse.data.data.documents?.[0]?.id;
 
       if (firstDocId) {
         navigate(`/main/${firstDocId}`);

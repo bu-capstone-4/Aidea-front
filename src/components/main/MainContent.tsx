@@ -8,9 +8,10 @@ import Button from '@/components/ui/Button';
 import FeedbackModal from './FeedbackModal';
 import SplitView from './SplitView';
 import { useFeedbackStore } from '@/store/FeedbackStore';
-import QuestionPanel from './QuestionPanel';
-import Loading from './Loading';
 import useFeedback from '@/hooks/useFeedback';
+import { Helmet } from 'react-helmet-async';
+import { useTeamspaceStore } from '@/store/teamspaceStore';
+import { useTeamspaceDetail } from '@/hooks/useTeamspaceDetail';
 
 const CURSOR_COLORS = ['#1971c2', '#e03131', '#2f9e44', '#f08c00', '#7048e8'];
 
@@ -24,6 +25,9 @@ export default function MainContent() {
   const isSplitView = useFeedbackStore((state) => state.isSplitView);
   const status = useFeedbackStore((state) => state.status);
   const feedbackId = useFeedbackStore((state) => state.feedbackId);
+  const { currentTeamspaceId, documentAiStatuses } = useTeamspaceStore();
+  const { teamspace } = useTeamspaceDetail(currentTeamspaceId);
+  const isAiDraftGenerating = docId ? documentAiStatuses[docId] === 'DRAFT' : false;
 
   const resetFeedback = useFeedbackStore((state) => state.resetFeedback);
   const { startPolling, stopPolling } = useFeedback();
@@ -64,6 +68,9 @@ export default function MainContent() {
 
   return (
     <main className="flex-1 overflow-y-auto bg-white relative">
+      <Helmet>
+        <title>{`${getDocLabel(doc.type)} - ${teamspace?.name ?? 'Aidea'}`}</title>
+      </Helmet>
       {isSplitView && <SplitView title={getDocLabel(doc.type)} />}
       <div
         className={`${isSplitView ? 'hidden' : 'block'} max-w-180 mx-auto px-24 md:px-10 sm:px-5 pt-5`}
@@ -72,20 +79,19 @@ export default function MainContent() {
           <h1 className="text-[2.5rem] font-bold text-[#1a1a1a] tracking-tight leading-tight">
             {getDocLabel(doc.type)}
           </h1>
-          {status === 'IDLE' && (
+          {(status === 'IDLE' || status === 'ACCEPTED') && (
             <Button variant="feedback" size="sm" className="shrink-0" onClick={toggleFeedbackModal}>
               + AI 피드백
             </Button>
           )}
         </div>
 
-        <QuestionPanel />
-
-        <div className={status === 'QUESTIONING' ? 'hidden' : 'block'}>
+        <div className={isSplitView === true ? 'hidden' : 'block'}>
           <CollaborativeEditor
             key={docId}
             docId={docId}
-            editable={true}
+            editable={!isAiDraftGenerating}
+            isAiDraftGenerating={isAiDraftGenerating}
             user={collabUser}
             token=""
           />
@@ -97,8 +103,6 @@ export default function MainContent() {
         toggleFeedbackModal={toggleFeedbackModal}
         docId={docId ?? ''}
       />
-
-      <Loading isLoading={status === 'PENDING' || status === 'ANSWERING'} />
 
       {status === 'FAILED' && (
         <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-999">

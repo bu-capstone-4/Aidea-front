@@ -20,6 +20,7 @@ function nameToColor(name: string): string {
 interface UserAvatarProps {
   name: string;
   imageUrl?: string | null;
+  githubLogin?: string | null;
   size?: number;
   className?: string;
 }
@@ -27,19 +28,22 @@ interface UserAvatarProps {
 export default function UserAvatar({
   name,
   imageUrl = null,
+  githubLogin = null,
   size = 32,
   className = '',
 }: UserAvatarProps) {
   const initial = name.trim().charAt(0).toUpperCase();
   const bg = nameToColor(name);
+  const resolvedImageUrl =
+    imageUrl ?? (githubLogin ? `https://avatars.githubusercontent.com/${githubLogin}` : null);
 
   return (
     <div
       className={`rounded-full flex items-center justify-center text-white font-semibold shrink-0 ${className}`}
       style={{ width: size, height: size, fontSize: size * 0.4, backgroundColor: bg }}
     >
-      {imageUrl ? (
-        <img src={imageUrl} alt={name} className="size-full rounded-full object-cover" />
+      {resolvedImageUrl ? (
+        <img src={resolvedImageUrl} alt={name} className="size-full rounded-full object-cover" />
       ) : (
         initial
       )}

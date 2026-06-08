@@ -33,9 +33,9 @@ export default function QuestionPanel() {
   if (status !== 'QUESTIONING' || !questions) return null;
 
   return (
-    <div className="w-full flex flex-col gap-6 bg-white">
-      <div className="bg-[#F4F0FF] rounded-xl p-6 border border-purple-50">
-        <div className="flex items-center gap-2 text-[#7C3AED] font-bold text-base mb-2">
+    <div className="flex-1 h-full overflow-y-auto flex flex-col gap-4 bg-white">
+      <div className="bg-[#F4F0FF] rounded-xl p-4 border border-purple-50">
+        <div className="flex items-center gap-2 text-[#7C3AED] font-bold text-base mb-1.5">
           <span className="text-xl">✦</span> Aidea
         </div>
         <div className="text-gray-800 text-sm leading-relaxed">
@@ -48,7 +48,7 @@ export default function QuestionPanel() {
         </div>
       </div>
 
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-4">
         {questions.map((q, idx) => {
           const currentAnswer = answers[q.id];
           const hasOptions = Array.isArray(q.options) && q.options.length > 0;
@@ -56,32 +56,30 @@ export default function QuestionPanel() {
             hasOptions && currentAnswer !== undefined && !q.options!.includes(currentAnswer);
 
           return (
-            <div key={q.id} className="border border-gray-200 rounded-2xl p-6 md:p-8 shadow-sm">
-              <div className="flex items-start gap-4 mb-6">
-                <div className="w-8 h-8 flex items-center justify-center bg-purple-100 text-[#7C3AED] rounded-full font-bold text-sm shrink-0">
+            <div key={q.id} className="border border-gray-200 rounded-2xl p-4 shadow-sm">
+              <div className="flex items-start gap-3 mb-4">
+                <div className="w-7 h-7 flex items-center justify-center bg-purple-100 text-[#7C3AED] rounded-full font-bold text-sm shrink-0">
                   {idx + 1}
                 </div>
-                <h3 className="font-bold text-gray-900 text-lg pt-1">{q.text}</h3>
+                <h3 className="font-bold text-gray-900 text-base pt-0.5">{q.text}</h3>
               </div>
 
               {!hasOptions ? (
-                /* options === null or undefined: 자유 입력 textarea 단독 */
                 <textarea
                   placeholder="직접 입력해주세요..."
                   value={currentAnswer || ''}
                   onChange={(e) => handleSelect(q.id, e.target.value)}
-                  rows={4}
+                  rows={3}
                   className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white resize-none"
                 />
               ) : (
-                /* options 배열: 라디오 + 직접 입력 옵션 */
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-2">
                   {q.options!.map((option) => {
                     const isSelected = currentAnswer === option;
                     return (
                       <label
                         key={option}
-                        className={`flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-colors ${
+                        className={`flex items-center gap-3 px-4 py-2.5 border-2 rounded-xl cursor-pointer transition-colors ${
                           isSelected
                             ? 'border-blue-500 bg-blue-50'
                             : 'border-transparent bg-gray-50 hover:bg-gray-100'
@@ -92,7 +90,7 @@ export default function QuestionPanel() {
                           name={q.id}
                           checked={isSelected}
                           onChange={() => handleSelect(q.id, option)}
-                          className="w-5 h-5 accent-blue-600 cursor-pointer"
+                          className="w-4 h-4 accent-blue-600 cursor-pointer"
                         />
                         <span
                           className={`text-sm ${
@@ -105,9 +103,9 @@ export default function QuestionPanel() {
                     );
                   })}
 
-                  <div className="flex flex-col gap-2 mt-1">
+                  <div className="flex flex-col gap-1.5 mt-0.5">
                     <label
-                      className={`flex items-center gap-3 p-4 border-2 rounded-xl cursor-pointer transition-colors ${
+                      className={`flex items-center gap-3 px-4 py-2.5 border-2 rounded-xl cursor-pointer transition-colors ${
                         isCustomSelected
                           ? 'border-blue-500 bg-blue-50'
                           : 'border-transparent bg-gray-50 hover:bg-gray-100'
@@ -118,7 +116,7 @@ export default function QuestionPanel() {
                         name={q.id}
                         checked={isCustomSelected}
                         onChange={() => handleSelect(q.id, '')}
-                        className="w-5 h-5 accent-blue-600 cursor-pointer"
+                        className="w-4 h-4 accent-blue-600 cursor-pointer"
                       />
                       <span
                         className={`text-sm ${
@@ -137,7 +135,7 @@ export default function QuestionPanel() {
                         placeholder="직접 입력해주세요..."
                         value={currentAnswer || ''}
                         onChange={(e) => handleSelect(q.id, e.target.value)}
-                        className="w-full border border-blue-300 rounded-xl px-4 py-4 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                        className="w-full border border-blue-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
                         autoFocus
                       />
                     )}
@@ -149,10 +147,10 @@ export default function QuestionPanel() {
         })}
       </div>
 
-      <div className="mt-8 flex flex-col items-center gap-4 pb-10">
+      <div className="mt-4 flex flex-col items-center gap-3 pb-8">
         <Button
           onClick={handleSubmit}
-          className="w-full max-w-lg py-4 bg-blue-600 text-white rounded-xl font-bold text-lg hover:bg-blue-700 transition-colors shadow-md"
+          className="w-full max-w-lg py-3.5 bg-blue-600 text-white rounded-xl font-bold text-base hover:bg-blue-700 transition-colors shadow-md"
         >
           AI 피드백 받기
         </Button>

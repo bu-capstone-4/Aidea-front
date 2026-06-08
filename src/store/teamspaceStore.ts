@@ -1,22 +1,36 @@
 import { create } from 'zustand';
-import type { ActiveMember, TeamspaceStatus } from '@/types/teamspaceSocket';
+import type { ActiveMember } from '@/types/teamspaceSocket';
+import type { DocumentAiStatus } from '@/types/api';
+
+interface PendingDraft {
+  documentId: string;
+  content: string;
+}
 
 interface TeamspaceState {
   currentTeamspaceId: string | null;
   onlineMembers: ActiveMember[];
-  teamspaceStatus: TeamspaceStatus | null;
-  setCurrentTeamspaceId: (id: string) => void;
+  documentAiStatuses: Record<string, DocumentAiStatus>;
+  pendingDraft: PendingDraft | null;
+  setCurrentTeamspaceId: (id: string | null) => void;
   setOnlineMembers: (members: ActiveMember[]) => void;
-  setTeamspaceStatus: (status: TeamspaceStatus | null) => void;
+  setDocumentAiStatus: (documentId: string, aiStatus: DocumentAiStatus) => void;
+  setPendingDraft: (draft: PendingDraft | null) => void;
   clearTeamspacePresence: () => void;
 }
 
 export const useTeamspaceStore = create<TeamspaceState>()((set) => ({
   currentTeamspaceId: null,
   onlineMembers: [],
-  teamspaceStatus: null,
+  documentAiStatuses: {},
+  pendingDraft: null,
   setCurrentTeamspaceId: (id) => set({ currentTeamspaceId: id }),
   setOnlineMembers: (members) => set({ onlineMembers: members }),
-  setTeamspaceStatus: (status) => set({ teamspaceStatus: status }),
-  clearTeamspacePresence: () => set({ onlineMembers: [], teamspaceStatus: null }),
+  setDocumentAiStatus: (documentId, aiStatus) =>
+    set((state) => ({
+      documentAiStatuses: { ...state.documentAiStatuses, [documentId]: aiStatus },
+    })),
+  setPendingDraft: (draft) => set({ pendingDraft: draft }),
+  clearTeamspacePresence: () =>
+    set({ onlineMembers: [], documentAiStatuses: {}, pendingDraft: null }),
 }));

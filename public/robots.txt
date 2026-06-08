@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /$
+
+Disallow: /login
+Disallow: /api/
+Disallow: /create/
+Disallow: /main/
+
+Sitemap: https://aidea-front.pages.dev/sitemap.xml

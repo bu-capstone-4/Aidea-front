@@ -1,0 +1,2380 @@
+{
+  "openapi": "3.1.0",
+  "info": { "title": "API Title", "description": "This is my Swagger UI", "version": "1.0.0" },
+  "servers": [{ "url": "http://localhost:8080", "description": "Generated server url" }],
+  "tags": [
+    { "name": "Task", "description": "백로그 태스크 API" },
+    { "name": "BacklogTask", "description": "최상위 태스크 API" },
+    { "name": "Story", "description": "백로그 스토리 API" },
+    { "name": "Epic", "description": "백로그 에픽 API" },
+    { "name": "BacklogConfig", "description": "백로그 설정 API" }
+  ],
+  "paths": {
+    "/api/teamspaces/{teamspaceId}": {
+      "get": {
+        "tags": ["team-space-controller"],
+        "operationId": "get",
+        "parameters": [
+          { "name": "teamspaceId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/GlobalResponseTeamSpaceDetailResponse" }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["team-space-controller"],
+        "operationId": "update",
+        "parameters": [
+          { "name": "teamspaceId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/TeamSpaceUpdateRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/GlobalResponseTeamSpaceCreateResponse" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["team-space-controller"],
+        "operationId": "delete",
+        "parameters": [
+          { "name": "teamspaceId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": { "schema": { "$ref": "#/components/schemas/GlobalResponseVoid" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/teamspaces/{teamspaceId}/tasks/{taskId}": {
+      "put": {
+        "tags": ["BacklogTask"],
+        "summary": "최상위 태스크 수정",
+        "operationId": "updateTask",
+        "parameters": [
+          { "name": "teamspaceId", "in": "path", "required": true, "schema": { "type": "string" } },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateBacklogTaskRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/GlobalResponseBacklogTaskResponse" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["BacklogTask"],
+        "summary": "최상위 태스크 삭제",
+        "operationId": "deleteTask",
+        "parameters": [
+          { "name": "teamspaceId", "in": "path", "required": true, "schema": { "type": "string" } },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": { "schema": { "$ref": "#/components/schemas/GlobalResponseVoid" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/teamspaces/{teamspaceId}/stories/{storyId}": {
+      "get": {
+        "tags": ["Story"],
+        "summary": "스토리 상세 조회",
+        "operationId": "getStory",
+        "parameters": [
+          { "name": "teamspaceId", "in": "path", "required": true, "schema": { "type": "string" } },
+          {
+            "name": "storyId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/GlobalResponseStoryDetailResponse" }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Story"],
+        "summary": "스토리 수정",
+        "operationId": "updateStory",
+        "parameters": [
+          { "name": "teamspaceId", "in": "path", "required": true, "schema": { "type": "string" } },
+          {
+            "name": "storyId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/UpdateStoryRequest" } }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/GlobalResponseStoryDetailResponse" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Story"],
+        "summary": "스토리 삭제",
+        "operationId": "deleteStory",
+        "parameters": [
+          { "name": "teamspaceId", "in": "path", "required": true, "schema": { "type": "string" } },
+          {
+            "name": "storyId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": { "schema": { "$ref": "#/components/schemas/GlobalResponseVoid" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/teamspaces/{teamspaceId}/stories/{storyId}/tasks/{taskId}": {
+      "put": {
+        "tags": ["Task"],
+        "summary": "태스크 수정",
+        "operationId": "updateTask_1",
+        "parameters": [
+          { "name": "teamspaceId", "in": "path", "required": true, "schema": { "type": "string" } },
+          {
+            "name": "storyId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/UpdateTaskRequest" } }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": { "schema": { "$ref": "#/components/schemas/GlobalResponseTaskResponse" } }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Task"],
+        "summary": "태스크 삭제",
+        "operationId": "deleteTask_1",
+        "parameters": [
+          { "name": "teamspaceId", "in": "path", "required": true, "schema": { "type": "string" } },
+          {
+            "name": "storyId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": { "schema": { "$ref": "#/components/schemas/GlobalResponseVoid" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/teamspaces/{teamspaceId}/epics/{epicId}": {
+      "put": {
+        "tags": ["Epic"],
+        "summary": "에픽 수정",
+        "operationId": "updateEpic",
+        "parameters": [
+          { "name": "teamspaceId", "in": "path", "required": true, "schema": { "type": "string" } },
+          {
+            "name": "epicId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/UpdateEpicRequest" } }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": { "schema": { "$ref": "#/components/schemas/GlobalResponseEpicResponse" } }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Epic"],
+        "summary": "에픽 삭제",
+        "operationId": "deleteEpic",
+        "parameters": [
+          { "name": "teamspaceId", "in": "path", "required": true, "schema": { "type": "string" } },
+          {
+            "name": "epicId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": { "schema": { "$ref": "#/components/schemas/GlobalResponseVoid" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/teamspaces/{teamspaceId}/backlog/config": {
+      "get": {
+        "tags": ["BacklogConfig"],
+        "summary": "백로그 설정 조회",
+        "operationId": "getConfig",
+        "parameters": [
+          { "name": "teamspaceId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/GlobalResponseBacklogConfigResponse" }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["BacklogConfig"],
+        "summary": "백로그 설정 저장 (없으면 생성, 있으면 덮어쓰기)",
+        "operationId": "upsertConfig",
+        "parameters": [
+          { "name": "teamspaceId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/BacklogConfigRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/GlobalResponseBacklogConfigResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/teamspaces": {
+      "get": {
+        "tags": ["team-space-controller"],
+        "operationId": "getList",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/GlobalResponseTeamSpaceListResponse" }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["team-space-controller"],
+        "operationId": "create",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/TeamSpaceCreateRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/GlobalResponseTeamSpaceCreateResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/teamspaces/{teamspaceId}/tasks": {
+      "post": {
+        "tags": ["BacklogTask"],
+        "summary": "최상위 태스크 생성",
+        "operationId": "createTask",
+        "parameters": [
+          { "name": "teamspaceId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateBacklogTaskRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/GlobalResponseBacklogTaskResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/teamspaces/{teamspaceId}/stories": {
+      "get": {
+        "tags": ["Story"],
+        "summary": "스토리 목록 조회 (필터링)",
+        "operationId": "getStories",
+        "parameters": [
+          { "name": "teamspaceId", "in": "path", "required": true, "schema": { "type": "string" } },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": { "type": "string", "enum": ["OPEN", "IN_PROGRESS", "DONE", "CLOSED"] }
+            }
+          },
+          {
+            "name": "epicId",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "format": "int64" }
+          },
+          {
+            "name": "assigneeId",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "format": "int64" }
+          },
+          {
+            "name": "priority",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH", "URGENT"] }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/GlobalResponseListStorySummaryResponse" }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Story"],
+        "summary": "스토리 생성",
+        "operationId": "createStory",
+        "parameters": [
+          { "name": "teamspaceId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/CreateStoryRequest" } }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/GlobalResponseStoryDetailResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/teamspaces/{teamspaceId}/stories/{storyId}/tasks": {
+      "post": {
+        "tags": ["Task"],
+        "summary": "태스크 생성",
+        "operationId": "createTask_1",
+        "parameters": [
+          { "name": "teamspaceId", "in": "path", "required": true, "schema": { "type": "string" } },
+          {
+            "name": "storyId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/CreateTaskRequest" } }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": { "schema": { "$ref": "#/components/schemas/GlobalResponseTaskResponse" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/teamspaces/{teamspaceId}/members/invite": {
+      "post": {
+        "tags": ["invitation-controller"],
+        "operationId": "inviteMember",
+        "parameters": [
+          { "name": "teamspaceId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "type": "object", "additionalProperties": { "type": "string" } }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": { "schema": { "$ref": "#/components/schemas/GlobalResponseVoid" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/teamspaces/{teamspaceId}/invitations": {
+      "post": {
+        "tags": ["invitation-controller"],
+        "operationId": "bulkInvite",
+        "parameters": [
+          { "name": "teamspaceId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/BulkInviteRequest" } }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/GlobalResponseListBulkInviteResultItem" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/teamspaces/{teamspaceId}/epics": {
+      "get": {
+        "tags": ["Epic"],
+        "summary": "에픽 목록 조회",
+        "operationId": "getEpics",
+        "parameters": [
+          { "name": "teamspaceId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": { "schema": { "$ref": "#/components/schemas/GlobalResponseListEpicResponse" } }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Epic"],
+        "summary": "에픽 생성",
+        "operationId": "createEpic",
+        "parameters": [
+          { "name": "teamspaceId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/CreateEpicRequest" } }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": { "schema": { "$ref": "#/components/schemas/GlobalResponseEpicResponse" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/invitations": {
+      "post": {
+        "tags": ["invitation-controller"],
+        "operationId": "invite",
+        "requestBody": {
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/InvitationRequest" } }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": { "schema": { "$ref": "#/components/schemas/GlobalResponseVoid" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/invitations/accept": {
+      "get": {
+        "tags": ["invitation-controller"],
+        "operationId": "acceptByLink",
+        "parameters": [
+          { "name": "token", "in": "query", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": { "*/*": { "schema": { "$ref": "#/components/schemas/RedirectView" } } }
+          }
+        }
+      },
+      "post": {
+        "tags": ["invitation-controller"],
+        "operationId": "accept",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AcceptInvitationRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": { "schema": { "$ref": "#/components/schemas/GlobalResponseMapStringString" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/feedbacks/{feedbackId}/reject": {
+      "post": {
+        "tags": ["Feedback"],
+        "summary": "AI 피드백 거부 — 원본 유지",
+        "operationId": "rejectFeedback",
+        "parameters": [
+          { "name": "feedbackId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/GlobalResponseFeedbackIdResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/feedbacks/{feedbackId}/answers": {
+      "post": {
+        "tags": ["Feedback"],
+        "summary": "질문 답변 제출",
+        "operationId": "submitAnswer",
+        "parameters": [
+          { "name": "feedbackId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/AnswerRequest" } }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/GlobalResponseFeedbackIdResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/feedbacks/{feedbackId}/accept": {
+      "post": {
+        "tags": ["Feedback"],
+        "summary": "AI 피드백 수락 — 수정안 채택",
+        "operationId": "acceptFeedback",
+        "parameters": [
+          { "name": "feedbackId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/GlobalResponseFeedbackIdResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/documents": {
+      "get": {
+        "tags": ["document-controller"],
+        "operationId": "getDocuments",
+        "parameters": [
+          { "name": "teamspaceId", "in": "query", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/GlobalResponseListDocumentSummary" }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["document-controller"],
+        "operationId": "createDocument",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/DocumentCreateRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/GlobalResponseDocumentCreateResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/documents/{docId}/feedback": {
+      "post": {
+        "tags": ["Feedback"],
+        "summary": "AI 피드백 요청",
+        "operationId": "requestFeedback",
+        "parameters": [
+          { "name": "docId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/FeedbackRequest" } }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/GlobalResponseFeedbackIdResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/refresh": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "토큰 갱신",
+        "operationId": "refresh",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": { "schema": { "$ref": "#/components/schemas/GlobalResponseVoid" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "로그아웃",
+        "operationId": "logout",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": { "schema": { "$ref": "#/components/schemas/GlobalResponseVoid" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/teamspaces/{teamspaceId}/tasks/{taskId}/story": {
+      "patch": {
+        "tags": ["BacklogTask"],
+        "summary": "최상위 태스크 상위 스토리 연결/해제",
+        "operationId": "linkStory",
+        "parameters": [
+          { "name": "teamspaceId", "in": "path", "required": true, "schema": { "type": "string" } },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/LinkStoryRequest" } }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/GlobalResponseBacklogTaskResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/teamspaces/{teamspaceId}/tasks/{taskId}/status": {
+      "patch": {
+        "tags": ["BacklogTask"],
+        "summary": "최상위 태스크 상태 변경",
+        "operationId": "changeStatus",
+        "parameters": [
+          { "name": "teamspaceId", "in": "path", "required": true, "schema": { "type": "string" } },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateBacklogTaskStatusRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/GlobalResponseBacklogTaskResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/teamspaces/{teamspaceId}/tasks/reorder": {
+      "patch": {
+        "tags": ["BacklogTask"],
+        "summary": "최상위 태스크 순서 변경",
+        "operationId": "reorder",
+        "parameters": [
+          { "name": "teamspaceId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/ReorderRequest" } }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": { "schema": { "$ref": "#/components/schemas/GlobalResponseReorderResponse" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/teamspaces/{teamspaceId}/stories/{storyId}/tasks/{taskId}/complete": {
+      "patch": {
+        "tags": ["Task"],
+        "summary": "태스크 완료 토글",
+        "operationId": "toggleComplete",
+        "parameters": [
+          { "name": "teamspaceId", "in": "path", "required": true, "schema": { "type": "string" } },
+          {
+            "name": "storyId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": { "schema": { "$ref": "#/components/schemas/GlobalResponseMapStringObject" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/teamspaces/{teamspaceId}/stories/{storyId}/tasks/reorder": {
+      "patch": {
+        "tags": ["Task"],
+        "summary": "태스크 순서 변경",
+        "operationId": "reorder_1",
+        "parameters": [
+          { "name": "teamspaceId", "in": "path", "required": true, "schema": { "type": "string" } },
+          {
+            "name": "storyId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/ReorderRequest" } }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": { "schema": { "$ref": "#/components/schemas/GlobalResponseReorderResponse" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/teamspaces/{teamspaceId}/stories/{storyId}/status": {
+      "patch": {
+        "tags": ["Story"],
+        "summary": "스토리 상태 변경",
+        "operationId": "changeStatus_1",
+        "parameters": [
+          { "name": "teamspaceId", "in": "path", "required": true, "schema": { "type": "string" } },
+          {
+            "name": "storyId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateStoryStatusRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/GlobalResponseStoryStatusResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/teamspaces/{teamspaceId}/stories/reorder": {
+      "patch": {
+        "tags": ["Story"],
+        "summary": "스토리 순서 변경",
+        "operationId": "reorder_2",
+        "parameters": [
+          { "name": "teamspaceId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/ReorderRequest" } }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": { "schema": { "$ref": "#/components/schemas/GlobalResponseReorderResponse" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/teamspaces/{teamspaceId}/epics/{epicId}/status": {
+      "patch": {
+        "tags": ["Epic"],
+        "summary": "에픽 상태 변경",
+        "operationId": "changeStatus_2",
+        "parameters": [
+          { "name": "teamspaceId", "in": "path", "required": true, "schema": { "type": "string" } },
+          {
+            "name": "epicId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/UpdateEpicStatusRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": { "schema": { "$ref": "#/components/schemas/GlobalResponseEpicResponse" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/teamspaces/{teamspaceId}/epics/reorder": {
+      "patch": {
+        "tags": ["Epic"],
+        "summary": "에픽 순서 변경",
+        "operationId": "reorder_3",
+        "parameters": [
+          { "name": "teamspaceId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/ReorderRequest" } }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": { "schema": { "$ref": "#/components/schemas/GlobalResponseReorderResponse" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/documents/{documentId}": {
+      "get": {
+        "tags": ["document-controller"],
+        "operationId": "getDocument",
+        "parameters": [
+          { "name": "documentId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": { "schema": { "$ref": "#/components/schemas/GlobalResponseDocumentDetail" } }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["document-controller"],
+        "operationId": "deleteDocument",
+        "parameters": [
+          { "name": "documentId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": { "schema": { "$ref": "#/components/schemas/GlobalResponseVoid" } }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": ["document-controller"],
+        "operationId": "updateTitle",
+        "parameters": [
+          { "name": "documentId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/DocumentUpdateRequest" }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/GlobalResponseDocumentUpdateResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/teamspaces/{teamspaceId}/members": {
+      "get": {
+        "tags": ["member-controller"],
+        "operationId": "getMembers",
+        "parameters": [
+          { "name": "teamspaceId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/GlobalResponseListMemberInfoResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/feedbacks/{feedbackId}": {
+      "get": {
+        "tags": ["Feedback"],
+        "summary": "AI 피드백 상태 조회 (폴링용)",
+        "operationId": "getFeedback",
+        "parameters": [
+          { "name": "feedbackId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": { "$ref": "#/components/schemas/GlobalResponseFeedbackDetailResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/documents/{documentId}/export": {
+      "get": {
+        "tags": ["document-controller"],
+        "operationId": "exportDocument",
+        "parameters": [
+          { "name": "documentId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "format", "in": "query", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": { "*/*": { "schema": { "type": "string", "format": "byte" } } }
+          }
+        }
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "내 정보 조회",
+        "operationId": "me",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": { "schema": { "$ref": "#/components/schemas/GlobalResponseUserResponse" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/teamspaces/{teamspaceId}/members/{memberId}": {
+      "delete": {
+        "tags": ["invitation-controller"],
+        "operationId": "removeMember",
+        "parameters": [
+          { "name": "teamspaceId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "memberId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": { "schema": { "$ref": "#/components/schemas/GlobalResponseVoid" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/teamspaces/{teamspaceId}/invitations/{invitationId}": {
+      "delete": {
+        "tags": ["invitation-controller"],
+        "operationId": "cancelInvitation",
+        "parameters": [
+          { "name": "teamspaceId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "invitationId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": { "schema": { "$ref": "#/components/schemas/GlobalResponseVoid" } }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "TeamSpaceUpdateRequest": {
+        "type": "object",
+        "properties": { "name": { "type": "string" } }
+      },
+      "GlobalResponseTeamSpaceCreateResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "code": { "type": "string" },
+          "message": { "type": "string" },
+          "data": { "$ref": "#/components/schemas/TeamSpaceCreateResponse" }
+        }
+      },
+      "TeamSpaceCreateResponse": {
+        "type": "object",
+        "properties": {
+          "teamspaceId": { "type": "string" },
+          "name": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "UpdateBacklogTaskRequest": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "status": { "type": "string", "enum": ["OPEN", "IN_PROGRESS", "DONE", "CLOSED"] },
+          "priority": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH", "URGENT"] },
+          "issueType": { "type": "string", "enum": ["FE", "BE"] },
+          "sprint": { "type": "string" },
+          "assigneeId": { "type": "integer", "format": "int64" },
+          "dueDate": { "type": "string", "format": "date" },
+          "storyId": { "type": "integer", "format": "int64" }
+        },
+        "required": ["title"]
+      },
+      "BacklogTaskResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "number": { "type": "integer", "format": "int64" },
+          "title": { "type": "string" },
+          "status": { "type": "string", "enum": ["OPEN", "IN_PROGRESS", "DONE", "CLOSED"] },
+          "priority": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH", "URGENT"] },
+          "issueType": { "type": "string", "enum": ["FE", "BE"] },
+          "sprint": { "type": "string" },
+          "assignee": { "$ref": "#/components/schemas/UserResponse" },
+          "reporter": { "$ref": "#/components/schemas/UserResponse" },
+          "dueDate": { "type": "string", "format": "date" },
+          "position": { "type": "integer", "format": "int32" },
+          "storyId": { "type": "integer", "format": "int64" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "GlobalResponseBacklogTaskResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "code": { "type": "string" },
+          "message": { "type": "string" },
+          "data": { "$ref": "#/components/schemas/BacklogTaskResponse" }
+        }
+      },
+      "UserResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "name": { "type": "string" },
+          "githubLogin": { "type": "string" },
+          "profileImageUrl": { "type": "string" }
+        }
+      },
+      "UpdateStoryRequest": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "body": { "type": "string" },
+          "priority": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH", "URGENT"] },
+          "issueType": { "type": "string", "enum": ["FE", "BE"] },
+          "sprint": { "type": "string" },
+          "epicIds": { "type": "array", "items": { "type": "integer", "format": "int64" } },
+          "assigneeId": { "type": "integer", "format": "int64" },
+          "dueDate": { "type": "string", "format": "date" }
+        },
+        "required": ["title"]
+      },
+      "EpicSummaryResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "name": { "type": "string" },
+          "color": { "type": "string" }
+        }
+      },
+      "GlobalResponseStoryDetailResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "code": { "type": "string" },
+          "message": { "type": "string" },
+          "data": { "$ref": "#/components/schemas/StoryDetailResponse" }
+        }
+      },
+      "StoryDetailResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "number": { "type": "integer", "format": "int64" },
+          "title": { "type": "string" },
+          "body": { "type": "string" },
+          "status": { "type": "string", "enum": ["OPEN", "IN_PROGRESS", "DONE", "CLOSED"] },
+          "priority": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH", "URGENT"] },
+          "issueType": { "type": "string", "enum": ["FE", "BE"] },
+          "sprint": { "type": "string" },
+          "epics": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/EpicSummaryResponse" }
+          },
+          "assignee": { "$ref": "#/components/schemas/UserResponse" },
+          "reporter": { "$ref": "#/components/schemas/UserResponse" },
+          "dueDate": { "type": "string", "format": "date" },
+          "position": { "type": "integer", "format": "int32" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" },
+          "closedAt": { "type": "string", "format": "date-time" },
+          "tasks": { "type": "array", "items": { "$ref": "#/components/schemas/TaskResponse" } },
+          "linkedTasks": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/BacklogTaskResponse" }
+          }
+        }
+      },
+      "TaskResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "title": { "type": "string" },
+          "issueType": { "type": "string", "enum": ["FE", "BE"] },
+          "isCompleted": { "type": "boolean" },
+          "assignee": { "$ref": "#/components/schemas/UserResponse" },
+          "position": { "type": "integer", "format": "int32" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "UpdateTaskRequest": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "issueType": { "type": "string", "enum": ["FE", "BE"] },
+          "assigneeId": { "type": "integer", "format": "int64" }
+        },
+        "required": ["title"]
+      },
+      "GlobalResponseTaskResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "code": { "type": "string" },
+          "message": { "type": "string" },
+          "data": { "$ref": "#/components/schemas/TaskResponse" }
+        }
+      },
+      "UpdateEpicRequest": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+          "description": { "type": "string" },
+          "priority": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH", "URGENT"] },
+          "issueType": { "type": "string", "enum": ["FE", "BE"] },
+          "assigneeId": { "type": "integer", "format": "int64" },
+          "dueDate": { "type": "string", "format": "date" }
+        },
+        "required": ["color", "name"]
+      },
+      "EpicResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "number": { "type": "integer", "format": "int64" },
+          "name": { "type": "string" },
+          "color": { "type": "string" },
+          "description": { "type": "string" },
+          "status": { "type": "string", "enum": ["OPEN", "IN_PROGRESS", "DONE", "CLOSED"] },
+          "priority": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH", "URGENT"] },
+          "issueType": { "type": "string", "enum": ["FE", "BE"] },
+          "assignee": { "$ref": "#/components/schemas/UserResponse" },
+          "reporter": { "$ref": "#/components/schemas/UserResponse" },
+          "dueDate": { "type": "string", "format": "date" },
+          "position": { "type": "integer", "format": "int32" },
+          "storyCount": { "type": "integer", "format": "int32" },
+          "completedStoryCount": { "type": "integer", "format": "int32" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" },
+          "closedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "GlobalResponseEpicResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "code": { "type": "string" },
+          "message": { "type": "string" },
+          "data": { "$ref": "#/components/schemas/EpicResponse" }
+        }
+      },
+      "BacklogConfigRequest": {
+        "type": "object",
+        "properties": {
+          "feBeEnabled": { "type": "boolean" },
+          "epicEnabled": { "type": "boolean" },
+          "storyEnabled": { "type": "boolean" },
+          "priorityEnabled": { "type": "boolean" },
+          "sprintEnabled": { "type": "boolean" },
+          "dueDateEnabled": { "type": "boolean" }
+        }
+      },
+      "BacklogConfigResponse": {
+        "type": "object",
+        "properties": {
+          "teamspaceId": { "type": "string" },
+          "feBeEnabled": { "type": "boolean" },
+          "epicEnabled": { "type": "boolean" },
+          "storyEnabled": { "type": "boolean" },
+          "priorityEnabled": { "type": "boolean" },
+          "sprintEnabled": { "type": "boolean" },
+          "dueDateEnabled": { "type": "boolean" }
+        }
+      },
+      "GlobalResponseBacklogConfigResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "code": { "type": "string" },
+          "message": { "type": "string" },
+          "data": { "$ref": "#/components/schemas/BacklogConfigResponse" }
+        }
+      },
+      "TeamSpaceCreateRequest": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "idea": { "type": "string" },
+          "documentTypes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["IDEA", "PLAN", "USER_SCENARIO", "API_SPEC", "ERD"]
+            }
+          }
+        }
+      },
+      "CreateBacklogTaskRequest": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "status": { "type": "string", "enum": ["OPEN", "IN_PROGRESS", "DONE", "CLOSED"] },
+          "priority": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH", "URGENT"] },
+          "issueType": { "type": "string", "enum": ["FE", "BE"] },
+          "sprint": { "type": "string" },
+          "assigneeId": { "type": "integer", "format": "int64" },
+          "dueDate": { "type": "string", "format": "date" },
+          "storyId": { "type": "integer", "format": "int64" }
+        },
+        "required": ["title"]
+      },
+      "CreateStoryRequest": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "body": { "type": "string" },
+          "status": { "type": "string", "enum": ["OPEN", "IN_PROGRESS", "DONE", "CLOSED"] },
+          "priority": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH", "URGENT"] },
+          "issueType": { "type": "string", "enum": ["FE", "BE"] },
+          "sprint": { "type": "string" },
+          "epicIds": { "type": "array", "items": { "type": "integer", "format": "int64" } },
+          "assigneeId": { "type": "integer", "format": "int64" },
+          "dueDate": { "type": "string", "format": "date" }
+        },
+        "required": ["title"]
+      },
+      "CreateTaskRequest": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "issueType": { "type": "string", "enum": ["FE", "BE"] },
+          "assigneeId": { "type": "integer", "format": "int64" }
+        },
+        "required": ["title"]
+      },
+      "GlobalResponseVoid": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "code": { "type": "string" },
+          "message": { "type": "string" },
+          "data": { "type": "object" }
+        }
+      },
+      "BulkInviteRequest": {
+        "type": "object",
+        "properties": { "emails": { "type": "array", "items": { "type": "string" } } },
+        "required": ["emails"]
+      },
+      "BulkInviteResultItem": {
+        "type": "object",
+        "properties": { "email": { "type": "string" }, "status": { "type": "string" } }
+      },
+      "GlobalResponseListBulkInviteResultItem": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "code": { "type": "string" },
+          "message": { "type": "string" },
+          "data": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/BulkInviteResultItem" }
+          }
+        }
+      },
+      "CreateEpicRequest": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "color": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+          "description": { "type": "string" },
+          "priority": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH", "URGENT"] },
+          "issueType": { "type": "string", "enum": ["FE", "BE"] },
+          "assigneeId": { "type": "integer", "format": "int64" },
+          "dueDate": { "type": "string", "format": "date" }
+        },
+        "required": ["color", "name"]
+      },
+      "InvitationRequest": {
+        "type": "object",
+        "properties": {
+          "inviteeEmail": { "type": "string" },
+          "teamspaceId": { "type": "string" },
+          "role": { "type": "string", "enum": ["OWNER", "MEMBER", "VIEWER"] }
+        },
+        "required": ["inviteeEmail", "teamspaceId"]
+      },
+      "AcceptInvitationRequest": {
+        "type": "object",
+        "properties": { "token": { "type": "string" } },
+        "required": ["token"]
+      },
+      "GlobalResponseMapStringString": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "code": { "type": "string" },
+          "message": { "type": "string" },
+          "data": { "type": "object", "additionalProperties": { "type": "string" } }
+        }
+      },
+      "FeedbackIdResponse": {
+        "type": "object",
+        "properties": {
+          "feedbackId": { "type": "string" },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "QUESTIONING",
+              "ANSWERING",
+              "DONE",
+              "ACCEPTED",
+              "REJECTED",
+              "FAILED"
+            ]
+          }
+        }
+      },
+      "GlobalResponseFeedbackIdResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "code": { "type": "string" },
+          "message": { "type": "string" },
+          "data": { "$ref": "#/components/schemas/FeedbackIdResponse" }
+        }
+      },
+      "AnswerItem": {
+        "type": "object",
+        "properties": { "questionId": { "type": "string" }, "value": { "type": "string" } },
+        "required": ["questionId", "value"]
+      },
+      "AnswerRequest": {
+        "type": "object",
+        "properties": {
+          "answer": { "type": "array", "items": { "$ref": "#/components/schemas/AnswerItem" } }
+        },
+        "required": ["answer"]
+      },
+      "DocumentCreateRequest": {
+        "type": "object",
+        "properties": {
+          "teamspaceId": { "type": "string" },
+          "type": {
+            "type": "string",
+            "enum": ["IDEA", "PLAN", "USER_SCENARIO", "API_SPEC", "ERD"]
+          },
+          "title": { "type": "string", "maxLength": 100, "minLength": 0 }
+        },
+        "required": ["teamspaceId", "type"]
+      },
+      "DocumentCreateResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "type": {
+            "type": "string",
+            "enum": ["IDEA", "PLAN", "USER_SCENARIO", "API_SPEC", "ERD"]
+          },
+          "title": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "GlobalResponseDocumentCreateResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "code": { "type": "string" },
+          "message": { "type": "string" },
+          "data": { "$ref": "#/components/schemas/DocumentCreateResponse" }
+        }
+      },
+      "FeedbackRequest": {
+        "type": "object",
+        "properties": {
+          "additionalRequest": { "type": "string", "maxLength": 500, "minLength": 0 }
+        }
+      },
+      "LinkStoryRequest": {
+        "type": "object",
+        "properties": { "storyId": { "type": "integer", "format": "int64" } }
+      },
+      "UpdateBacklogTaskStatusRequest": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string", "enum": ["OPEN", "IN_PROGRESS", "DONE", "CLOSED"] }
+        },
+        "required": ["status"]
+      },
+      "ReorderRequest": {
+        "type": "object",
+        "properties": {
+          "orderedIds": { "type": "array", "items": { "type": "integer", "format": "int64" } }
+        },
+        "required": ["orderedIds"]
+      },
+      "GlobalResponseReorderResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "code": { "type": "string" },
+          "message": { "type": "string" },
+          "data": { "$ref": "#/components/schemas/ReorderResponse" }
+        }
+      },
+      "ReorderResponse": {
+        "type": "object",
+        "properties": {
+          "orderedIds": { "type": "array", "items": { "type": "integer", "format": "int64" } }
+        }
+      },
+      "GlobalResponseMapStringObject": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "code": { "type": "string" },
+          "message": { "type": "string" },
+          "data": { "type": "object", "additionalProperties": {} }
+        }
+      },
+      "UpdateStoryStatusRequest": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string", "enum": ["OPEN", "IN_PROGRESS", "DONE", "CLOSED"] }
+        },
+        "required": ["status"]
+      },
+      "GlobalResponseStoryStatusResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "code": { "type": "string" },
+          "message": { "type": "string" },
+          "data": { "$ref": "#/components/schemas/StoryStatusResponse" }
+        }
+      },
+      "StoryStatusResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "status": { "type": "string", "enum": ["OPEN", "IN_PROGRESS", "DONE", "CLOSED"] },
+          "closedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "UpdateEpicStatusRequest": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string", "enum": ["OPEN", "IN_PROGRESS", "DONE", "CLOSED"] }
+        },
+        "required": ["status"]
+      },
+      "DocumentUpdateRequest": {
+        "type": "object",
+        "properties": { "title": { "type": "string" } }
+      },
+      "DocumentUpdateResponse": {
+        "type": "object",
+        "properties": { "id": { "type": "string" }, "title": { "type": "string" } }
+      },
+      "GlobalResponseDocumentUpdateResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "code": { "type": "string" },
+          "message": { "type": "string" },
+          "data": { "$ref": "#/components/schemas/DocumentUpdateResponse" }
+        }
+      },
+      "GlobalResponseTeamSpaceListResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "code": { "type": "string" },
+          "message": { "type": "string" },
+          "data": { "$ref": "#/components/schemas/TeamSpaceListResponse" }
+        }
+      },
+      "TeamSpaceListResponse": {
+        "type": "object",
+        "properties": {
+          "teamspaces": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/TeamSpaceSummary" }
+          }
+        }
+      },
+      "TeamSpaceSummary": {
+        "type": "object",
+        "properties": {
+          "teamspaceId": { "type": "string" },
+          "name": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "DocumentSummary": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "type": { "type": "string" },
+          "title": { "type": "string" },
+          "aiStatus": { "type": "string" },
+          "updatedAt": { "type": "string", "format": "date-time" },
+          "updatedBy": { "type": "string" }
+        }
+      },
+      "GlobalResponseTeamSpaceDetailResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "code": { "type": "string" },
+          "message": { "type": "string" },
+          "data": { "$ref": "#/components/schemas/TeamSpaceDetailResponse" }
+        }
+      },
+      "TeamSpaceDetailResponse": {
+        "type": "object",
+        "properties": {
+          "teamspaceId": { "type": "string" },
+          "name": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "documents": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/DocumentSummary" }
+          }
+        }
+      },
+      "GlobalResponseListStorySummaryResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "code": { "type": "string" },
+          "message": { "type": "string" },
+          "data": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/StorySummaryResponse" }
+          }
+        }
+      },
+      "StorySummaryResponse": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "number": { "type": "integer", "format": "int64" },
+          "title": { "type": "string" },
+          "status": { "type": "string", "enum": ["OPEN", "IN_PROGRESS", "DONE", "CLOSED"] },
+          "priority": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH", "URGENT"] },
+          "issueType": { "type": "string", "enum": ["FE", "BE"] },
+          "sprint": { "type": "string" },
+          "epics": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/EpicSummaryResponse" }
+          },
+          "assignee": { "$ref": "#/components/schemas/UserResponse" },
+          "reporter": { "$ref": "#/components/schemas/UserResponse" },
+          "taskCount": { "type": "integer", "format": "int32" },
+          "completedTaskCount": { "type": "integer", "format": "int32" },
+          "dueDate": { "type": "string", "format": "date" },
+          "position": { "type": "integer", "format": "int32" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "GlobalResponseListMemberInfoResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "code": { "type": "string" },
+          "message": { "type": "string" },
+          "data": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/MemberInfoResponse" }
+          }
+        }
+      },
+      "MemberInfoResponse": {
+        "type": "object",
+        "properties": {
+          "userId": { "type": "integer", "format": "int64" },
+          "name": { "type": "string" },
+          "email": { "type": "string" },
+          "role": { "type": "string" },
+          "status": { "type": "string" },
+          "profileImageUrl": { "type": "string" },
+          "invitationId": { "type": "string" }
+        }
+      },
+      "GlobalResponseListEpicResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "code": { "type": "string" },
+          "message": { "type": "string" },
+          "data": { "type": "array", "items": { "$ref": "#/components/schemas/EpicResponse" } }
+        }
+      },
+      "ApplicationContext": {
+        "type": "object",
+        "properties": {
+          "parent": { "$ref": "#/components/schemas/ApplicationContext" },
+          "id": { "type": "string" },
+          "displayName": { "type": "string" },
+          "startupDate": { "type": "integer", "format": "int64" },
+          "applicationName": { "type": "string" },
+          "autowireCapableBeanFactory": {
+            "$ref": "#/components/schemas/AutowireCapableBeanFactory"
+          },
+          "environment": { "$ref": "#/components/schemas/Environment" },
+          "beanDefinitionCount": { "type": "integer", "format": "int32" },
+          "beanDefinitionNames": { "type": "array", "items": { "type": "string" } },
+          "parentBeanFactory": { "$ref": "#/components/schemas/BeanFactory" },
+          "classLoader": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "registeredAsParallelCapable": { "type": "boolean" },
+              "parent": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "registeredAsParallelCapable": { "type": "boolean" },
+                  "unnamedModule": {
+                    "type": "object",
+                    "properties": {
+                      "name": { "type": "string" },
+                      "classLoader": {
+                        "type": "object",
+                        "properties": {
+                          "name": { "type": "string" },
+                          "registeredAsParallelCapable": { "type": "boolean" },
+                          "definedPackages": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "name": { "type": "string" },
+                                "annotations": { "type": "array", "items": { "type": "object" } },
+                                "declaredAnnotations": {
+                                  "type": "array",
+                                  "items": { "type": "object" }
+                                },
+                                "sealed": { "type": "boolean" },
+                                "specificationTitle": { "type": "string" },
+                                "specificationVersion": { "type": "string" },
+                                "specificationVendor": { "type": "string" },
+                                "implementationTitle": { "type": "string" },
+                                "implementationVersion": { "type": "string" },
+                                "implementationVendor": { "type": "string" }
+                              }
+                            }
+                          },
+                          "defaultAssertionStatus": { "type": "boolean", "writeOnly": true }
+                        }
+                      },
+                      "descriptor": {
+                        "type": "object",
+                        "properties": {
+                          "open": { "type": "boolean" },
+                          "automatic": { "type": "boolean" }
+                        }
+                      },
+                      "named": { "type": "boolean" },
+                      "annotations": { "type": "array", "items": { "type": "object" } },
+                      "declaredAnnotations": { "type": "array", "items": { "type": "object" } },
+                      "packages": {
+                        "type": "array",
+                        "items": { "type": "string" },
+                        "uniqueItems": true
+                      },
+                      "layer": { "type": "object" }
+                    }
+                  },
+                  "definedPackages": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": { "type": "string" },
+                        "annotations": { "type": "array", "items": { "type": "object" } },
+                        "declaredAnnotations": { "type": "array", "items": { "type": "object" } },
+                        "sealed": { "type": "boolean" },
+                        "specificationTitle": { "type": "string" },
+                        "specificationVersion": { "type": "string" },
+                        "specificationVendor": { "type": "string" },
+                        "implementationTitle": { "type": "string" },
+                        "implementationVersion": { "type": "string" },
+                        "implementationVendor": { "type": "string" }
+                      }
+                    }
+                  },
+                  "defaultAssertionStatus": { "type": "boolean", "writeOnly": true }
+                }
+              },
+              "unnamedModule": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "classLoader": {
+                    "type": "object",
+                    "properties": {
+                      "name": { "type": "string" },
+                      "registeredAsParallelCapable": { "type": "boolean" },
+                      "definedPackages": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "name": { "type": "string" },
+                            "annotations": { "type": "array", "items": { "type": "object" } },
+                            "declaredAnnotations": {
+                              "type": "array",
+                              "items": { "type": "object" }
+                            },
+                            "sealed": { "type": "boolean" },
+                            "specificationTitle": { "type": "string" },
+                            "specificationVersion": { "type": "string" },
+                            "specificationVendor": { "type": "string" },
+                            "implementationTitle": { "type": "string" },
+                            "implementationVersion": { "type": "string" },
+                            "implementationVendor": { "type": "string" }
+                          }
+                        }
+                      },
+                      "defaultAssertionStatus": { "type": "boolean", "writeOnly": true }
+                    }
+                  },
+                  "descriptor": {
+                    "type": "object",
+                    "properties": {
+                      "open": { "type": "boolean" },
+                      "automatic": { "type": "boolean" }
+                    }
+                  },
+                  "named": { "type": "boolean" },
+                  "annotations": { "type": "array", "items": { "type": "object" } },
+                  "declaredAnnotations": { "type": "array", "items": { "type": "object" } },
+                  "packages": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "uniqueItems": true
+                  },
+                  "layer": { "type": "object" }
+                }
+              },
+              "definedPackages": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": { "type": "string" },
+                    "annotations": { "type": "array", "items": { "type": "object" } },
+                    "declaredAnnotations": { "type": "array", "items": { "type": "object" } },
+                    "sealed": { "type": "boolean" },
+                    "specificationTitle": { "type": "string" },
+                    "specificationVersion": { "type": "string" },
+                    "specificationVendor": { "type": "string" },
+                    "implementationTitle": { "type": "string" },
+                    "implementationVersion": { "type": "string" },
+                    "implementationVendor": { "type": "string" }
+                  }
+                }
+              },
+              "defaultAssertionStatus": { "type": "boolean", "writeOnly": true }
+            }
+          }
+        }
+      },
+      "AutowireCapableBeanFactory": { "type": "object" },
+      "BeanFactory": { "type": "object" },
+      "Environment": {
+        "type": "object",
+        "properties": {
+          "activeProfiles": { "type": "array", "items": { "type": "string" } },
+          "defaultProfiles": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "FilterRegistration": {
+        "type": "object",
+        "properties": {
+          "urlPatternMappings": { "type": "array", "items": { "type": "string" } },
+          "servletNameMappings": { "type": "array", "items": { "type": "string" } },
+          "name": { "type": "string" },
+          "className": { "type": "string" },
+          "initParameters": { "type": "object", "additionalProperties": { "type": "string" } }
+        }
+      },
+      "HttpStatusCode": {
+        "type": "object",
+        "properties": {
+          "error": { "type": "boolean" },
+          "is4xxClientError": { "type": "boolean" },
+          "is5xxServerError": { "type": "boolean" },
+          "is3xxRedirection": { "type": "boolean" },
+          "is2xxSuccessful": { "type": "boolean" },
+          "is1xxInformational": { "type": "boolean" }
+        }
+      },
+      "JspConfigDescriptor": {
+        "type": "object",
+        "properties": {
+          "jspPropertyGroups": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/JspPropertyGroupDescriptor" }
+          },
+          "taglibs": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/TaglibDescriptor" }
+          }
+        }
+      },
+      "JspPropertyGroupDescriptor": {
+        "type": "object",
+        "properties": {
+          "buffer": { "type": "string" },
+          "defaultContentType": { "type": "string" },
+          "urlPatterns": { "type": "array", "items": { "type": "string" } },
+          "errorOnUndeclaredNamespace": { "type": "string" },
+          "trimDirectiveWhitespaces": { "type": "string" },
+          "errorOnELNotFound": { "type": "string" },
+          "scriptingInvalid": { "type": "string" },
+          "deferredSyntaxAllowedAsLiteral": { "type": "string" },
+          "includeCodas": { "type": "array", "items": { "type": "string" } },
+          "includePreludes": { "type": "array", "items": { "type": "string" } },
+          "elIgnored": { "type": "string" },
+          "pageEncoding": { "type": "string" },
+          "isXml": { "type": "string" }
+        }
+      },
+      "RedirectView": {
+        "type": "object",
+        "properties": {
+          "applicationContext": { "$ref": "#/components/schemas/ApplicationContext" },
+          "servletContext": { "$ref": "#/components/schemas/ServletContext", "writeOnly": true },
+          "contentType": { "type": "string" },
+          "requestContextAttribute": { "type": "string" },
+          "staticAttributes": { "type": "object", "additionalProperties": {} },
+          "exposePathVariables": { "type": "boolean" },
+          "exposeContextBeansAsAttributes": { "type": "boolean", "writeOnly": true },
+          "exposedContextBeanNames": {
+            "type": "array",
+            "items": { "type": "string" },
+            "writeOnly": true
+          },
+          "beanName": { "type": "string" },
+          "url": { "type": "string" },
+          "contextRelative": { "type": "boolean", "writeOnly": true },
+          "http10Compatible": { "type": "boolean", "writeOnly": true },
+          "exposeModelAttributes": { "type": "boolean", "writeOnly": true },
+          "encodingScheme": { "type": "string", "writeOnly": true },
+          "statusCode": { "$ref": "#/components/schemas/HttpStatusCode", "writeOnly": true },
+          "expandUriTemplateVariables": { "type": "boolean", "writeOnly": true },
+          "propagateQueryParams": { "type": "boolean", "writeOnly": true },
+          "hosts": { "type": "array", "items": { "type": "string" } },
+          "propagateQueryProperties": { "type": "boolean" },
+          "redirectView": { "type": "boolean" },
+          "attributesMap": { "type": "object", "additionalProperties": {} },
+          "attributesCSV": { "type": "string", "writeOnly": true },
+          "attributes": {
+            "type": "object",
+            "additionalProperties": { "type": "string" },
+            "writeOnly": true
+          }
+        }
+      },
+      "ServletContext": {
+        "type": "object",
+        "properties": {
+          "classLoader": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "registeredAsParallelCapable": { "type": "boolean" },
+              "definedPackages": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": { "type": "string" },
+                    "annotations": { "type": "array", "items": { "type": "object" } },
+                    "declaredAnnotations": { "type": "array", "items": { "type": "object" } },
+                    "sealed": { "type": "boolean" },
+                    "specificationTitle": { "type": "string" },
+                    "specificationVersion": { "type": "string" },
+                    "specificationVendor": { "type": "string" },
+                    "implementationTitle": { "type": "string" },
+                    "implementationVersion": { "type": "string" },
+                    "implementationVendor": { "type": "string" }
+                  }
+                }
+              },
+              "defaultAssertionStatus": { "type": "boolean", "writeOnly": true }
+            }
+          },
+          "majorVersion": { "type": "integer", "format": "int32" },
+          "minorVersion": { "type": "integer", "format": "int32" },
+          "attributeNames": { "type": "object" },
+          "contextPath": { "type": "string" },
+          "initParameterNames": { "type": "object" },
+          "sessionCookieConfig": { "$ref": "#/components/schemas/SessionCookieConfig" },
+          "virtualServerName": { "type": "string" },
+          "sessionTrackingModes": {
+            "type": "array",
+            "items": { "type": "string", "enum": ["COOKIE", "URL", "SSL"] },
+            "uniqueItems": true,
+            "writeOnly": true
+          },
+          "sessionTimeout": { "type": "integer", "format": "int32" },
+          "jspConfigDescriptor": { "$ref": "#/components/schemas/JspConfigDescriptor" },
+          "defaultSessionTrackingModes": {
+            "type": "array",
+            "items": { "type": "string", "enum": ["COOKIE", "URL", "SSL"] },
+            "uniqueItems": true
+          },
+          "effectiveSessionTrackingModes": {
+            "type": "array",
+            "items": { "type": "string", "enum": ["COOKIE", "URL", "SSL"] },
+            "uniqueItems": true
+          },
+          "requestCharacterEncoding": { "type": "string" },
+          "responseCharacterEncoding": { "type": "string" },
+          "filterRegistrations": {
+            "type": "object",
+            "additionalProperties": { "$ref": "#/components/schemas/FilterRegistration" }
+          },
+          "effectiveMinorVersion": { "type": "integer", "format": "int32" },
+          "effectiveMajorVersion": { "type": "integer", "format": "int32" },
+          "servletContextName": { "type": "string" },
+          "servletRegistrations": {
+            "type": "object",
+            "additionalProperties": { "$ref": "#/components/schemas/ServletRegistration" }
+          },
+          "serverInfo": { "type": "string" }
+        }
+      },
+      "ServletRegistration": {
+        "type": "object",
+        "properties": {
+          "mappings": { "type": "array", "items": { "type": "string" } },
+          "runAsRole": { "type": "string" },
+          "name": { "type": "string" },
+          "className": { "type": "string" },
+          "initParameters": { "type": "object", "additionalProperties": { "type": "string" } }
+        }
+      },
+      "SessionCookieConfig": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "path": { "type": "string" },
+          "attributes": { "type": "object", "additionalProperties": { "type": "string" } },
+          "comment": { "type": "string", "deprecated": true },
+          "secure": { "type": "boolean" },
+          "maxAge": { "type": "integer", "format": "int32" },
+          "httpOnly": { "type": "boolean" },
+          "domain": { "type": "string" }
+        }
+      },
+      "TaglibDescriptor": {
+        "type": "object",
+        "properties": { "taglibURI": { "type": "string" }, "taglibLocation": { "type": "string" } }
+      },
+      "Answer": {
+        "type": "object",
+        "properties": { "questionId": { "type": "string" }, "value": { "type": "string" } }
+      },
+      "FeedbackDetailResponse": {
+        "type": "object",
+        "properties": {
+          "feedbackId": { "type": "string" },
+          "documentId": { "type": "string" },
+          "status": {
+            "type": "string",
+            "enum": [
+              "PENDING",
+              "QUESTIONING",
+              "ANSWERING",
+              "DONE",
+              "ACCEPTED",
+              "REJECTED",
+              "FAILED"
+            ]
+          },
+          "originalMarkdown": { "type": "string" },
+          "revisedMarkdown": { "type": "string" },
+          "questions": { "type": "array", "items": { "$ref": "#/components/schemas/Question" } },
+          "answers": { "type": "array", "items": { "$ref": "#/components/schemas/Answer" } },
+          "additionalRequest": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "GlobalResponseFeedbackDetailResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "code": { "type": "string" },
+          "message": { "type": "string" },
+          "data": { "$ref": "#/components/schemas/FeedbackDetailResponse" }
+        }
+      },
+      "Question": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "section": { "type": "string" },
+          "text": { "type": "string" },
+          "options": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "GlobalResponseListDocumentSummary": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "code": { "type": "string" },
+          "message": { "type": "string" },
+          "data": { "type": "array", "items": { "$ref": "#/components/schemas/DocumentSummary" } }
+        }
+      },
+      "DocumentDetail": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "teamspaceId": { "type": "string" },
+          "type": {
+            "type": "string",
+            "enum": ["IDEA", "PLAN", "USER_SCENARIO", "API_SPEC", "ERD"]
+          },
+          "title": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" },
+          "updatedBy": { "type": "string" }
+        }
+      },
+      "GlobalResponseDocumentDetail": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "code": { "type": "string" },
+          "message": { "type": "string" },
+          "data": { "$ref": "#/components/schemas/DocumentDetail" }
+        }
+      },
+      "GlobalResponseUserResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "code": { "type": "string" },
+          "message": { "type": "string" },
+          "data": { "$ref": "#/components/schemas/UserResponse" }
+        }
+      }
+    }
+  }
+}
