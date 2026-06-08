@@ -55,15 +55,6 @@ export default function StoryRow({
     return () => document.removeEventListener('mousedown', onClickOutside);
   }, [menuOpen]);
 
-  useEffect(() => {
-    if (isExpanded && tasks === undefined) {
-      setLoadingTasks(true);
-      getStoryDetail(teamspaceId, story.id)
-        .then((detail) => setTasksForStory(story.id, detail.tasks))
-        .finally(() => setLoadingTasks(false));
-    }
-  }, [isExpanded, tasks, teamspaceId, story.id, setTasksForStory]);
-
   const handleExpand = async () => {
     onExpandToggle();
     if (!isExpanded && tasks === undefined) {

@@ -1,6 +1,8 @@
 import '@blocknote/mantine/style.css';
+import { useEffect } from 'react';
 import { BlockNoteView } from '@blocknote/mantine';
 import { useCollabEditor } from '@/hooks/useCollabEditor';
+import { useDocumentEditorStore } from '@/store/documentEditorStore';
 
 interface Props {
   docId: string;
@@ -12,6 +14,13 @@ interface Props {
 
 function CollaborativeEditor({ docId, editable, isAiDraftGenerating = false, user, token }: Props) {
   const { editor } = useCollabEditor({ docId, editable, user, token });
+  const setEditor = useDocumentEditorStore((state) => state.setEditor);
+
+  useEffect(() => {
+    setEditor(editor);
+
+    return () => setEditor(null);
+  }, [editor, setEditor]);
 
   return (
     <div className="relative">

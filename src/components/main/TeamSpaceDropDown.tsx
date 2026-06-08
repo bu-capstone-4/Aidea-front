@@ -12,10 +12,12 @@ import { useTeamspaceStore } from '@/store/teamspaceStore';
 import { useAuth } from '@/shared/useAuth';
 import { apiClient } from '@/shared/apiClient';
 import type { TeamspaceDetail } from '@/types/api';
+import CreateTeamSpace from '@/components/CreateTeamSpace';
 
 export default function TeamSpaceDropDown() {
   const [isDropDownOpen, setIsDropDownOpen] = useState(false);
   const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
+  const [isCreateTeamspaceModalOpen, setIsCreateTeamspaceModalOpen] = useState(false);
   const [hoveredTsId, setHoveredTsId] = useState<string | null>(null);
   const [openMenuTsId, setOpenMenuTsId] = useState<string | null>(null);
   const [deleteTargetTsId, setDeleteTargetTsId] = useState<string | null>(null);
@@ -40,7 +42,7 @@ export default function TeamSpaceDropDown() {
 
   const handleCreateTeamspace = () => {
     setIsDropDownOpen(false);
-    navigate('/create');
+    setIsCreateTeamspaceModalOpen(true);
   };
 
   const handleSwitchTeamspace = async (tsId: string) => {
@@ -190,6 +192,9 @@ export default function TeamSpaceDropDown() {
         toggleMemberModal={() => setIsMemberModalOpen(false)}
       />
 
+      {isCreateTeamspaceModalOpen && (
+        <CreateTeamSpace onClose={() => setIsCreateTeamspaceModalOpen(false)} />
+      )}
       <ConfirmModal
         isOpen={deleteTargetTsId !== null}
         title="팀스페이스 삭제"

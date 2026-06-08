@@ -17,7 +17,11 @@ const initialForm: TeamSpaceForm = {
   ],
 };
 
-export default function CreateTeamSpace() {
+interface CreateTeamSpaceProps {
+  onClose?: () => void;
+}
+
+export default function CreateTeamSpace({ onClose }: CreateTeamSpaceProps) {
   const [step, setStep] = useState<1 | 2>(1);
   const [form, setForm] = useState<TeamSpaceForm>(initialForm);
   const [teamspaceId, setTeamspaceId] = useState<string | null>(null);
@@ -93,6 +97,8 @@ export default function CreateTeamSpace() {
       } else {
         navigate('/');
       }
+
+      onClose?.();
     } catch {
       // 서버 에러는 apiClient 인터셉터가 toast로 처리
     }
@@ -100,7 +106,18 @@ export default function CreateTeamSpace() {
 
   return (
     <div className="fixed inset-0 bg-black/35 flex items-center justify-center z-50">
-      <div className="bg-white rounded-2xl border border-gray-200 w-full max-w-[600px] mx-4 p-10">
+      <div className="relative bg-white rounded-2xl border border-gray-200 w-full max-w-[600px] mx-4 p-10">
+        {onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            className="absolute right-5 top-5 rounded-md px-2 py-1 text-xl leading-none text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+            aria-label="팀스페이스 생성 닫기"
+          >
+            ×
+          </button>
+        )}
+
         {step === 1 && <Step1 form={form} onChange={updateForm} onNext={handleCreateTeamspace} />}
 
         {step === 2 && <Step2 form={form} onChange={updateForm} onSubmit={handleCompleteSetup} />}
