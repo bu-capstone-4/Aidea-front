@@ -14,7 +14,7 @@ export default function AssigneeSelect({ value, members, onChange }: AssigneeSel
   const popoverRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
 
-  const activeMembers = members.filter((m) => m.status === 'ACTIVE' && m.userId !== null);
+  const activeMembers = members;
   const selected = activeMembers.find((m) => m.userId === value) ?? null;
 
   const filtered = activeMembers.filter((m) => {

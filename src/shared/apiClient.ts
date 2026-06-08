@@ -2,6 +2,16 @@ import axios from 'axios';
 import { useAuthStore } from '@/store/authStore';
 import { useToastStore } from '@/store/toastStore';
 
+const INVITATION_ERROR_MESSAGES: Record<string, string> = {
+  ALREADY_MEMBER: '이미 팀스페이스에 가입된 사용자입니다.',
+  ALREADY_INVITED: '이미 초대가 발송된 이메일입니다.',
+  INSUFFICIENT_PERMISSION: '초대 권한이 없습니다.',
+  NOT_TEAMSPACE_OWNER: '일괄 초대는 OWNER만 가능합니다.',
+  INVITATION_001: '초대는 최대 8명까지 가능합니다.',
+  INVITATION_EXPIRED: '초대 링크가 만료되었습니다. 초대를 다시 요청하세요.',
+  INVITATION_NOT_FOUND: '유효하지 않은 초대입니다.',
+};
+
 // 목 모드(VITE_USE_REAL_AUTH !== 'true')에서는 빈 baseURL → MSW가 동일 오리진 요청을 인터셉트
 // 실제 모드에서는 VITE_API_BASE_URL 사용
 const baseURL =
@@ -36,9 +46,9 @@ apiClient.interceptors.response.use(
     if (error.response?.status !== 401 || originalRequest._retry) {
       // 401은 refresh 흐름이 처리. 그 외 서버/네트워크 에러는 toast로 표시.
       if (error.response?.status !== 401) {
-        const message =
-          (error.response?.data as { message?: string })?.message ??
-          '서버와 통신 중 오류가 발생했습니다.';
+        const data = error.response?.data as { message?: string; code?: string } | undefined;
+        const customMessage = data?.code ? INVITATION_ERROR_MESSAGES[data.code] : undefined;
+        const message = customMessage ?? data?.message ?? '서버와 통신 중 오류가 발생했습니다.';
         useToastStore.getState().addToast({ type: 'error', message });
       }
       return Promise.reject(error);

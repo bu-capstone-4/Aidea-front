@@ -3,7 +3,7 @@ import { apiClient } from '@/shared/apiClient';
 import { useTeamspaceStore } from '@/store/teamspaceStore';
 import UserAvatar from '@/components/ui/UserAvatar';
 import Button from '@/components/ui/Button';
-import type { MemberInfo } from '@/types/api';
+import type { MemberInfo, PendingInvitation, InviteResponse } from '@/types/api';
 
 interface MemberModalProps {
   isMemberModalOpen: boolean;
@@ -13,6 +13,7 @@ interface MemberModalProps {
 export default function MemberModal({ isMemberModalOpen, toggleMemberModal }: MemberModalProps) {
   const { currentTeamspaceId } = useTeamspaceStore();
   const [members, setMembers] = useState<MemberInfo[]>([]);
+  const [pendingInvitations, setPendingInvitations] = useState<PendingInvitation[]>([]);
   const [email, setEmail] = useState('');
 
   const fetchMembers = useCallback(() => {
@@ -28,11 +29,12 @@ export default function MemberModal({ isMemberModalOpen, toggleMemberModal }: Me
 
   const handleInvite = async () => {
     if (!email.trim() || !currentTeamspaceId) return;
-    await apiClient.post(`/api/teamspaces/${currentTeamspaceId}/members/invite`, {
+    const res = await apiClient.post(`/api/teamspaces/${currentTeamspaceId}/members/invite`, {
       email: email.trim(),
     });
+    const { invitationId } = res.data.data as InviteResponse;
+    setPendingInvitations((prev) => [...prev, { invitationId, email: email.trim() }]);
     setEmail('');
-    fetchMembers();
   };
 
   const handleRemoveMember = async (memberId: string) => {
@@ -44,7 +46,7 @@ export default function MemberModal({ isMemberModalOpen, toggleMemberModal }: Me
   const handleCancelInvitation = async (invitationId: string) => {
     if (!currentTeamspaceId) return;
     await apiClient.delete(`/api/teamspaces/${currentTeamspaceId}/invitations/${invitationId}`);
-    fetchMembers();
+    setPendingInvitations((prev) => prev.filter((inv) => inv.invitationId !== invitationId));
   };
 
   if (!isMemberModalOpen) return null;
@@ -64,12 +66,12 @@ export default function MemberModal({ isMemberModalOpen, toggleMemberModal }: Me
         <div className="text-xs text-gray-500">멤버</div>
         <div className="flex flex-col gap-3">
           {members.map((member) => (
-            <div key={member.email} className="flex justify-between items-center">
+            <div key={member.userId} className="flex justify-between items-center">
               <div className="flex gap-3 items-center">
-                <UserAvatar name={member.name ?? member.email} imageUrl={member.profileImageUrl} />
+                <UserAvatar name={member.name} imageUrl={member.profileImageUrl} />
                 <div>
                   <div className="font-medium text-sm">
-                    {member.status === 'PENDING' ? '초대 대기 중' : member.name}
+                    {member.name}
                     {member.role === 'OWNER' && (
                       <span className="ml-1 text-xs text-primary">(방장)</span>
                     )}
@@ -78,16 +80,7 @@ export default function MemberModal({ isMemberModalOpen, toggleMemberModal }: Me
                 </div>
               </div>
 
-              {member.status === 'PENDING' && member.invitationId && (
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => handleCancelInvitation(member.invitationId!)}
-                >
-                  초대 취소
-                </Button>
-              )}
-              {member.status === 'ACTIVE' && member.role !== 'OWNER' && (
+              {member.role !== 'OWNER' && (
                 <Button
                   variant="secondary"
                   size="sm"
@@ -100,6 +93,32 @@ export default function MemberModal({ isMemberModalOpen, toggleMemberModal }: Me
             </div>
           ))}
         </div>
+
+        {pendingInvitations.length > 0 && (
+          <>
+            <div className="text-xs text-gray-500">초대 대기 중</div>
+            <div className="flex flex-col gap-3">
+              {pendingInvitations.map((inv) => (
+                <div key={inv.invitationId} className="flex justify-between items-center">
+                  <div className="flex gap-3 items-center">
+                    <UserAvatar name={inv.email} imageUrl={null} />
+                    <div>
+                      <div className="font-medium text-sm text-gray-400">초대 대기 중</div>
+                      <div className="text-xs text-gray-500">{inv.email}</div>
+                    </div>
+                  </div>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => handleCancelInvitation(inv.invitationId)}
+                  >
+                    초대 취소
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
 
         <hr className="h-px border-none" />
 
