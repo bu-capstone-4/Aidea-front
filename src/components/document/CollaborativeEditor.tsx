@@ -58,7 +58,7 @@ function CollaborativeEditor({ docId, editable, isAiDraftGenerating = false, use
   const isAnsweringThisDoc = draftQA?.documentId === docId && draftQA.status === 'ANSWERING';
 
   return (
-    <div className="relative">
+    <div className="relative min-h-[calc(100vh-160px)]">
       <div inert={isAiDraftGenerating || undefined}>
         <BlockNoteView editor={editor} theme="light" />
       </div>

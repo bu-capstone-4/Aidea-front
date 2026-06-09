@@ -81,22 +81,24 @@ export default function DraftQuestionPanel({ documentId }: DraftQuestionPanelPro
   }
 
   return (
-    <div className="absolute inset-0 z-20 flex flex-col gap-4 bg-white overflow-y-auto p-6">
-      <div className="bg-[#F4F0FF] rounded-xl p-4 border border-purple-50">
-        <div className="flex items-center gap-2 text-[#7C3AED] font-bold text-base mb-1.5">
-          <span className="text-xl">✦</span> Aidea
+    <div className="absolute inset-0 z-20 flex flex-col bg-white">
+      <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-4">
+        <div className="bg-[#F4F0FF] rounded-xl p-4 border border-purple-50">
+          <div className="flex items-center gap-2 text-[#7C3AED] font-bold text-base mb-1.5">
+            <span className="text-xl">✦</span> Aidea
+          </div>
+          <div className="text-gray-800 text-sm leading-relaxed">
+            <p>더 좋은 초안을 만들기 위해 아이디어를 조금 더 구체화하고 싶어요.</p>
+            <p className="font-medium text-[#7C3AED] mt-1">
+              몇 가지만 여쭤봐도 될까요? 선택하거나 직접 입력하실 수 있어요.
+            </p>
+          </div>
         </div>
-        <div className="text-gray-800 text-sm leading-relaxed">
-          <p>더 좋은 초안을 만들기 위해 아이디어를 조금 더 구체화하고 싶어요.</p>
-          <p className="font-medium text-[#7C3AED] mt-1">
-            몇 가지만 여쭤봐도 될까요? 선택하거나 직접 입력하실 수 있어요.
-          </p>
-        </div>
+
+        <QuestionList questions={questions} answers={answers} onSelect={handleSelect} />
       </div>
 
-      <QuestionList questions={questions} answers={answers} onSelect={handleSelect} />
-
-      <div className="mt-4 flex flex-col items-center gap-3 pb-8">
+      <div className="shrink-0 flex flex-col items-center gap-3 px-6 py-5 border-t border-gray-100 bg-white">
         <Button
           onClick={handleSubmit}
           disabled={submitting}
