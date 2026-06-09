@@ -42,6 +42,7 @@ export interface ActiveDraftInfo {
   draftId: string;
   status: 'PENDING' | 'QUESTIONING' | 'ANSWERING' | 'DONE' | 'FAILED';
   content?: string | null;
+  questions?: Question[] | null;
 }
 
 export interface DocInitEvent {

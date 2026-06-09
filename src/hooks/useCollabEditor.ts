@@ -102,10 +102,13 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
             pendingDraftRef.current = draftContent;
           }
         }
-        // IDEA 문서 전용 중간 상태 — doc:init.activeDraft에는 questions가 없으므로(알려진 백엔드 갭)
-        // 같은 세션에서 이미 draft:questioning을 수신한 경우가 아니라면 폴백 상태로 복원한다.
         if (msg.activeDraft?.status === 'QUESTIONING' || msg.activeDraft?.status === 'ANSWERING') {
-          restoreDraftQA(docId, msg.activeDraft.draftId, msg.activeDraft.status);
+          restoreDraftQA(
+            docId,
+            msg.activeDraft.draftId,
+            msg.activeDraft.status,
+            msg.activeDraft.questions
+          );
         }
         return;
       }

@@ -30,7 +30,8 @@ interface TeamspaceState {
   restoreDraftQA: (
     documentId: string,
     draftId: string,
-    status: 'QUESTIONING' | 'ANSWERING'
+    status: 'QUESTIONING' | 'ANSWERING',
+    questions?: Question[] | null
   ) => void;
   clearDraftQA: () => void;
   clearTeamspacePresence: () => void;
@@ -55,13 +56,13 @@ export const useTeamspaceStore = create<TeamspaceState>()((set) => ({
     set((state) =>
       state.draftQA ? { draftQA: { ...state.draftQA, status: 'ANSWERING', questions: null } } : {}
     ),
-  // doc:init.activeDraft로 QUESTIONING/ANSWERING을 복원할 때 사용 — questions는 내려오지 않으므로 null.
+  // doc:init.activeDraft로 상태 복원 시 사용.
   // 이미 같은 문서의 draftQA가 있다면(같은 세션에서 draft:questioning을 수신해 questions를 보유 중) 덮어쓰지 않는다.
-  restoreDraftQA: (documentId, draftId, status) =>
+  restoreDraftQA: (documentId, draftId, status, questions = null) =>
     set((state) =>
       state.draftQA?.documentId === documentId
         ? {}
-        : { draftQA: { documentId, draftId, status, questions: null } }
+        : { draftQA: { documentId, draftId, status, questions: questions ?? null } }
     ),
   clearDraftQA: () => set({ draftQA: null }),
   clearTeamspacePresence: () =>

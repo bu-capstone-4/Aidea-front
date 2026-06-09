@@ -55,8 +55,6 @@ export default function DraftQuestionPanel({ documentId }: DraftQuestionPanelPro
 
   const { questions } = draftQA;
 
-  // 새로고침/재접속 시: doc:init.activeDraft에는 questions가 포함되지 않으므로(알려진 백엔드 갭)
-  // 질문 화면을 정상적으로 그릴 수 없다 — 안내와 건너뛰기 옵션을 제공한다.
   if (!questions) {
     return (
       <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 bg-white p-6 text-center">
