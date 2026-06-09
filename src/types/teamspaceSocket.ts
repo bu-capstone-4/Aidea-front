@@ -1,4 +1,4 @@
-import type { DocumentType, TeamRole } from '@/types/document';
+import type { DocumentType, Question, TeamRole } from '@/types/document';
 
 export type MemberRole = TeamRole;
 
@@ -31,6 +31,15 @@ export interface TeamspaceInitEvent {
   };
 }
 
+export interface DraftQuestioningEvent {
+  event: 'draft:questioning';
+  data: {
+    documentId: string;
+    draftId: string;
+    questions: Question[];
+  };
+}
+
 export interface DraftReadyEvent {
   event: 'draft:ready';
   data: {
@@ -56,6 +65,7 @@ export interface MemberUpdateEvent {
 
 export type TeamspaceServerMessage =
   | TeamspaceInitEvent
+  | DraftQuestioningEvent
   | DraftReadyEvent
   | DraftErrorEvent
   | MemberUpdateEvent;

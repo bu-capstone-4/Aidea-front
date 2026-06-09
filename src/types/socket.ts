@@ -40,7 +40,7 @@ export interface ActiveFeedbackInfo {
 
 export interface ActiveDraftInfo {
   draftId: string;
-  status: 'PENDING' | 'PROCESSING' | 'DONE' | 'ERROR';
+  status: 'PENDING' | 'QUESTIONING' | 'ANSWERING' | 'DONE' | 'FAILED';
   content?: string | null;
 }
 
@@ -153,6 +153,15 @@ export interface TeamspaceInitEvent {
   };
 }
 
+export interface DraftQuestioningEvent {
+  event: 'draft:questioning';
+  data: {
+    documentId: string;
+    draftId: string;
+    questions: Question[];
+  };
+}
+
 export interface DraftReadyEvent {
   event: 'draft:ready';
   data: {
@@ -182,6 +191,7 @@ export interface TeamspaceSocketErrorEvent {
 
 export type TeamspaceServerMessage =
   | TeamspaceInitEvent
+  | DraftQuestioningEvent
   | DraftReadyEvent
   | DraftErrorEvent
   | MemberUpdateEvent
