@@ -12,6 +12,7 @@ import { handleSocketError } from '@/shared/socketErrorHandler';
 import type { DocumentServerMessage } from '@/types/socket';
 import { useFeedbackStore } from '@/store/FeedbackStore';
 import { restoreFeedbackState } from '@/hooks/useFeedback';
+import { useTeamspaceStore } from '@/store/teamspaceStore';
 
 function base64ToUint8Array(b64: string): Uint8Array {
   return Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
@@ -53,6 +54,7 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
   const applyMarkdownRef = useRef<((md: string) => Promise<void>) | null>(null);
   const pendingDraftRef = useRef<string | null>(null);
   const { setYdoc } = useFeedbackStore();
+  const restoreDraftQA = useTeamspaceStore((state) => state.restoreDraftQA);
 
   useEffect(() => {
     if (doc) {
@@ -99,6 +101,14 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
           } else {
             pendingDraftRef.current = draftContent;
           }
+        }
+        if (msg.activeDraft?.status === 'QUESTIONING' || msg.activeDraft?.status === 'ANSWERING') {
+          restoreDraftQA(
+            docId,
+            msg.activeDraft.draftId,
+            msg.activeDraft.status,
+            msg.activeDraft.questions
+          );
         }
         return;
       }
@@ -204,7 +214,7 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
       doc.off('update', handleUpdate);
       ws.close(1000);
     };
-  }, [docId, token, doc, provider, editable]);
+  }, [docId, token, doc, provider, editable, restoreDraftQA]);
 
   const editor = useCreateBlockNote({
     collaboration: {

@@ -22,6 +22,7 @@ function isTeamspaceServerMessage(message: unknown): message is TeamspaceServerM
   const event = (message as { event?: unknown }).event;
   return (
     event === 'teamspace:init' ||
+    event === 'draft:questioning' ||
     event === 'draft:ready' ||
     event === 'draft:error' ||
     event === 'member:update'
@@ -38,6 +39,8 @@ export function useTeamspaceSocket({
   const setOnlineMembers = useTeamspaceStore((state) => state.setOnlineMembers);
   const setDocumentAiStatus = useTeamspaceStore((state) => state.setDocumentAiStatus);
   const setPendingDraft = useTeamspaceStore((state) => state.setPendingDraft);
+  const setDraftQuestioning = useTeamspaceStore((state) => state.setDraftQuestioning);
+  const clearDraftQA = useTeamspaceStore((state) => state.clearDraftQA);
   const clearTeamspacePresence = useTeamspaceStore((state) => state.clearTeamspacePresence);
 
   useEffect(() => {
@@ -63,14 +66,21 @@ export function useTeamspaceSocket({
         return;
       }
 
+      if (message.event === 'draft:questioning') {
+        setDraftQuestioning(message.data.documentId, message.data.draftId, message.data.questions);
+        return;
+      }
+
       if (message.event === 'draft:ready') {
         setDocumentAiStatus(message.data.documentId, 'IDLE');
         setPendingDraft({ documentId: message.data.documentId, content: message.data.content });
+        clearDraftQA();
         return;
       }
 
       if (message.event === 'draft:error') {
         setDocumentAiStatus(message.data.documentId, 'IDLE');
+        clearDraftQA();
         return;
       }
 
@@ -89,7 +99,16 @@ export function useTeamspaceSocket({
       clearTeamspacePresence();
       wsRef.current = null;
     };
-  }, [clearTeamspacePresence, enabled, setDocumentAiStatus, setOnlineMembers, teamspaceId]);
+  }, [
+    clearDraftQA,
+    clearTeamspacePresence,
+    enabled,
+    setDocumentAiStatus,
+    setDraftQuestioning,
+    setOnlineMembers,
+    setPendingDraft,
+    teamspaceId,
+  ]);
 
   useEffect(() => {
     const ws = wsRef.current;
