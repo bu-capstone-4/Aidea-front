@@ -14,6 +14,7 @@ import type { IssueKind } from './IssueTypeDropdown';
 import IssueTypeTag from './IssueTypeTag';
 import PriorityBadge from './PriorityBadge';
 import UserAvatar from '@/components/ui/UserAvatar';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 
 interface BacklogBoardViewProps {
   teamspaceId: string;
@@ -401,6 +402,9 @@ export default function BacklogBoardView({
   const applyBacklogtaskStatusChanged = useBacklogStore((s) => s.applyBacklogtaskStatusChanged);
   const addToast = useToastStore((s) => s.addToast);
 
+  const [deleteStoryTarget, setDeleteStoryTarget] = useState<StorySummary | null>(null);
+  const [deleteTaskTarget, setDeleteTaskTarget] = useState<BacklogTask | null>(null);
+
   const tasksByStoryId = useMemo(() => {
     const map: Record<number, BacklogTask[]> = {};
     for (const task of backlogTasks) {
@@ -439,7 +443,6 @@ export default function BacklogBoardView({
   );
 
   const handleDeleteStory = async (story: StorySummary) => {
-    if (!window.confirm(`"${story.title}" 이슈를 삭제하시겠습니까?`)) return;
     try {
       await deleteStory(teamspaceId, story.id);
       applyStoryDeleted(story.id);
@@ -449,7 +452,6 @@ export default function BacklogBoardView({
   };
 
   const handleDeleteTask = async (task: BacklogTask) => {
-    if (!window.confirm(`"${task.title}" 태스크를 삭제하시겠습니까?`)) return;
     try {
       await deleteBacklogTask(teamspaceId, task.id);
       applyBacklogtaskDeleted(task.id);
@@ -494,9 +496,9 @@ export default function BacklogBoardView({
             tasks={tasksByStoryId[story.id] ?? []}
             config={config}
             onEditStory={() => onEditStory(story)}
-            onDeleteStory={() => handleDeleteStory(story)}
+            onDeleteStory={() => setDeleteStoryTarget(story)}
             onEditTask={onEditTask}
-            onDeleteTask={handleDeleteTask}
+            onDeleteTask={(task) => setDeleteTaskTarget(task)}
             onAddIssue={(status) => onAddIssue('task', status)}
             onDropTask={handleDropTask}
           />
@@ -507,12 +509,34 @@ export default function BacklogBoardView({
             tasks={standaloneTasks}
             config={config}
             onEditTask={onEditTask}
-            onDeleteTask={handleDeleteTask}
+            onDeleteTask={(task) => setDeleteTaskTarget(task)}
             onAddIssue={(status) => onAddIssue('task', status)}
             onDropTask={handleDropTask}
           />
         )}
       </div>
+
+      <ConfirmModal
+        isOpen={deleteStoryTarget !== null}
+        title="이슈 삭제"
+        message={
+          deleteStoryTarget ? `"${deleteStoryTarget.title}" 이슈를 삭제하시겠습니까?` : undefined
+        }
+        confirmLabel="삭제"
+        onConfirm={() => deleteStoryTarget && handleDeleteStory(deleteStoryTarget)}
+        onClose={() => setDeleteStoryTarget(null)}
+      />
+
+      <ConfirmModal
+        isOpen={deleteTaskTarget !== null}
+        title="태스크 삭제"
+        message={
+          deleteTaskTarget ? `"${deleteTaskTarget.title}" 태스크를 삭제하시겠습니까?` : undefined
+        }
+        confirmLabel="삭제"
+        onConfirm={() => deleteTaskTarget && handleDeleteTask(deleteTaskTarget)}
+        onClose={() => setDeleteTaskTarget(null)}
+      />
     </div>
   );
 }

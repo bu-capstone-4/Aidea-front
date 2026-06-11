@@ -10,6 +10,7 @@ import { deleteStory, deleteBacklogTask } from '@/api/backlog';
 import { useBacklogStore } from '@/store/backlogStore';
 import { useToastStore } from '@/store/toastStore';
 import { COL_WIDTHS } from '@/constants/backlog';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 import StoryRow from './StoryRow';
 import NoParentSection from './NoParentSection';
 
@@ -37,6 +38,8 @@ export default function BacklogListView({
   onAddTaskForStory,
 }: BacklogListViewProps) {
   const [collapsedStoryIds, setCollapsedStoryIds] = useState<Set<number>>(new Set());
+  const [deleteStoryTarget, setDeleteStoryTarget] = useState<StorySummary | null>(null);
+  const [deleteTaskTarget, setDeleteTaskTarget] = useState<BacklogTask | null>(null);
   const applyStoryDeleted = useBacklogStore((s) => s.applyStoryDeleted);
   const applyBacklogtaskDeleted = useBacklogStore((s) => s.applyBacklogtaskDeleted);
   const addToast = useToastStore((s) => s.addToast);
@@ -87,7 +90,6 @@ export default function BacklogListView({
   };
 
   const handleDeleteStory = async (story: StorySummary) => {
-    if (!window.confirm(`"${story.title}" 이슈를 삭제하시겠습니까?`)) return;
     try {
       await deleteStory(teamspaceId, story.id);
       applyStoryDeleted(story.id);
@@ -97,7 +99,6 @@ export default function BacklogListView({
   };
 
   const handleDeleteTask = async (task: BacklogTask) => {
-    if (!window.confirm(`"${task.title}" 태스크를 삭제하시겠습니까?`)) return;
     try {
       await deleteBacklogTask(teamspaceId, task.id);
       applyBacklogtaskDeleted(task.id);
@@ -160,7 +161,7 @@ export default function BacklogListView({
                 isExpanded={!collapsedStoryIds.has(story.id)}
                 onExpandToggle={() => handleExpandToggle(story.id)}
                 onEditClick={() => onEditStory(story)}
-                onDeleteClick={() => handleDeleteStory(story)}
+                onDeleteClick={() => setDeleteStoryTarget(story)}
                 onAddItemClick={() => onAddTaskForStory(story.id)}
                 onEditLinkedTask={onEditTask}
               />
@@ -171,7 +172,7 @@ export default function BacklogListView({
               config={config}
               colWidths={COL_WIDTHS}
               onEditClick={onEditTask}
-              onDeleteClick={handleDeleteTask}
+              onDeleteClick={(task) => setDeleteTaskTarget(task)}
             />
           </>
         )}
@@ -184,6 +185,28 @@ export default function BacklogListView({
           {counts.done}개
         </span>
       </div>
+
+      <ConfirmModal
+        isOpen={deleteStoryTarget !== null}
+        title="이슈 삭제"
+        message={
+          deleteStoryTarget ? `"${deleteStoryTarget.title}" 이슈를 삭제하시겠습니까?` : undefined
+        }
+        confirmLabel="삭제"
+        onConfirm={() => deleteStoryTarget && handleDeleteStory(deleteStoryTarget)}
+        onClose={() => setDeleteStoryTarget(null)}
+      />
+
+      <ConfirmModal
+        isOpen={deleteTaskTarget !== null}
+        title="태스크 삭제"
+        message={
+          deleteTaskTarget ? `"${deleteTaskTarget.title}" 태스크를 삭제하시겠습니까?` : undefined
+        }
+        confirmLabel="삭제"
+        onConfirm={() => deleteTaskTarget && handleDeleteTask(deleteTaskTarget)}
+        onClose={() => setDeleteTaskTarget(null)}
+      />
     </div>
   );
 }
