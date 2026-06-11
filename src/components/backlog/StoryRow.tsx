@@ -35,7 +35,6 @@ export default function StoryRow({
 }: StoryRowProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [dropUp, setDropUp] = useState(false);
-  const [loadingTasks, setLoadingTasks] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -55,17 +54,21 @@ export default function StoryRow({
     return () => document.removeEventListener('mousedown', onClickOutside);
   }, [menuOpen]);
 
-  const handleExpand = async () => {
+  useEffect(() => {
+    if (!isExpanded || tasks !== undefined) return;
+    let cancelled = false;
+    getStoryDetail(teamspaceId, story.id).then((detail) => {
+      if (!cancelled) setTasksForStory(story.id, detail.tasks);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [isExpanded, tasks, teamspaceId, story.id, setTasksForStory]);
+
+  const loadingTasks = isExpanded && tasks === undefined;
+
+  const handleExpand = () => {
     onExpandToggle();
-    if (!isExpanded && tasks === undefined) {
-      setLoadingTasks(true);
-      try {
-        const detail = await getStoryDetail(teamspaceId, story.id);
-        setTasksForStory(story.id, detail.tasks);
-      } finally {
-        setLoadingTasks(false);
-      }
-    }
   };
 
   const subTaskTotal = tasks !== undefined ? tasks.length : story.taskCount;
