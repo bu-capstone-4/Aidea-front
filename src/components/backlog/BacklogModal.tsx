@@ -4,6 +4,7 @@ import { MdClose, MdSettings, MdList, MdGridView, MdTune } from 'react-icons/md'
 import { useBacklogSocket } from '@/hooks/useBacklogSocket';
 import { useBacklogStore } from '@/store/backlogStore';
 import { useTeamspaceMembers } from '@/hooks/useTeamspaceMembers';
+import { useToastStore } from '@/store/toastStore';
 import { useStoryApi } from '@/hooks/useStoryApi';
 import { useBacklogTaskApi } from '@/hooks/useBacklogTaskApi';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
@@ -52,6 +53,34 @@ function toActiveMembers(editors: BacklogOnlineEditor[]): ActiveMember[] {
 interface BacklogModalProps {
   teamspaceId: string;
   onClose: () => void;
+}
+
+function DraftGeneratingOverlay() {
+  return (
+    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white/75 z-20">
+      <svg
+        className="animate-spin h-7 w-7 text-blue-500"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <circle
+          className="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          strokeWidth="4"
+        />
+        <path
+          className="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+        />
+      </svg>
+      <p className="text-sm font-medium text-gray-600">AI가 초안을 생성하고 있습니다...</p>
+    </div>
+  );
 }
 
 function isConfigEmpty(config: BacklogConfigResponse) {
@@ -108,6 +137,18 @@ function BacklogMainView({
   const backlogTasks = useBacklogStore((s) => s.backlogTasks);
   const applyEpicCreated = useBacklogStore((s) => s.applyEpicCreated);
   const applyEpicUpdated = useBacklogStore((s) => s.applyEpicUpdated);
+  const draftGenerating = useBacklogStore((s) => s.draftGenerating);
+  const draftSummary = useBacklogStore((s) => s.draftSummary);
+  const clearDraftSummary = useBacklogStore((s) => s.clearDraftSummary);
+
+  useEffect(() => {
+    if (!draftSummary) return;
+    useToastStore.getState().addToast({
+      type: 'success',
+      message: `Epic ${draftSummary.epicCount}개, Story ${draftSummary.storyCount}개, Task ${draftSummary.taskCount}개가 생성되었습니다.`,
+    });
+    clearDraftSummary();
+  }, [draftSummary, clearDraftSummary]);
 
   const { handleCreate: handleCreateStory, handleUpdate: handleUpdateStory } =
     useStoryApi(teamspaceId);
@@ -177,7 +218,8 @@ function BacklogMainView({
   };
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
+    <div className="relative flex flex-col h-full overflow-hidden">
+      {draftGenerating && <DraftGeneratingOverlay />}
       {/* 헤더 */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
         <h2 className="text-xl font-bold text-ink">백로그</h2>
@@ -206,22 +248,24 @@ function BacklogMainView({
 
       {/* 필터 툴바 */}
       <div className="flex items-center gap-2 px-6 py-2 border-b border-border shrink-0 flex-wrap">
-        {/* 상태 탭 */}
-        <div className="flex items-center gap-1">
-          {STATUS_TABS.map((tab) => (
-            <button
-              key={tab.value}
-              onClick={() => setStatusFilter(tab.value)}
-              className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
-                statusFilter === tab.value
-                  ? 'bg-primary/10 text-primary'
-                  : 'text-ink-muted hover:text-ink'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        {/* 상태 탭 (목록 뷰에서만 표시) */}
+        {viewMode === 'list' && (
+          <div className="flex items-center gap-1">
+            {STATUS_TABS.map((tab) => (
+              <button
+                key={tab.value}
+                onClick={() => setStatusFilter(tab.value)}
+                className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                  statusFilter === tab.value
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-ink-muted hover:text-ink'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        )}
 
         <div className="flex-1" />
 

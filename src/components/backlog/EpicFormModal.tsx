@@ -9,13 +9,7 @@ import type {
   CreateEpicRequest,
 } from '@/types/backlog';
 import type { MemberInfo } from '@/types/api';
-import {
-  EPIC_COLORS,
-  STATUS_OPTIONS,
-  PRIORITY_OPTIONS,
-  ISSUE_TYPE_OPTIONS,
-} from '@/constants/backlog';
-import AssigneeSelect from './AssigneeSelect';
+import { EPIC_COLORS } from '@/constants/backlog';
 
 interface EpicFormModalProps {
   mode: 'create' | 'edit';
@@ -32,7 +26,6 @@ export default function EpicFormModal({
   initialData,
   defaultStatus,
   config,
-  members,
   onSave,
   onClose,
 }: EpicFormModalProps) {
@@ -124,117 +117,6 @@ export default function EpicFormModal({
             />
             {nameError && <p className="text-xs text-red-500">에픽 이름을 입력해주세요.</p>}
           </div>
-
-          {/* 색상 */}
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-ink-muted">색상</label>
-            <div className="flex flex-wrap gap-2">
-              {EPIC_COLORS.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => set('color', c)}
-                  className={`w-6 h-6 rounded-full transition-transform hover:scale-110 ${
-                    form.color === c ? 'ring-2 ring-offset-1 ring-ink' : ''
-                  }`}
-                  style={{ backgroundColor: c }}
-                  aria-label={c}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* 설명 */}
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-ink-muted">설명</label>
-            <textarea
-              value={form.description}
-              onChange={(e) => set('description', e.target.value)}
-              placeholder="에픽에 대한 설명을 입력하세요 (선택)"
-              rows={3}
-              className="w-full rounded border border-border px-3 py-2 text-sm outline-none focus:ring-1 focus:ring-primary resize-none"
-            />
-          </div>
-
-          {/* 상태 */}
-          <FormRow label="상태">
-            <select
-              value={form.status}
-              onChange={(e) => set('status', e.target.value as StoryStatus)}
-              className="rounded border border-border px-2 py-1.5 text-sm outline-none focus:ring-1 focus:ring-primary bg-white"
-            >
-              {STATUS_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-          </FormRow>
-
-          {/* 이슈 유형 (feBeEnabled) */}
-          {config.feBeEnabled && (
-            <FormRow label="이슈 유형">
-              <div className="flex items-center gap-2">
-                {ISSUE_TYPE_OPTIONS.map((o) => (
-                  <button
-                    key={o.value}
-                    type="button"
-                    onClick={() => set('issueType', form.issueType === o.value ? null : o.value)}
-                    className={`px-3 py-1 rounded border text-xs font-medium transition-colors ${
-                      form.issueType === o.value
-                        ? o.value === 'FE'
-                          ? 'bg-blue-50 border-blue-300 text-blue-600'
-                          : 'bg-purple-50 border-purple-300 text-purple-600'
-                        : 'border-border text-ink-muted hover:text-ink'
-                    }`}
-                  >
-                    {o.label}
-                  </button>
-                ))}
-              </div>
-            </FormRow>
-          )}
-
-          {/* 우선순위 (priorityEnabled) */}
-          {config.priorityEnabled && (
-            <FormRow label="우선순위">
-              <select
-                value={form.priority ?? ''}
-                onChange={(e) =>
-                  set('priority', e.target.value ? (e.target.value as Priority) : null)
-                }
-                className="rounded border border-border px-2 py-1.5 text-sm outline-none focus:ring-1 focus:ring-primary bg-white"
-              >
-                <option value="">선택 안 함</option>
-                {PRIORITY_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
-            </FormRow>
-          )}
-
-          {/* 담당자 */}
-          <FormRow label="담당자">
-            <AssigneeSelect
-              value={form.assigneeId}
-              members={members}
-              onChange={(id) => set('assigneeId', id)}
-            />
-          </FormRow>
-
-          {/* 마감일 (dueDateEnabled) */}
-          {config.dueDateEnabled && (
-            <FormRow label="마감일">
-              <input
-                type="date"
-                value={form.dueDate}
-                onChange={(e) => set('dueDate', e.target.value)}
-                className="rounded border border-border px-2 py-1.5 text-sm outline-none focus:ring-1 focus:ring-primary"
-              />
-            </FormRow>
-          )}
         </div>
 
         {/* 버튼 */}
@@ -254,15 +136,6 @@ export default function EpicFormModal({
           </button>
         </div>
       </div>
-    </div>
-  );
-}
-
-function FormRow({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="flex items-center gap-3">
-      <span className="text-xs font-semibold text-ink-muted w-20 shrink-0">{label}</span>
-      <div className="flex items-center gap-2">{children}</div>
     </div>
   );
 }

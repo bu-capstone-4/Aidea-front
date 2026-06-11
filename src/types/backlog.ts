@@ -9,6 +9,8 @@ export interface BacklogUser {
   profileImageUrl: string | null;
 }
 
+export type BacklogDraftStatus = 'PENDING' | 'DONE' | 'FAILED' | null;
+
 export interface BacklogConfigResponse {
   teamspaceId: string;
   feBeEnabled: boolean;
@@ -17,6 +19,19 @@ export interface BacklogConfigResponse {
   priorityEnabled: boolean;
   sprintEnabled: boolean;
   dueDateEnabled: boolean;
+  // GET 응답에서는 항상 null (진행 상태는 WebSocket 이벤트로만 전달됨)
+  draftStatus: BacklogDraftStatus;
+}
+
+export interface SaveBacklogConfigRequest {
+  feBeEnabled: boolean;
+  epicEnabled: boolean;
+  storyEnabled: boolean;
+  priorityEnabled: boolean;
+  sprintEnabled: boolean;
+  dueDateEnabled: boolean;
+  // 백로그 설정이 처음 생성될 때만 true 허용
+  generateDraft?: boolean;
 }
 
 export interface EpicSummary {
@@ -290,6 +305,45 @@ export interface BacklogtaskStoryChangedEvent {
   storyId: number | null;
 }
 
+// ── AI 백로그 초안 생성 WS 이벤트 ─────────────────────────────
+
+export interface BacklogDraftStartedEvent {
+  type: 'backlog:draft_started';
+  actorId: string;
+}
+
+export interface BacklogDraftSummary {
+  epicCount: number;
+  storyCount: number;
+  taskCount: number;
+}
+
+export interface BacklogDraftReadyEvent {
+  type: 'backlog:draft_ready';
+  actorId: string;
+  summary: BacklogDraftSummary;
+}
+
+export type BacklogDraftErrorCode =
+  | 'BACKLOG_DRAFT_GEMINI_INVALID_RESPONSE'
+  | 'BACKLOG_DRAFT_GEMINI_API_ERROR'
+  | 'BACKLOG_DRAFT_GENERATION_FAILED'
+  | 'DRAFT_QUOTA_EXCEEDED';
+
+export interface BacklogDraftErrorEvent {
+  type: 'backlog:draft_error';
+  actorId: string;
+  errorCode: BacklogDraftErrorCode;
+}
+
+// ── PUT .../backlog/config 응답 에러 코드 (REST) ──────────────
+
+export type BacklogConfigErrorCode =
+  | 'BACKLOG_DRAFT_NOT_FIRST_CREATION'
+  | 'BACKLOG_DRAFT_BLOCKED_BY_DOCUMENT_DRAFT'
+  | 'BACKLOG_DRAFT_NO_PLANNING_DOCUMENT'
+  | 'BACKLOG_DRAFT_ALREADY_IN_PROGRESS';
+
 export type BacklogSocketErrorCode =
   | 'INSUFFICIENT_PERMISSION'
   | 'DOCUMENT_NOT_FOUND'
@@ -329,4 +383,7 @@ export type BacklogServerMessage =
   | BacklogtaskReorderedEvent
   | BacklogtaskDeletedEvent
   | BacklogtaskStoryChangedEvent
+  | BacklogDraftStartedEvent
+  | BacklogDraftReadyEvent
+  | BacklogDraftErrorEvent
   | BacklogSocketErrorEvent;

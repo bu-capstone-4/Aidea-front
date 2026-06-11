@@ -7,6 +7,7 @@ import { useBacklogStore } from '@/store/backlogStore';
 import { useToastStore } from '@/store/toastStore';
 import type { MemberInfo } from '@/types/api';
 import { EPIC_COLORS } from '@/constants/backlog';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 import StatusBadge from './StatusBadge';
 
 export interface EpicManagerModalProps {
@@ -43,6 +44,7 @@ export default function EpicManagerModal({ teamspaceId, epics, onClose }: EpicMa
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState<EpicFormState>(defaultForm());
   const [saving, setSaving] = useState(false);
+  const [deleteEpicTarget, setDeleteEpicTarget] = useState<EpicResponse | null>(null);
 
   const handleOpenCreate = () => {
     setEditingId(null);
@@ -96,12 +98,6 @@ export default function EpicManagerModal({ teamspaceId, epics, onClose }: EpicMa
   };
 
   const handleDelete = async (epic: EpicResponse) => {
-    if (
-      !window.confirm(
-        `"${epic.name}" 에픽을 삭제하면 연결된 스토리에서 에픽이 제거됩니다. 삭제할까요?`
-      )
-    )
-      return;
     try {
       await deleteEpic(teamspaceId, epic.id);
       applyEpicDeleted(epic.id);
@@ -176,7 +172,7 @@ export default function EpicManagerModal({ teamspaceId, epics, onClose }: EpicMa
                       <MdEdit size={15} />
                     </button>
                     <button
-                      onClick={() => handleDelete(epic)}
+                      onClick={() => setDeleteEpicTarget(epic)}
                       className="p-1 rounded text-ink-muted hover:text-red-500 hover:bg-red-50 transition-colors"
                       aria-label="삭제"
                     >
@@ -220,6 +216,19 @@ export default function EpicManagerModal({ teamspaceId, epics, onClose }: EpicMa
           </button>
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={deleteEpicTarget !== null}
+        title="에픽 삭제"
+        message={
+          deleteEpicTarget
+            ? `"${deleteEpicTarget.name}" 에픽을 삭제하면 연결된 스토리에서 에픽이 제거됩니다. 삭제할까요?`
+            : undefined
+        }
+        confirmLabel="삭제"
+        onConfirm={() => deleteEpicTarget && handleDelete(deleteEpicTarget)}
+        onClose={() => setDeleteEpicTarget(null)}
+      />
     </div>
   );
 }

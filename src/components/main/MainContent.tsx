@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router';
+import { MdAutoAwesome } from 'react-icons/md';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useDocument } from '@/hooks/useDocument';
 import { getDocLabel } from '@/components/CreateTeamSpace/types';
@@ -80,9 +81,16 @@ export default function MainContent() {
             {getDocLabel(doc.type)}
           </h1>
           {(status === 'IDLE' || status === 'ACCEPTED') && (
-            <Button variant="feedback" size="sm" className="shrink-0" onClick={toggleFeedbackModal}>
-              + AI 피드백
-            </Button>
+            <button
+              onClick={toggleFeedbackModal}
+              className="group flex shrink-0 items-center gap-1.5 rounded-full border border-ai/15 bg-ai-bg px-3.5 py-1.5 text-sm font-semibold text-ai transition-colors hover:bg-ai hover:text-white"
+            >
+              <MdAutoAwesome
+                size={15}
+                className="transition-transform duration-300 group-hover:rotate-45"
+              />
+              AI 피드백
+            </button>
           )}
         </div>
 

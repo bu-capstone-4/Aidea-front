@@ -38,6 +38,9 @@ const VALID_BACKLOG_TYPES = new Set([
   'backlogtask:reordered',
   'backlogtask:deleted',
   'backlogtask:story_changed',
+  'backlog:draft_started',
+  'backlog:draft_ready',
+  'backlog:draft_error',
 ]);
 
 function isBacklogServerMessage(msg: unknown): msg is BacklogServerMessage {
@@ -54,9 +57,13 @@ export function useBacklogSocket({
   const wsRef = useRef<WebSocket | null>(null);
   const [connected, setConnected] = useState(false);
   const [onlineEditors, setOnlineEditors] = useState<BacklogOnlineEditor[]>([]);
+  const [reconnectKey, setReconnectKey] = useState(0);
 
   const applyInit = useBacklogStore((s) => s.applyInit);
   const applyConfigUpdated = useBacklogStore((s) => s.applyConfigUpdated);
+  const startDraftGenerating = useBacklogStore((s) => s.startDraftGenerating);
+  const applyDraftReady = useBacklogStore((s) => s.applyDraftReady);
+  const applyDraftError = useBacklogStore((s) => s.applyDraftError);
   const applyEpicCreated = useBacklogStore((s) => s.applyEpicCreated);
   const applyEpicUpdated = useBacklogStore((s) => s.applyEpicUpdated);
   const applyEpicDeleted = useBacklogStore((s) => s.applyEpicDeleted);
@@ -170,6 +177,22 @@ export function useBacklogSocket({
         case 'backlogtask:story_changed':
           applyBacklogtaskStoryChanged(raw.taskId, raw.storyId);
           break;
+        case 'backlog:draft_started':
+          startDraftGenerating();
+          break;
+        case 'backlog:draft_ready':
+          applyDraftReady(raw.summary);
+          // Epic/Story/Task 목록을 최신 상태로 받기 위해 소켓을 재연결하여
+          // backlog:init을 다시 수신한다.
+          setReconnectKey((k) => k + 1);
+          break;
+        case 'backlog:draft_error':
+          applyDraftError();
+          handleSocketError({
+            code: raw.errorCode,
+            message: '백로그 초안 생성에 실패했습니다.',
+          });
+          break;
       }
     };
 
@@ -190,8 +213,12 @@ export function useBacklogSocket({
   }, [
     enabled,
     teamspaceId,
+    reconnectKey,
     applyInit,
     applyConfigUpdated,
+    startDraftGenerating,
+    applyDraftReady,
+    applyDraftError,
     applyEpicCreated,
     applyEpicUpdated,
     applyEpicDeleted,

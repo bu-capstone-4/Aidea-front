@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { MdCheck, MdMoreVert } from 'react-icons/md';
 import { useShallow } from 'zustand/react/shallow';
 import type { TaskResponse, BacklogConfigResponse, BacklogTask } from '@/types/backlog';
@@ -6,7 +6,8 @@ import { useTaskApi } from '@/hooks/useTaskApi';
 import { useBacklogTaskApi } from '@/hooks/useBacklogTaskApi';
 import { useBacklogStore } from '@/store/backlogStore';
 import { PRIORITY_LABEL, PRIORITY_TEXT_CLASS } from '@/constants/backlog';
-import type { ColWidths } from '@/constants/backlog';
+import type { ColWidths, StatusFilter } from '@/constants/backlog';
+import ConfirmModal from '@/components/ui/ConfirmModal';
 import UserAvatar from '@/components/ui/UserAvatar';
 import IssueTypeTag from './IssueTypeTag';
 import StatusBadge from './StatusBadge';
@@ -35,6 +36,7 @@ interface StoryDetailPanelProps {
   teamspaceId: string;
   tasks: TaskResponse[] | undefined;
   config: BacklogConfigResponse;
+  statusFilter: StatusFilter;
   colWidths: ColWidths;
   onAddItemClick: () => void;
   onEditLinkedTask: (task: BacklogTask) => void;
@@ -45,6 +47,7 @@ export default function StoryDetailPanel({
   teamspaceId,
   tasks,
   config,
+  statusFilter,
   colWidths,
   onAddItemClick,
   onEditLinkedTask,
@@ -56,10 +59,23 @@ export default function StoryDetailPanel({
     useShallow((s) => s.backlogTasks.filter((t) => t.storyId === storyId))
   );
 
+  const filteredTasks = useMemo(() => {
+    if (!tasks || statusFilter === 'all') return tasks;
+    if (statusFilter === 'IN_PROGRESS') return [];
+    return tasks.filter((t) => (statusFilter === 'DONE' ? t.isCompleted : !t.isCompleted));
+  }, [tasks, statusFilter]);
+
+  const filteredLinkedTasks = useMemo(() => {
+    if (statusFilter === 'all') return linkedTasks;
+    return linkedTasks.filter((t) => t.status === statusFilter);
+  }, [linkedTasks, statusFilter]);
+
   const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
   const [editingTitle, setEditingTitle] = useState('');
   const [menuOpenKey, setMenuOpenKey] = useState<string | null>(null);
   const [dropUp, setDropUp] = useState(false);
+  const [deleteSubTaskTarget, setDeleteSubTaskTarget] = useState<TaskResponse | null>(null);
+  const [deleteLinkedTaskTarget, setDeleteLinkedTaskTarget] = useState<BacklogTask | null>(null);
   const editInputRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -96,16 +112,14 @@ export default function StoryDetailPanel({
     if (e.key === 'Escape') setEditingTaskId(null);
   };
 
-  const confirmDelete = async (taskId: number, title: string) => {
+  const confirmDelete = (task: TaskResponse) => {
     setMenuOpenKey(null);
-    if (!window.confirm(`"${title}" 태스크를 삭제하시겠습니까?`)) return;
-    await handleDelete(storyId, taskId);
+    setDeleteSubTaskTarget(task);
   };
 
-  const confirmDeleteBacklogTask = async (task: BacklogTask) => {
+  const confirmDeleteBacklogTask = (task: BacklogTask) => {
     setMenuOpenKey(null);
-    if (!window.confirm(`"${task.title}" 태스크를 삭제하시겠습니까?`)) return;
-    await handleDeleteBacklogTask(task.id);
+    setDeleteLinkedTaskTarget(task);
   };
 
   const toggleMenu = (key: string, e: React.MouseEvent<HTMLButtonElement>) => {
@@ -118,13 +132,13 @@ export default function StoryDetailPanel({
 
   return (
     <div className="border-t border-border/60 bg-surface/30">
-      {tasks === undefined ? (
+      {tasks === undefined || filteredTasks === undefined ? (
         <p className="text-xs text-ink-muted py-2 pl-14">태스크를 불러오는 중...</p>
       ) : (
         <>
-          {tasks.length > 0 && (
+          {filteredTasks.length > 0 && (
             <ul className="flex flex-col">
-              {tasks.map((task, index) => {
+              {filteredTasks.map((task, index) => {
                 const menuKey = `task-${task.id}`;
                 const isMenuOpen = menuOpenKey === menuKey;
                 return (
@@ -248,7 +262,7 @@ export default function StoryDetailPanel({
                                 수정
                               </button>
                               <button
-                                onClick={() => confirmDelete(task.id, task.title)}
+                                onClick={() => confirmDelete(task)}
                                 className="w-full px-3 py-1.5 text-left text-sm text-red-500 hover:bg-red-50"
                               >
                                 삭제
@@ -264,9 +278,9 @@ export default function StoryDetailPanel({
             </ul>
           )}
 
-          {linkedTasks.length > 0 && (
+          {filteredLinkedTasks.length > 0 && (
             <ul className="flex flex-col border-t border-border/40">
-              {linkedTasks.map((task: BacklogTask) => {
+              {filteredLinkedTasks.map((task: BacklogTask) => {
                 const menuKey = `bt-${task.id}`;
                 const isMenuOpen = menuOpenKey === menuKey;
                 return (
@@ -417,6 +431,34 @@ export default function StoryDetailPanel({
           </button>
         </>
       )}
+
+      <ConfirmModal
+        isOpen={deleteSubTaskTarget !== null}
+        title="태스크 삭제"
+        message={
+          deleteSubTaskTarget
+            ? `"${deleteSubTaskTarget.title}" 태스크를 삭제하시겠습니까?`
+            : undefined
+        }
+        confirmLabel="삭제"
+        onConfirm={() => deleteSubTaskTarget && handleDelete(storyId, deleteSubTaskTarget.id)}
+        onClose={() => setDeleteSubTaskTarget(null)}
+      />
+
+      <ConfirmModal
+        isOpen={deleteLinkedTaskTarget !== null}
+        title="태스크 삭제"
+        message={
+          deleteLinkedTaskTarget
+            ? `"${deleteLinkedTaskTarget.title}" 태스크를 삭제하시겠습니까?`
+            : undefined
+        }
+        confirmLabel="삭제"
+        onConfirm={() =>
+          deleteLinkedTaskTarget && handleDeleteBacklogTask(deleteLinkedTaskTarget.id)
+        }
+        onClose={() => setDeleteLinkedTaskTarget(null)}
+      />
     </div>
   );
 }

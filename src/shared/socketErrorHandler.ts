@@ -4,13 +4,14 @@ import type {
   FeedbackErrorCode,
   TeamspaceSocketErrorCode,
 } from '@/types/socket';
-import type { BacklogSocketErrorCode } from '@/types/backlog';
+import type { BacklogSocketErrorCode, BacklogDraftErrorCode } from '@/types/backlog';
 
 type KnownSocketErrorCode =
   | DocumentSocketErrorCode
   | FeedbackErrorCode
   | TeamspaceSocketErrorCode
-  | BacklogSocketErrorCode;
+  | BacklogSocketErrorCode
+  | BacklogDraftErrorCode;
 
 // 세션 종료가 필요한 치명적 코드
 const FATAL_CODES = new Set<string>(['UNAUTHORIZED', 'SESSION_EXPIRED']);
@@ -28,6 +29,12 @@ const ERROR_MESSAGES: Partial<Record<KnownSocketErrorCode, string>> = {
   AI_FEEDBACK_FAILED: 'AI 피드백 생성에 실패했습니다.',
   AI_TIMEOUT: 'AI 응답 시간이 초과되었습니다. 잠시 후 다시 시도해 주세요.',
   CONTENT_EMPTY: '문서 내용이 없어 피드백을 생성할 수 없습니다.',
+  // 백로그 AI 초안 생성 에러
+  BACKLOG_DRAFT_GEMINI_INVALID_RESPONSE: 'AI 초안 생성에 실패했습니다. 다시 시도해 주세요.',
+  BACKLOG_DRAFT_GEMINI_API_ERROR:
+    'AI 서비스 호출 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.',
+  BACKLOG_DRAFT_GENERATION_FAILED: '백로그 초안 생성에 실패했습니다.',
+  DRAFT_QUOTA_EXCEEDED: 'AI 사용량 한도를 초과했습니다. 잠시 후 다시 시도해 주세요.',
 };
 
 export interface SocketErrorPayload {

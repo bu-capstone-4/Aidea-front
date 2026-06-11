@@ -1,6 +1,7 @@
 import { apiClient } from '@/shared/apiClient';
 import type {
   BacklogConfigResponse,
+  SaveBacklogConfigRequest,
   EpicResponse,
   StorySummary,
   StoryDetail,
@@ -29,7 +30,7 @@ export async function getBacklogConfig(teamspaceId: string): Promise<BacklogConf
 
 export async function saveBacklogConfig(
   teamspaceId: string,
-  config: Omit<BacklogConfigResponse, 'teamspaceId'>
+  config: SaveBacklogConfigRequest
 ): Promise<BacklogConfigResponse> {
   const res = await apiClient.put<GlobalResponse<BacklogConfigResponse>>(
     `/api/teamspaces/${teamspaceId}/backlog/config`,

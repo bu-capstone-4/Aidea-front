@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type {
   BacklogConfigResponse,
+  BacklogDraftSummary,
   EpicResponse,
   StorySummary,
   TaskResponse,
@@ -16,6 +17,10 @@ interface BacklogState {
   backlogTasks: BacklogTask[];
   tasksByStoryId: Record<number, TaskResponse[]>;
   expandedStoryId: number | null;
+  // AI 백로그 초안 생성 진행 상태 (GET 응답의 draftStatus는 항상 null이므로
+  // PUT 응답 및 backlog:draft_* WebSocket 이벤트로만 갱신)
+  draftGenerating: boolean;
+  draftSummary: BacklogDraftSummary | null;
 }
 
 interface BacklogActions {
@@ -28,6 +33,11 @@ interface BacklogActions {
   reset: () => void;
 
   applyConfigUpdated: (config: BacklogConfigResponse) => void;
+
+  startDraftGenerating: () => void;
+  applyDraftReady: (summary: BacklogDraftSummary) => void;
+  clearDraftSummary: () => void;
+  applyDraftError: () => void;
 
   applyEpicCreated: (epic: EpicResponse) => void;
   applyEpicUpdated: (epic: EpicResponse) => void;
@@ -66,6 +76,8 @@ const initialState: BacklogState = {
   backlogTasks: [],
   tasksByStoryId: {},
   expandedStoryId: null,
+  draftGenerating: false,
+  draftSummary: null,
 };
 
 export const useBacklogStore = create<BacklogState & BacklogActions>()((set) => ({
@@ -77,6 +89,14 @@ export const useBacklogStore = create<BacklogState & BacklogActions>()((set) => 
   reset: () => set(initialState),
 
   applyConfigUpdated: (config) => set({ config }),
+
+  startDraftGenerating: () => set({ draftGenerating: true }),
+
+  applyDraftReady: (summary) => set({ draftGenerating: false, draftSummary: summary }),
+
+  clearDraftSummary: () => set({ draftSummary: null }),
+
+  applyDraftError: () => set({ draftGenerating: false }),
 
   applyEpicCreated: (epic) =>
     set((state) => {
