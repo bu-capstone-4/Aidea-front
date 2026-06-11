@@ -248,22 +248,24 @@ function BacklogMainView({
 
       {/* 필터 툴바 */}
       <div className="flex items-center gap-2 px-6 py-2 border-b border-border shrink-0 flex-wrap">
-        {/* 상태 탭 */}
-        <div className="flex items-center gap-1">
-          {STATUS_TABS.map((tab) => (
-            <button
-              key={tab.value}
-              onClick={() => setStatusFilter(tab.value)}
-              className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
-                statusFilter === tab.value
-                  ? 'bg-primary/10 text-primary'
-                  : 'text-ink-muted hover:text-ink'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        {/* 상태 탭 (목록 뷰에서만 표시) */}
+        {viewMode === 'list' && (
+          <div className="flex items-center gap-1">
+            {STATUS_TABS.map((tab) => (
+              <button
+                key={tab.value}
+                onClick={() => setStatusFilter(tab.value)}
+                className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                  statusFilter === tab.value
+                    ? 'bg-primary/10 text-primary'
+                    : 'text-ink-muted hover:text-ink'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        )}
 
         <div className="flex-1" />
 
