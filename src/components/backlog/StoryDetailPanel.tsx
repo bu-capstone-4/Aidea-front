@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { MdCheck, MdMoreVert } from 'react-icons/md';
 import { useShallow } from 'zustand/react/shallow';
 import type { TaskResponse, BacklogConfigResponse, BacklogTask } from '@/types/backlog';
@@ -6,7 +6,7 @@ import { useTaskApi } from '@/hooks/useTaskApi';
 import { useBacklogTaskApi } from '@/hooks/useBacklogTaskApi';
 import { useBacklogStore } from '@/store/backlogStore';
 import { PRIORITY_LABEL, PRIORITY_TEXT_CLASS } from '@/constants/backlog';
-import type { ColWidths } from '@/constants/backlog';
+import type { ColWidths, StatusFilter } from '@/constants/backlog';
 import UserAvatar from '@/components/ui/UserAvatar';
 import IssueTypeTag from './IssueTypeTag';
 import StatusBadge from './StatusBadge';
@@ -35,6 +35,7 @@ interface StoryDetailPanelProps {
   teamspaceId: string;
   tasks: TaskResponse[] | undefined;
   config: BacklogConfigResponse;
+  statusFilter: StatusFilter;
   colWidths: ColWidths;
   onAddItemClick: () => void;
   onEditLinkedTask: (task: BacklogTask) => void;
@@ -45,6 +46,7 @@ export default function StoryDetailPanel({
   teamspaceId,
   tasks,
   config,
+  statusFilter,
   colWidths,
   onAddItemClick,
   onEditLinkedTask,
@@ -55,6 +57,17 @@ export default function StoryDetailPanel({
   const linkedTasks = useBacklogStore(
     useShallow((s) => s.backlogTasks.filter((t) => t.storyId === storyId))
   );
+
+  const filteredTasks = useMemo(() => {
+    if (!tasks || statusFilter === 'all') return tasks;
+    if (statusFilter === 'IN_PROGRESS') return [];
+    return tasks.filter((t) => (statusFilter === 'DONE' ? t.isCompleted : !t.isCompleted));
+  }, [tasks, statusFilter]);
+
+  const filteredLinkedTasks = useMemo(() => {
+    if (statusFilter === 'all') return linkedTasks;
+    return linkedTasks.filter((t) => t.status === statusFilter);
+  }, [linkedTasks, statusFilter]);
 
   const [editingTaskId, setEditingTaskId] = useState<number | null>(null);
   const [editingTitle, setEditingTitle] = useState('');
@@ -118,13 +131,13 @@ export default function StoryDetailPanel({
 
   return (
     <div className="border-t border-border/60 bg-surface/30">
-      {tasks === undefined ? (
+      {tasks === undefined || filteredTasks === undefined ? (
         <p className="text-xs text-ink-muted py-2 pl-14">태스크를 불러오는 중...</p>
       ) : (
         <>
-          {tasks.length > 0 && (
+          {filteredTasks.length > 0 && (
             <ul className="flex flex-col">
-              {tasks.map((task, index) => {
+              {filteredTasks.map((task, index) => {
                 const menuKey = `task-${task.id}`;
                 const isMenuOpen = menuOpenKey === menuKey;
                 return (
@@ -264,9 +277,9 @@ export default function StoryDetailPanel({
             </ul>
           )}
 
-          {linkedTasks.length > 0 && (
+          {filteredLinkedTasks.length > 0 && (
             <ul className="flex flex-col border-t border-border/40">
-              {linkedTasks.map((task: BacklogTask) => {
+              {filteredLinkedTasks.map((task: BacklogTask) => {
                 const menuKey = `bt-${task.id}`;
                 const isMenuOpen = menuOpenKey === menuKey;
                 return (

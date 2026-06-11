@@ -6,12 +6,13 @@ import { getStoryDetail } from '@/api/backlog';
 import { useBacklogStore } from '@/store/backlogStore';
 import EpicBadge from './EpicBadge';
 import StoryDetailPanel from './StoryDetailPanel';
-import type { ColWidths } from '@/constants/backlog';
+import type { ColWidths, StatusFilter } from '@/constants/backlog';
 
 interface StoryRowProps {
   story: StorySummary;
   config: BacklogConfigResponse;
   teamspaceId: string;
+  statusFilter: StatusFilter;
   colWidths: ColWidths;
   isExpanded: boolean;
   onExpandToggle: () => void;
@@ -25,6 +26,7 @@ export default function StoryRow({
   story,
   config,
   teamspaceId,
+  statusFilter,
   colWidths,
   isExpanded,
   onExpandToggle,
@@ -54,8 +56,12 @@ export default function StoryRow({
     return () => document.removeEventListener('mousedown', onClickOutside);
   }, [menuOpen]);
 
+  // 현재 스토리의 상태가 필터와 다르더라도 하위 태스크가 필터에 해당하면 자동으로 펼친다.
+  const forceExpand = statusFilter !== 'all' && story.status !== statusFilter;
+  const effectiveExpanded = isExpanded || forceExpand;
+
   useEffect(() => {
-    if (!isExpanded || tasks !== undefined) return;
+    if (!effectiveExpanded || tasks !== undefined) return;
     let cancelled = false;
     getStoryDetail(teamspaceId, story.id).then((detail) => {
       if (!cancelled) setTasksForStory(story.id, detail.tasks);
@@ -63,18 +69,23 @@ export default function StoryRow({
     return () => {
       cancelled = true;
     };
-  }, [isExpanded, tasks, teamspaceId, story.id, setTasksForStory]);
+  }, [effectiveExpanded, tasks, teamspaceId, story.id, setTasksForStory]);
 
-  const loadingTasks = isExpanded && tasks === undefined;
+  const loadingTasks = effectiveExpanded && tasks === undefined;
 
   const handleExpand = () => {
     onExpandToggle();
   };
 
-  const subTaskTotal = tasks !== undefined ? tasks.length : story.taskCount;
-  const subTaskCompleted =
-    tasks !== undefined ? tasks.filter((t) => t.isCompleted).length : story.completedTaskCount;
+  // story.taskCount/completedTaskCount는 서브태스크 + 연결된 BacklogTask를 합산한 값이므로,
+  // tasks 미로딩 시 linkedBacklogTasks 수를 빼서 서브태스크 단독 수치로 환산한다.
   const linkedCompleted = linkedBacklogTasks.filter((t) => t.status === 'DONE').length;
+  const subTaskTotal =
+    tasks !== undefined ? tasks.length : Math.max(0, story.taskCount - linkedBacklogTasks.length);
+  const subTaskCompleted =
+    tasks !== undefined
+      ? tasks.filter((t) => t.isCompleted).length
+      : Math.max(0, story.completedTaskCount - linkedCompleted);
   const totalCount = subTaskTotal + linkedBacklogTasks.length;
   const completedCount = subTaskCompleted + linkedCompleted;
   const progressPct = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
@@ -91,7 +102,7 @@ export default function StoryRow({
         {/* Title column */}
         <div className="flex-1 flex items-center gap-2 px-4 py-2.5 min-w-0 overflow-hidden">
           <span className="shrink-0 text-ink-muted">
-            {isExpanded ? <MdExpandMore size={16} /> : <MdChevronRight size={16} />}
+            {effectiveExpanded ? <MdExpandMore size={16} /> : <MdChevronRight size={16} />}
           </span>
 
           <span
@@ -189,12 +200,13 @@ export default function StoryRow({
       </div>
 
       {/* Expanded tasks */}
-      {isExpanded && (
+      {effectiveExpanded && (
         <StoryDetailPanel
           storyId={story.id}
           teamspaceId={teamspaceId}
           tasks={loadingTasks ? undefined : tasks}
           config={config}
+          statusFilter={statusFilter}
           colWidths={colWidths}
           onAddItemClick={onAddItemClick}
           onEditLinkedTask={onEditLinkedTask}

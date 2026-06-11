@@ -44,8 +44,12 @@ export default function BacklogListView({
   const filteredStories = useMemo(() => {
     const sorted = [...stories].sort((a, b) => a.position - b.position);
     if (statusFilter === 'all') return sorted;
-    return sorted.filter((s) => s.status === statusFilter);
-  }, [stories, statusFilter]);
+    return sorted.filter(
+      (s) =>
+        s.status === statusFilter ||
+        backlogTasks.some((t) => t.storyId === s.id && t.status === statusFilter)
+    );
+  }, [stories, backlogTasks, statusFilter]);
 
   const displayedStories = useMemo(() => {
     return [...filteredStories].sort((a, b) => {
@@ -151,6 +155,7 @@ export default function BacklogListView({
                 story={story}
                 config={config}
                 teamspaceId={teamspaceId}
+                statusFilter={statusFilter}
                 colWidths={COL_WIDTHS}
                 isExpanded={!collapsedStoryIds.has(story.id)}
                 onExpandToggle={() => handleExpandToggle(story.id)}
