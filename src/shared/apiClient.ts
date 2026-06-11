@@ -12,6 +12,14 @@ const INVITATION_ERROR_MESSAGES: Record<string, string> = {
   INVITATION_NOT_FOUND: '유효하지 않은 초대입니다.',
 };
 
+// PUT .../backlog/config 에서 generateDraft=true 요청 시 발생 가능한 에러
+const BACKLOG_DRAFT_ERROR_MESSAGES: Record<string, string> = {
+  BACKLOG_DRAFT_NOT_FIRST_CREATION: '백로그 설정이 이미 존재하여 초안을 생성할 수 없습니다.',
+  BACKLOG_DRAFT_BLOCKED_BY_DOCUMENT_DRAFT: '문서 AI 생성이 끝난 후 다시 시도해주세요.',
+  BACKLOG_DRAFT_NO_PLANNING_DOCUMENT: '먼저 기획 문서를 작성해주세요.',
+  BACKLOG_DRAFT_ALREADY_IN_PROGRESS: '이미 백로그 초안 생성이 진행 중입니다.',
+};
+
 // 목 모드(VITE_USE_REAL_AUTH !== 'true')에서는 빈 baseURL → MSW가 동일 오리진 요청을 인터셉트
 // 실제 모드에서는 VITE_API_BASE_URL 사용
 const baseURL =
@@ -47,7 +55,9 @@ apiClient.interceptors.response.use(
       // 401은 refresh 흐름이 처리. 그 외 서버/네트워크 에러는 toast로 표시.
       if (error.response?.status !== 401) {
         const data = error.response?.data as { message?: string; code?: string } | undefined;
-        const customMessage = data?.code ? INVITATION_ERROR_MESSAGES[data.code] : undefined;
+        const customMessage = data?.code
+          ? (INVITATION_ERROR_MESSAGES[data.code] ?? BACKLOG_DRAFT_ERROR_MESSAGES[data.code])
+          : undefined;
         const message = customMessage ?? data?.message ?? '서버와 통신 중 오류가 발생했습니다.';
         useToastStore.getState().addToast({ type: 'error', message });
       }

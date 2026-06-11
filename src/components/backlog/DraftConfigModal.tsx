@@ -12,6 +12,7 @@ interface ConfigSettings {
   priorityEnabled: boolean;
   sprintEnabled: boolean;
   dueDateEnabled: boolean;
+  generateDraft: boolean;
 }
 
 interface DraftConfigModalProps {
@@ -38,7 +39,9 @@ export default function DraftConfigModal({
     priorityEnabled: initialConfig?.priorityEnabled ?? false,
     sprintEnabled: initialConfig?.sprintEnabled ?? false,
     dueDateEnabled: initialConfig?.dueDateEnabled ?? false,
+    generateDraft: true,
   });
+  const startDraftGenerating = useBacklogStore((s) => s.startDraftGenerating);
 
   const toggle = (key: keyof ConfigSettings) =>
     setSettings((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -48,7 +51,12 @@ export default function DraftConfigModal({
     try {
       const config = await saveBacklogConfig(teamspaceId, settings);
       applyConfigUpdated(config);
+      if (config.draftStatus === 'PENDING') {
+        startDraftGenerating();
+      }
       onSaved();
+    } catch {
+      // 에러 토스트는 apiClient 인터셉터가 표시. 모달은 유지하여 재시도 가능하게 함.
     } finally {
       setLoading(false);
     }
@@ -135,6 +143,17 @@ export default function DraftConfigModal({
                 />
               </SettingRow>
             </div>
+          </section>
+
+          {/* AI 도움받기 섹션 */}
+          <section>
+            <SectionLabel>AI 도움받기</SectionLabel>
+            <SettingRow
+              label="AI로 초안 생성"
+              description="팀스페이스의 기획 문서를 바탕으로 Epic/Story/Task 초안을 자동 생성합니다"
+            >
+              <Toggle checked={settings.generateDraft} onChange={() => toggle('generateDraft')} />
+            </SettingRow>
           </section>
 
           {/* 버튼 */}
