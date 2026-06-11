@@ -10,9 +10,6 @@ import type {
   StorySummary,
 } from '@/types/backlog';
 import type { MemberInfo } from '@/types/api';
-import { STATUS_OPTIONS, PRIORITY_OPTIONS, ISSUE_TYPE_OPTIONS } from '@/constants/backlog';
-import AssigneeSelect from './AssigneeSelect';
-
 interface BacklogTaskFormModalProps {
   mode: 'create' | 'edit';
   initialData?: Partial<CreateBacklogTaskRequest> & { id?: number };
@@ -29,8 +26,6 @@ export default function BacklogTaskFormModal({
   initialData,
   defaultStatus,
   config,
-  members,
-  stories,
   onSave,
   onClose,
 }: BacklogTaskFormModalProps) {
@@ -118,116 +113,6 @@ export default function BacklogTaskFormModal({
             />
             {titleError && <p className="text-xs text-red-500">제목을 입력해주세요.</p>}
           </div>
-
-          {/* 상태 */}
-          <FormRow label="상태">
-            <select
-              value={form.status}
-              onChange={(e) => set('status', e.target.value as StoryStatus)}
-              className="rounded border border-border px-2 py-1.5 text-sm outline-none focus:ring-1 focus:ring-primary bg-white"
-            >
-              {STATUS_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-          </FormRow>
-
-          {/* 이슈 유형 (feBeEnabled) */}
-          {config.feBeEnabled && (
-            <FormRow label="이슈 유형">
-              <div className="flex items-center gap-2">
-                {ISSUE_TYPE_OPTIONS.map((o) => (
-                  <button
-                    key={o.value}
-                    type="button"
-                    onClick={() => set('issueType', form.issueType === o.value ? null : o.value)}
-                    className={`px-3 py-1 rounded border text-xs font-medium transition-colors ${
-                      form.issueType === o.value
-                        ? o.value === 'FE'
-                          ? 'bg-blue-50 border-blue-300 text-blue-600'
-                          : 'bg-purple-50 border-purple-300 text-purple-600'
-                        : 'border-border text-ink-muted hover:text-ink'
-                    }`}
-                  >
-                    {o.label}
-                  </button>
-                ))}
-              </div>
-            </FormRow>
-          )}
-
-          {/* 우선순위 (priorityEnabled) */}
-          {config.priorityEnabled && (
-            <FormRow label="우선순위">
-              <select
-                value={form.priority ?? ''}
-                onChange={(e) =>
-                  set('priority', e.target.value ? (e.target.value as Priority) : null)
-                }
-                className="rounded border border-border px-2 py-1.5 text-sm outline-none focus:ring-1 focus:ring-primary bg-white"
-              >
-                <option value="">선택 안 함</option>
-                {PRIORITY_OPTIONS.map((o) => (
-                  <option key={o.value} value={o.value}>
-                    {o.label}
-                  </option>
-                ))}
-              </select>
-            </FormRow>
-          )}
-
-          {/* 상위 스토리 */}
-          {stories.length > 0 && (
-            <FormRow label="상위 스토리">
-              <select
-                value={form.storyId ?? ''}
-                onChange={(e) => set('storyId', e.target.value ? Number(e.target.value) : null)}
-                className="rounded border border-border px-2 py-1.5 text-sm outline-none focus:ring-1 focus:ring-primary bg-white max-w-[240px] truncate"
-              >
-                <option value="">없음</option>
-                {stories.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    #{s.number} {s.title}
-                  </option>
-                ))}
-              </select>
-            </FormRow>
-          )}
-
-          {/* 담당자 */}
-          <FormRow label="담당자">
-            <AssigneeSelect
-              value={form.assigneeId}
-              members={members}
-              onChange={(id) => set('assigneeId', id)}
-            />
-          </FormRow>
-
-          {/* 스프린트 (sprintEnabled) */}
-          {config.sprintEnabled && (
-            <FormRow label="스프린트">
-              <input
-                value={form.sprint}
-                onChange={(e) => set('sprint', e.target.value)}
-                placeholder="Sprint 1"
-                className="rounded border border-border px-2 py-1.5 text-sm outline-none focus:ring-1 focus:ring-primary w-40"
-              />
-            </FormRow>
-          )}
-
-          {/* 마감일 (dueDateEnabled) */}
-          {config.dueDateEnabled && (
-            <FormRow label="마감일">
-              <input
-                type="date"
-                value={form.dueDate}
-                onChange={(e) => set('dueDate', e.target.value)}
-                className="rounded border border-border px-2 py-1.5 text-sm outline-none focus:ring-1 focus:ring-primary"
-              />
-            </FormRow>
-          )}
         </div>
 
         {/* 버튼 */}
@@ -247,15 +132,6 @@ export default function BacklogTaskFormModal({
           </button>
         </div>
       </div>
-    </div>
-  );
-}
-
-function FormRow({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="flex items-center gap-3">
-      <span className="text-xs font-semibold text-ink-muted w-20 shrink-0">{label}</span>
-      <div className="flex items-center gap-2">{children}</div>
     </div>
   );
 }
