@@ -12,6 +12,15 @@ const INVITATION_ERROR_MESSAGES: Record<string, string> = {
   INVITATION_NOT_FOUND: '유효하지 않은 초대입니다.',
 };
 
+// PATCH .../members/{memberId}/role 에서 발생 가능한 에러
+const ROLE_CHANGE_ERROR_MESSAGES: Record<string, string> = {
+  INSUFFICIENT_PERMISSION: '권한 변경은 소유자(Owner)만 할 수 있습니다.',
+  NOT_TEAMSPACE_OWNER: '권한 변경은 소유자(Owner)만 할 수 있습니다.',
+  NOT_TEAMSPACE_MEMBER: '대상이 팀스페이스 멤버가 아닙니다.',
+  TEAMSPACE_LAST_OWNER: '팀스페이스에는 최소 1명의 소유자가 있어야 합니다.',
+  INVALID_INPUT: '잘못된 역할 값입니다.',
+};
+
 // PUT .../backlog/config 에서 generateDraft=true 요청 시 발생 가능한 에러
 const BACKLOG_DRAFT_ERROR_MESSAGES: Record<string, string> = {
   BACKLOG_DRAFT_NOT_FIRST_CREATION: '백로그 설정이 이미 존재하여 초안을 생성할 수 없습니다.',
@@ -55,8 +64,11 @@ apiClient.interceptors.response.use(
       // 401은 refresh 흐름이 처리. 그 외 서버/네트워크 에러는 toast로 표시.
       if (error.response?.status !== 401) {
         const data = error.response?.data as { message?: string; code?: string } | undefined;
+        const isRoleChangeRequest = /\/members\/[^/]+\/role$/.test(originalRequest.url ?? '');
         const customMessage = data?.code
-          ? (INVITATION_ERROR_MESSAGES[data.code] ?? BACKLOG_DRAFT_ERROR_MESSAGES[data.code])
+          ? isRoleChangeRequest
+            ? ROLE_CHANGE_ERROR_MESSAGES[data.code]
+            : (INVITATION_ERROR_MESSAGES[data.code] ?? BACKLOG_DRAFT_ERROR_MESSAGES[data.code])
           : undefined;
         const message = customMessage ?? data?.message ?? '서버와 통신 중 오류가 발생했습니다.';
         useToastStore.getState().addToast({ type: 'error', message });

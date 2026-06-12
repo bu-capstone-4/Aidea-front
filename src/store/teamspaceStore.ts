@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { ActiveMember } from '@/types/teamspaceSocket';
+import type { ActiveMember, MemberRole } from '@/types/teamspaceSocket';
 import type { DocumentAiStatus } from '@/types/api';
 import type { Question } from '@/types/document';
 
@@ -23,6 +23,7 @@ interface TeamspaceState {
   draftQA: DraftQA | null;
   setCurrentTeamspaceId: (id: string | null) => void;
   setOnlineMembers: (members: ActiveMember[]) => void;
+  setMemberRole: (userId: number, role: MemberRole) => void;
   setDocumentAiStatus: (documentId: string, aiStatus: DocumentAiStatus) => void;
   setPendingDraft: (draft: PendingDraft | null) => void;
   setDraftQuestioning: (documentId: string, draftId: string, questions: Question[]) => void;
@@ -45,6 +46,10 @@ export const useTeamspaceStore = create<TeamspaceState>()((set) => ({
   draftQA: null,
   setCurrentTeamspaceId: (id) => set({ currentTeamspaceId: id }),
   setOnlineMembers: (members) => set({ onlineMembers: members }),
+  setMemberRole: (userId, role) =>
+    set((state) => ({
+      onlineMembers: state.onlineMembers.map((m) => (m.userId === userId ? { ...m, role } : m)),
+    })),
   setDocumentAiStatus: (documentId, aiStatus) =>
     set((state) => ({
       documentAiStatuses: { ...state.documentAiStatuses, [documentId]: aiStatus },

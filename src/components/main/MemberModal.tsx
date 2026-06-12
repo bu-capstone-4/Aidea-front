@@ -1,9 +1,12 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { apiClient } from '@/shared/apiClient';
 import { useTeamspaceStore } from '@/store/teamspaceStore';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 import UserAvatar from '@/components/ui/UserAvatar';
 import Button from '@/components/ui/Button';
+import MemberRoleSelect from './MemberRoleSelect';
 import type { MemberInfo, PendingInvitation, InviteResponse } from '@/types/api';
+import type { TeamRole } from '@/types/document';
 
 interface MemberModalProps {
   isMemberModalOpen: boolean;
@@ -11,10 +14,24 @@ interface MemberModalProps {
 }
 
 export default function MemberModal({ isMemberModalOpen, toggleMemberModal }: MemberModalProps) {
-  const { currentTeamspaceId } = useTeamspaceStore();
+  const { currentTeamspaceId, onlineMembers } = useTeamspaceStore();
+  const { user } = useCurrentUser();
   const [members, setMembers] = useState<MemberInfo[]>([]);
   const [pendingInvitations, setPendingInvitations] = useState<PendingInvitation[]>([]);
   const [email, setEmail] = useState('');
+  const [updatingMemberId, setUpdatingMemberId] = useState<number | null>(null);
+
+  // 다른 클라이언트의 역할 변경(member:role_changed)을 모달에도 반영
+  const displayMembers = useMemo(
+    () =>
+      members.map((m) => {
+        const online = onlineMembers.find((o) => o.userId === m.userId);
+        return online && online.role !== m.role ? { ...m, role: online.role } : m;
+      }),
+    [members, onlineMembers]
+  );
+
+  const isOwner = displayMembers.find((m) => m.userId === user?.id)?.role === 'OWNER';
 
   const fetchMembers = useCallback(() => {
     if (!currentTeamspaceId) return;
@@ -35,6 +52,23 @@ export default function MemberModal({ isMemberModalOpen, toggleMemberModal }: Me
     const { invitationId } = res.data.data as InviteResponse;
     setPendingInvitations((prev) => [...prev, { invitationId, email: email.trim() }]);
     setEmail('');
+  };
+
+  const handleRoleChange = async (member: MemberInfo, role: TeamRole) => {
+    if (!currentTeamspaceId || role === member.role) return;
+    setUpdatingMemberId(member.userId);
+    try {
+      const res = await apiClient.patch(
+        `/api/teamspaces/${currentTeamspaceId}/members/${member.userId}/role`,
+        { role }
+      );
+      const updated = res.data.data as MemberInfo;
+      setMembers((prev) => prev.map((m) => (m.userId === updated.userId ? updated : m)));
+    } catch {
+      // 에러 토스트는 apiClient 인터셉터에서 처리됨
+    } finally {
+      setUpdatingMemberId(null);
+    }
   };
 
   const handleRemoveMember = async (memberId: string) => {
@@ -65,14 +99,14 @@ export default function MemberModal({ isMemberModalOpen, toggleMemberModal }: Me
 
         <div className="text-xs text-gray-500">멤버</div>
         <div className="flex flex-col gap-3">
-          {members.map((member) => (
+          {displayMembers.map((member) => (
             <div key={member.userId} className="flex justify-between items-center">
               <div className="flex gap-3 items-center">
                 <UserAvatar name={member.name} imageUrl={member.profileImageUrl} />
                 <div>
                   <div className="font-medium text-sm">
                     {member.name}
-                    {member.role === 'OWNER' && (
+                    {!isOwner && member.role === 'OWNER' && (
                       <span className="ml-1 text-xs text-primary">(방장)</span>
                     )}
                   </div>
@@ -80,16 +114,26 @@ export default function MemberModal({ isMemberModalOpen, toggleMemberModal }: Me
                 </div>
               </div>
 
-              {member.role !== 'OWNER' && (
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="text-red-500"
-                  onClick={() => handleRemoveMember(String(member.userId))}
-                >
-                  추방
-                </Button>
-              )}
+              <div className="flex items-center gap-2">
+                {isOwner ? (
+                  <MemberRoleSelect
+                    value={member.role}
+                    onChange={(role) => handleRoleChange(member, role)}
+                    disabled={updatingMemberId === member.userId}
+                  />
+                ) : null}
+
+                {(isOwner || member.role !== 'OWNER') && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="text-red-500"
+                    onClick={() => handleRemoveMember(String(member.userId))}
+                  >
+                    추방
+                  </Button>
+                )}
+              </div>
             </div>
           ))}
         </div>

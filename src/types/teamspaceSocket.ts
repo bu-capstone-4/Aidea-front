@@ -63,12 +63,21 @@ export interface MemberUpdateEvent {
   };
 }
 
+export interface MemberRoleChangedEvent {
+  event: 'member:role_changed';
+  data: {
+    userId: number;
+    role: MemberRole;
+  };
+}
+
 export type TeamspaceServerMessage =
   | TeamspaceInitEvent
   | DraftQuestioningEvent
   | DraftReadyEvent
   | DraftErrorEvent
-  | MemberUpdateEvent;
+  | MemberUpdateEvent
+  | MemberRoleChangedEvent;
 
 export interface MemberFocusRequest {
   event: 'member:focus';
