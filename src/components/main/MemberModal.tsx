@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { FiX } from 'react-icons/fi';
 import { apiClient } from '@/shared/apiClient';
 import { useTeamspaceStore } from '@/store/teamspaceStore';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import UserAvatar from '@/components/ui/UserAvatar';
 import Button from '@/components/ui/Button';
 import MemberRoleSelect from './MemberRoleSelect';
+import { ROLE_LABELS } from '@/constants/teamRole';
 import type { MemberInfo, PendingInvitation, InviteResponse } from '@/types/api';
 import type { TeamRole } from '@/types/document';
 
@@ -31,7 +33,9 @@ export default function MemberModal({ isMemberModalOpen, toggleMemberModal }: Me
     [members, onlineMembers]
   );
 
-  const isOwner = displayMembers.find((m) => m.userId === user?.id)?.role === 'OWNER';
+  const currentMember = displayMembers.find((m) => m.userId === user?.id);
+  const isOwner = currentMember?.role === 'OWNER';
+  const isViewer = currentMember?.role === 'VIEWER';
 
   const fetchMembers = useCallback(() => {
     if (!currentTeamspaceId) return;
@@ -90,9 +94,14 @@ export default function MemberModal({ isMemberModalOpen, toggleMemberModal }: Me
       <div className="bg-white rounded-2xl shadow-2xl w-125 p-6 flex flex-col gap-4 relative">
         <div className="flex justify-between items-center">
           <span className="text-2xl font-bold">멤버 관리</span>
-          <Button variant="secondary" size="sm" onClick={toggleMemberModal}>
-            닫기
-          </Button>
+          <button
+            type="button"
+            onClick={toggleMemberModal}
+            className="text-ink-muted hover:text-ink transition-colors"
+            aria-label="닫기"
+          >
+            <FiX size={20} />
+          </button>
         </div>
 
         <hr className="h-px border-none" />
@@ -121,9 +130,11 @@ export default function MemberModal({ isMemberModalOpen, toggleMemberModal }: Me
                     onChange={(role) => handleRoleChange(member, role)}
                     disabled={updatingMemberId === member.userId}
                   />
-                ) : null}
+                ) : (
+                  <span className="text-sm text-ink-muted">{ROLE_LABELS[member.role]}</span>
+                )}
 
-                {(isOwner || member.role !== 'OWNER') && (
+                {isOwner && member.userId !== user?.id && (
                   <Button
                     variant="secondary"
                     size="sm"
@@ -166,22 +177,24 @@ export default function MemberModal({ isMemberModalOpen, toggleMemberModal }: Me
 
         <hr className="h-px border-none" />
 
-        <div>
-          <div className="text-xs text-gray-500 mb-2">새 멤버 초대</div>
-          <div className="flex items-center gap-2">
-            <input
-              type="text"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleInvite()}
-              placeholder="name@company.com"
-              className="flex-1 border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 placeholder:text-gray-400 transition-all"
-            />
-            <Button variant="primary" size="sm" onClick={handleInvite}>
-              초대 보내기
-            </Button>
+        {!isViewer && (
+          <div>
+            <div className="text-xs text-gray-500 mb-2">새 멤버 초대</div>
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleInvite()}
+                placeholder="name@company.com"
+                className="flex-1 border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 placeholder:text-gray-400 transition-all"
+              />
+              <Button variant="primary" size="sm" onClick={handleInvite}>
+                초대 보내기
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

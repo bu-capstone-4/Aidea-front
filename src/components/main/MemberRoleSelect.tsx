@@ -1,17 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
 import type { TeamRole } from '@/types/document';
+import { ROLE_LABELS } from '@/constants/teamRole';
 
 interface MemberRoleSelectProps {
   value: TeamRole;
   onChange: (role: TeamRole) => void;
   disabled?: boolean;
 }
-
-const ROLE_LABELS: Record<TeamRole, string> = {
-  OWNER: '소유자',
-  MEMBER: '멤버',
-  VIEWER: '뷰어',
-};
 
 const ROLE_OPTIONS: TeamRole[] = ['OWNER', 'MEMBER', 'VIEWER'];
 

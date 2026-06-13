@@ -6,7 +6,7 @@ const INVITATION_ERROR_MESSAGES: Record<string, string> = {
   ALREADY_MEMBER: '이미 팀스페이스에 가입된 사용자입니다.',
   ALREADY_INVITED: '이미 초대가 발송된 이메일입니다.',
   INSUFFICIENT_PERMISSION: '초대 권한이 없습니다.',
-  NOT_TEAMSPACE_OWNER: '일괄 초대는 OWNER만 가능합니다.',
+  NOT_TEAMSPACE_OWNER: 'OWNER만 가능한 작업입니다.',
   INVITATION_001: '초대는 최대 8명까지 가능합니다.',
   INVITATION_EXPIRED: '초대 링크가 만료되었습니다. 초대를 다시 요청하세요.',
   INVITATION_NOT_FOUND: '유효하지 않은 초대입니다.',
