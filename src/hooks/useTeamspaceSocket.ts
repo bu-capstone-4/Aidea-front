@@ -25,7 +25,8 @@ function isTeamspaceServerMessage(message: unknown): message is TeamspaceServerM
     event === 'draft:questioning' ||
     event === 'draft:ready' ||
     event === 'draft:error' ||
-    event === 'member:update'
+    event === 'member:update' ||
+    event === 'member:role_changed'
   );
 }
 
@@ -37,6 +38,7 @@ export function useTeamspaceSocket({
   const wsRef = useRef<WebSocket | null>(null);
   const documentIdRef = useRef<string | null>(documentId);
   const setOnlineMembers = useTeamspaceStore((state) => state.setOnlineMembers);
+  const setMemberRole = useTeamspaceStore((state) => state.setMemberRole);
   const setDocumentAiStatus = useTeamspaceStore((state) => state.setDocumentAiStatus);
   const setPendingDraft = useTeamspaceStore((state) => state.setPendingDraft);
   const setDraftQuestioning = useTeamspaceStore((state) => state.setDraftQuestioning);
@@ -86,6 +88,11 @@ export function useTeamspaceSocket({
 
       if (message.event === 'member:update') {
         setOnlineMembers(message.data.onlineMembers);
+        return;
+      }
+
+      if (message.event === 'member:role_changed') {
+        setMemberRole(message.data.userId, message.data.role);
       }
     };
 
@@ -105,6 +112,7 @@ export function useTeamspaceSocket({
     enabled,
     setDocumentAiStatus,
     setDraftQuestioning,
+    setMemberRole,
     setOnlineMembers,
     setPendingDraft,
     teamspaceId,

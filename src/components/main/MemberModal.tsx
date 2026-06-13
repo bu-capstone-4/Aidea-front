@@ -1,9 +1,14 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { FiX } from 'react-icons/fi';
 import { apiClient } from '@/shared/apiClient';
 import { useTeamspaceStore } from '@/store/teamspaceStore';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 import UserAvatar from '@/components/ui/UserAvatar';
 import Button from '@/components/ui/Button';
+import MemberRoleSelect from './MemberRoleSelect';
+import { ROLE_LABELS } from '@/constants/teamRole';
 import type { MemberInfo, PendingInvitation, InviteResponse } from '@/types/api';
+import type { TeamRole } from '@/types/document';
 
 interface MemberModalProps {
   isMemberModalOpen: boolean;
@@ -11,10 +16,26 @@ interface MemberModalProps {
 }
 
 export default function MemberModal({ isMemberModalOpen, toggleMemberModal }: MemberModalProps) {
-  const { currentTeamspaceId } = useTeamspaceStore();
+  const { currentTeamspaceId, onlineMembers } = useTeamspaceStore();
+  const { user } = useCurrentUser();
   const [members, setMembers] = useState<MemberInfo[]>([]);
   const [pendingInvitations, setPendingInvitations] = useState<PendingInvitation[]>([]);
   const [email, setEmail] = useState('');
+  const [updatingMemberId, setUpdatingMemberId] = useState<number | null>(null);
+
+  // 다른 클라이언트의 역할 변경(member:role_changed)을 모달에도 반영
+  const displayMembers = useMemo(
+    () =>
+      members.map((m) => {
+        const online = onlineMembers.find((o) => o.userId === m.userId);
+        return online && online.role !== m.role ? { ...m, role: online.role } : m;
+      }),
+    [members, onlineMembers]
+  );
+
+  const currentMember = displayMembers.find((m) => m.userId === user?.id);
+  const isOwner = currentMember?.role === 'OWNER';
+  const isViewer = currentMember?.role === 'VIEWER';
 
   const fetchMembers = useCallback(() => {
     if (!currentTeamspaceId) return;
@@ -37,6 +58,23 @@ export default function MemberModal({ isMemberModalOpen, toggleMemberModal }: Me
     setEmail('');
   };
 
+  const handleRoleChange = async (member: MemberInfo, role: TeamRole) => {
+    if (!currentTeamspaceId || role === member.role) return;
+    setUpdatingMemberId(member.userId);
+    try {
+      const res = await apiClient.patch(
+        `/api/teamspaces/${currentTeamspaceId}/members/${member.userId}/role`,
+        { role }
+      );
+      const updated = res.data.data as MemberInfo;
+      setMembers((prev) => prev.map((m) => (m.userId === updated.userId ? updated : m)));
+    } catch {
+      // 에러 토스트는 apiClient 인터셉터에서 처리됨
+    } finally {
+      setUpdatingMemberId(null);
+    }
+  };
+
   const handleRemoveMember = async (memberId: string) => {
     if (!currentTeamspaceId) return;
     await apiClient.delete(`/api/teamspaces/${currentTeamspaceId}/members/${memberId}`);
@@ -56,23 +94,28 @@ export default function MemberModal({ isMemberModalOpen, toggleMemberModal }: Me
       <div className="bg-white rounded-2xl shadow-2xl w-125 p-6 flex flex-col gap-4 relative">
         <div className="flex justify-between items-center">
           <span className="text-2xl font-bold">멤버 관리</span>
-          <Button variant="secondary" size="sm" onClick={toggleMemberModal}>
-            닫기
-          </Button>
+          <button
+            type="button"
+            onClick={toggleMemberModal}
+            className="text-ink-muted hover:text-ink transition-colors"
+            aria-label="닫기"
+          >
+            <FiX size={20} />
+          </button>
         </div>
 
         <hr className="h-px border-none" />
 
         <div className="text-xs text-gray-500">멤버</div>
         <div className="flex flex-col gap-3">
-          {members.map((member) => (
+          {displayMembers.map((member) => (
             <div key={member.userId} className="flex justify-between items-center">
               <div className="flex gap-3 items-center">
                 <UserAvatar name={member.name} imageUrl={member.profileImageUrl} />
                 <div>
                   <div className="font-medium text-sm">
                     {member.name}
-                    {member.role === 'OWNER' && (
+                    {!isOwner && member.role === 'OWNER' && (
                       <span className="ml-1 text-xs text-primary">(방장)</span>
                     )}
                   </div>
@@ -80,16 +123,28 @@ export default function MemberModal({ isMemberModalOpen, toggleMemberModal }: Me
                 </div>
               </div>
 
-              {member.role !== 'OWNER' && (
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="text-red-500"
-                  onClick={() => handleRemoveMember(String(member.userId))}
-                >
-                  추방
-                </Button>
-              )}
+              <div className="flex items-center gap-2">
+                {isOwner ? (
+                  <MemberRoleSelect
+                    value={member.role}
+                    onChange={(role) => handleRoleChange(member, role)}
+                    disabled={updatingMemberId === member.userId}
+                  />
+                ) : (
+                  <span className="text-sm text-ink-muted">{ROLE_LABELS[member.role]}</span>
+                )}
+
+                {isOwner && member.userId !== user?.id && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="text-red-500"
+                    onClick={() => handleRemoveMember(String(member.userId))}
+                  >
+                    추방
+                  </Button>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -122,22 +177,24 @@ export default function MemberModal({ isMemberModalOpen, toggleMemberModal }: Me
 
         <hr className="h-px border-none" />
 
-        <div>
-          <div className="text-xs text-gray-500 mb-2">새 멤버 초대</div>
-          <div className="flex items-center gap-2">
-            <input
-              type="text"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleInvite()}
-              placeholder="name@company.com"
-              className="flex-1 border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 placeholder:text-gray-400 transition-all"
-            />
-            <Button variant="primary" size="sm" onClick={handleInvite}>
-              초대 보내기
-            </Button>
+        {!isViewer && (
+          <div>
+            <div className="text-xs text-gray-500 mb-2">새 멤버 초대</div>
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleInvite()}
+                placeholder="name@company.com"
+                className="flex-1 border border-gray-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-blue-500 placeholder:text-gray-400 transition-all"
+              />
+              <Button variant="primary" size="sm" onClick={handleInvite}>
+                초대 보내기
+              </Button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
