@@ -26,9 +26,10 @@ export default function MainContent() {
   const isSplitView = useFeedbackStore((state) => state.isSplitView);
   const status = useFeedbackStore((state) => state.status);
   const feedbackId = useFeedbackStore((state) => state.feedbackId);
-  const { currentTeamspaceId, documentAiStatuses } = useTeamspaceStore();
+  const { currentTeamspaceId, documentAiStatuses, onlineMembers } = useTeamspaceStore();
   const { teamspace } = useTeamspaceDetail(currentTeamspaceId);
   const isAiDraftGenerating = docId ? documentAiStatuses[docId] === 'DRAFT' : false;
+  const isViewer = onlineMembers.find((m) => m.userId === user?.id)?.role === 'VIEWER';
 
   const resetFeedback = useFeedbackStore((state) => state.resetFeedback);
   const { startPolling, stopPolling } = useFeedback();
@@ -98,8 +99,9 @@ export default function MainContent() {
           <CollaborativeEditor
             key={docId}
             docId={docId}
-            editable={!isAiDraftGenerating}
+            editable={!isAiDraftGenerating && !isViewer}
             isAiDraftGenerating={isAiDraftGenerating}
+            isViewer={isViewer}
             user={collabUser}
             token=""
           />

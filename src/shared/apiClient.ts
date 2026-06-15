@@ -5,7 +5,7 @@ import { useToastStore } from '@/store/toastStore';
 const INVITATION_ERROR_MESSAGES: Record<string, string> = {
   ALREADY_MEMBER: '이미 팀스페이스에 가입된 사용자입니다.',
   ALREADY_INVITED: '이미 초대가 발송된 이메일입니다.',
-  INSUFFICIENT_PERMISSION: '초대 권한이 없습니다.',
+  INSUFFICIENT_PERMISSION: '작업을 수행할 수 있는 권한이 없습니다.',
   NOT_TEAMSPACE_OWNER: 'OWNER만 가능한 작업입니다.',
   INVITATION_001: '초대는 최대 8명까지 가능합니다.',
   INVITATION_EXPIRED: '초대 링크가 만료되었습니다. 초대를 다시 요청하세요.',
@@ -15,8 +15,8 @@ const INVITATION_ERROR_MESSAGES: Record<string, string> = {
 // PATCH .../members/{memberId}/role 에서 발생 가능한 에러
 const ROLE_CHANGE_ERROR_MESSAGES: Record<string, string> = {
   INSUFFICIENT_PERMISSION: '권한 변경은 소유자(Owner)만 할 수 있습니다.',
-  NOT_TEAMSPACE_OWNER: '권한 변경은 소유자(Owner)만 할 수 있습니다.',
-  NOT_TEAMSPACE_MEMBER: '대상이 팀스페이스 멤버가 아닙니다.',
+  NOT_TEAMSPACE_OWNER: 'OWNER만 가능한 작업입니다.',
+  NOT_TEAMSPACE_MEMBER: '팀스페이스 멤버가 아닙니다.',
   TEAMSPACE_LAST_OWNER: '팀스페이스에는 최소 1명의 소유자가 있어야 합니다.',
   INVALID_INPUT: '잘못된 역할 값입니다.',
 };

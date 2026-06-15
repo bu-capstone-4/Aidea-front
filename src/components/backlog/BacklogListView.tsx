@@ -111,39 +111,39 @@ export default function BacklogListView({
 
   return (
     <div className="flex flex-col flex-1 min-h-0">
-      {/* Table column header */}
-      <div className="flex items-center border-b border-border bg-surface shrink-0 text-xs font-semibold text-ink-muted select-none">
-        <div className="flex-1 px-4 py-2">제목</div>
-        <div className={`${COL_WIDTHS.assignees} px-3 py-2 border-l border-border text-center`}>
-          담당자
-        </div>
-        <div className={`${COL_WIDTHS.status} px-3 py-2 border-l border-border text-center`}>
-          상태
-        </div>
-        {config.feBeEnabled && (
-          <div className={`${COL_WIDTHS.issueType} px-3 py-2 border-l border-border text-center`}>
-            이슈 타입
-          </div>
-        )}
-        {config.priorityEnabled && (
-          <div className={`${COL_WIDTHS.priority} px-3 py-2 border-l border-border text-center`}>
-            중요도
-          </div>
-        )}
-        {config.sprintEnabled && (
-          <div className={`${COL_WIDTHS.sprint} px-3 py-2 border-l border-border text-center`}>
-            스프린트
-          </div>
-        )}
-        {config.dueDateEnabled && (
-          <div className={`${COL_WIDTHS.dueDate} px-3 py-2 border-l border-border text-center`}>
-            마감일
-          </div>
-        )}
-        <div className="w-8" />
-      </div>
-
       <div className="flex-1 overflow-y-auto">
+        {/* Table column header */}
+        <div className="flex items-center border-b border-border bg-surface sticky top-0 z-10 text-xs font-semibold text-ink-muted select-none">
+          <div className="flex-1 px-4 py-2">제목</div>
+          <div className={`${COL_WIDTHS.assignees} px-3 py-2 border-l border-border text-center`}>
+            담당자
+          </div>
+          <div className={`${COL_WIDTHS.status} px-3 py-2 border-l border-border text-center`}>
+            상태
+          </div>
+          {config.feBeEnabled && (
+            <div className={`${COL_WIDTHS.issueType} px-3 py-2 border-l border-border text-center`}>
+              이슈 타입
+            </div>
+          )}
+          {config.priorityEnabled && (
+            <div className={`${COL_WIDTHS.priority} px-3 py-2 border-l border-border text-center`}>
+              중요도
+            </div>
+          )}
+          {config.sprintEnabled && (
+            <div className={`${COL_WIDTHS.sprint} px-3 py-2 border-l border-border text-center`}>
+              스프린트
+            </div>
+          )}
+          {config.dueDateEnabled && (
+            <div className={`${COL_WIDTHS.dueDate} px-3 py-2 border-l border-border text-center`}>
+              마감일
+            </div>
+          )}
+          <div className="w-8" />
+        </div>
+
         {isEmpty ? (
           <div className="flex items-center justify-center h-32 text-sm text-ink-muted">
             이슈가 없습니다.
