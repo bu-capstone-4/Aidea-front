@@ -8,6 +8,7 @@ import {
 } from 'y-protocols/awareness';
 import { useCreateBlockNote } from '@blocknote/react';
 import { ko } from '@blocknote/core/locales';
+import { YCursorExtension } from '@blocknote/core';
 import { handleSocketError } from '@/shared/socketErrorHandler';
 import type { DocumentServerMessage } from '@/types/socket';
 import { useFeedbackStore } from '@/store/FeedbackStore';
@@ -226,6 +227,12 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
     dictionary: ko,
     editable,
   });
+
+  // user 정보는 비동기로 로드되므로, 최초 editor 생성 시점엔 '익명'일 수 있다.
+  // 이후 user가 갱신되면 awareness의 cursor 표시 이름/색상도 함께 갱신한다.
+  useEffect(() => {
+    editor.getExtension(YCursorExtension)?.updateUser({ name: user.name, color: user.color });
+  }, [editor, user.name, user.color]);
 
   useEffect(() => {
     applyMarkdownRef.current = (md: string) => {
