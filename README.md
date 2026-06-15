@@ -7,9 +7,10 @@
 [![Frontend Repo](https://img.shields.io/badge/Frontend-Aidea--front-blue?logo=react)](https://github.com/bu-capstone-4/Aidea-front)
 [![Backend Repo](https://img.shields.io/badge/Backend-Aidea--back-success?logo=spring)](https://github.com/bu-capstone-4/Aidea-back)
 
-</div>
 
-<img width="800" alt="readme_main" src="https://github.com/user-attachments/assets/3651cacd-aead-4e94-b80a-e8d74daa6965" />
+  <img width="800" alt="readme_main" src="https://github.com/user-attachments/assets/3651cacd-aead-4e94-b80a-e8d74daa6965" />
+  
+</div>
 
 <br>
 
@@ -41,9 +42,8 @@
 | 📝 실시간 협업 에디터 | BlockNote 기반 노션 스타일 에디터, 실시간 커서 프레즌스 및 동시 편집 |
 | 🗂️ AI 백로그 관리     | 기획 문서 기반 Epic/Story/Task 자동 생성, 보드/리스트 뷰 제공        |
 | 💬 AI 문서 피드백     | 논리적 일관성, 누락 내용, 모호한 표현에 대한 개선 제안               |
-| 🔗 GitHub 이슈 연동   | 완성된 기획을 GitHub Epic/Story/Task 이슈로 자동 변환                |
 | 👥 팀스페이스 & 초대  | 팀스페이스 생성, 멤버 초대 및 권한 관리                              |
-| 📄 문서 내보내기      | 완성된 기획 문서를 PDF 등으로 내보내기                               |
+| 📄 문서 내보내기      | 완성된 기획 문서를 MD, PDF 등으로 내보내기                               |
 
 <br>
 
@@ -51,7 +51,8 @@
 
 ### 1) 아이디어 입력
 
-GIF 삽입 예정
+<img width="720" height="622" alt="image" src="https://github.com/user-attachments/assets/eb962816-50e7-42c0-9129-4af70a61a26f" />
+
 
 만들고 싶은 서비스의 핵심 아이디어를 한 줄로 입력합니다.
 
@@ -59,7 +60,9 @@ GIF 삽입 예정
 
 ### 2) AI가 기획 문서 생성
 
-GIF 삽입 예정
+<img width="720" alt="image" src="https://github.com/user-attachments/assets/d2aab265-ef7e-4ec2-813d-c6156b15e1a1" />
+
+<img width="720" alt="image" src="https://github.com/user-attachments/assets/a0942bcc-66cc-4c63-9343-7d4c3046e3b7" />
 
 AI가 아이디어를 구체화하는 질문을 던지고, 사용자의 답변을 바탕으로 유저 시나리오·기능 명세 등 문서 초안을 자동 작성합니다.
 
@@ -69,16 +72,14 @@ AI가 아이디어를 구체화하는 질문을 던지고, 사용자의 답변�
 
 팀원을 초대해 실시간으로 문서를 함께 완성합니다. (커서 위치, 수정 이력 공유)
 
-<br>
 
-GIF 삽입 예정
-
-<br>
 <br>
 
 ### 4) AI 백로그 생성
+<img width="720" alt="image" src="https://github.com/user-attachments/assets/f7ea17b2-4b8b-48b5-838f-48d4ffc15e80" />
 
-GIF 삽입 예정
+<img width="720" alt="image" src="https://github.com/user-attachments/assets/1c75e6c1-afc8-43d1-ba40-5b6ccc839e7c" />
+
 
 완성된 기획을 기반으로 할 일 목록(Epic/Story/Task)을 자동 생성하여 백로그를 관리합니다.
 
