@@ -1,10 +1,10 @@
 export const DOC_OPTIONS = [
+  { label: '자유 문서', value: 'FREE' },
   { label: '아이디어', value: 'IDEA' },
   { label: '기획서', value: 'PLAN' },
   { label: '유저 시나리오', value: 'USER_SCENARIO' },
   { label: 'API 명세서', value: 'API_SPEC' },
   { label: 'ERD', value: 'ERD' },
-  { label: '자유 문서', value: 'FREE' },
 ] as const;
 
 export type DocType = (typeof DOC_OPTIONS)[number]['value'];

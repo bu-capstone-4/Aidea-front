@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { MdClose } from 'react-icons/md';
 import Button from '@/components/ui/Button';
 import { DOC_OPTIONS, type DocType } from '@/components/CreateTeamSpace/types';
 import type { DocumentType } from '@/types/document';
@@ -18,7 +19,7 @@ export default function CreateDocumentModal({
   onConfirm,
   existingDocTypes,
 }: Props) {
-  const [selectedType, setSelectedType] = useState<DocType | null>(null);
+  const [selectedType, setSelectedType] = useState<DocType | null>('FREE');
   const [freeTitle, setFreeTitle] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -44,7 +45,7 @@ export default function CreateDocumentModal({
   };
 
   const handleClose = () => {
-    setSelectedType(null);
+    setSelectedType('FREE');
     setFreeTitle('');
     onClose();
   };
@@ -58,9 +59,43 @@ export default function CreateDocumentModal({
         {/* 헤더 */}
         <div className="flex justify-between items-center">
           <span className="text-xl font-bold text-gray-900">새 문서 추가</span>
-          <Button variant="secondary" size="sm" onClick={handleClose}>
-            ✕
-          </Button>
+          <button
+            type="button"
+            onClick={handleClose}
+            className="text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <MdClose size={20} />
+          </button>
+        </div>
+
+        {/* 문서 제목 */}
+        <div>
+          <p className="text-sm font-medium text-gray-700 mb-2">
+            문서 제목
+            {selectedType === 'FREE' && <span className="ml-1 text-red-400">*</span>}
+          </p>
+          {selectedType === 'FREE' ? (
+            <input
+              type="text"
+              value={freeTitle}
+              onChange={(e) => setFreeTitle(e.target.value)}
+              placeholder="문서 제목을 입력하세요"
+              className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg outline-none focus:border-blue-400 transition-colors text-gray-900 placeholder-gray-400"
+            />
+          ) : (
+            <div
+              className={
+                'w-full px-4 py-2.5 text-sm border rounded-lg select-none ' +
+                (selectedType
+                  ? 'border-gray-200 bg-gray-50 text-gray-500'
+                  : 'border-gray-200 bg-gray-50 text-gray-300')
+              }
+            >
+              {selectedType
+                ? DOC_OPTIONS.find((o) => o.value === selectedType)?.label
+                : '문서 타입을 선택하면 자동으로 설정됩니다'}
+            </div>
+          )}
         </div>
 
         {/* 문서 타입 선택 */}
@@ -102,53 +137,6 @@ export default function CreateDocumentModal({
             })}
           </div>
         </div>
-
-        {/* 문서 제목 */}
-        <div>
-          <p className="text-sm font-medium text-gray-700 mb-2">
-            문서 제목
-            {selectedType === 'FREE' && <span className="ml-1 text-red-400">*</span>}
-          </p>
-          {selectedType === 'FREE' ? (
-            <input
-              type="text"
-              value={freeTitle}
-              onChange={(e) => setFreeTitle(e.target.value)}
-              placeholder="문서 제목을 입력하세요"
-              className="w-full px-4 py-2.5 text-sm border border-gray-300 rounded-lg outline-none focus:border-blue-400 transition-colors text-gray-900 placeholder-gray-400"
-            />
-          ) : (
-            <div
-              className={
-                'w-full px-4 py-2.5 text-sm border rounded-lg select-none ' +
-                (selectedType
-                  ? 'border-gray-200 bg-gray-50 text-gray-500'
-                  : 'border-gray-200 bg-gray-50 text-gray-300')
-              }
-            >
-              {selectedType
-                ? DOC_OPTIONS.find((o) => o.value === selectedType)?.label
-                : '문서 타입을 선택하면 자동으로 설정됩니다'}
-            </div>
-          )}
-        </div>
-
-        {/* AI 초안 생성 — FREE 타입은 미지원이므로 렌더링하지 않음 */}
-        {selectedType !== 'FREE' && (
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <p className="text-sm font-medium text-gray-700">AI 초안 생성</p>
-              <span className="bg-gray-100 text-gray-500 text-xs px-2 py-0.5 rounded-md">
-                준비 중
-              </span>
-            </div>
-            <textarea
-              placeholder="문서 초안을 어떻게 작성할지 AI에게 알려주세요... (준비 중인 기능입니다)"
-              disabled
-              className="w-full h-24 px-4 py-2.5 text-sm border border-gray-200 rounded-lg resize-none text-gray-400 placeholder-gray-300 bg-gray-50 cursor-not-allowed outline-none"
-            />
-          </div>
-        )}
 
         {/* 버튼 */}
         <div className="flex justify-end gap-2">
