@@ -19,12 +19,14 @@ interface TeamspaceState {
   currentTeamspaceId: string | null;
   onlineMembers: ActiveMember[];
   documentAiStatuses: Record<string, DocumentAiStatus>;
+  documentTitleOverrides: Record<string, string>;
   pendingDraft: PendingDraft | null;
   draftQA: DraftQA | null;
   setCurrentTeamspaceId: (id: string | null) => void;
   setOnlineMembers: (members: ActiveMember[]) => void;
   setMemberRole: (userId: number, role: MemberRole) => void;
   setDocumentAiStatus: (documentId: string, aiStatus: DocumentAiStatus) => void;
+  setDocumentTitleOverride: (documentId: string, title: string) => void;
   setPendingDraft: (draft: PendingDraft | null) => void;
   setDraftQuestioning: (documentId: string, draftId: string, questions: Question[]) => void;
   setDraftAnswering: () => void;
@@ -42,6 +44,7 @@ export const useTeamspaceStore = create<TeamspaceState>()((set) => ({
   currentTeamspaceId: null,
   onlineMembers: [],
   documentAiStatuses: {},
+  documentTitleOverrides: {},
   pendingDraft: null,
   draftQA: null,
   setCurrentTeamspaceId: (id) => set({ currentTeamspaceId: id }),
@@ -53,6 +56,10 @@ export const useTeamspaceStore = create<TeamspaceState>()((set) => ({
   setDocumentAiStatus: (documentId, aiStatus) =>
     set((state) => ({
       documentAiStatuses: { ...state.documentAiStatuses, [documentId]: aiStatus },
+    })),
+  setDocumentTitleOverride: (documentId, title) =>
+    set((state) => ({
+      documentTitleOverrides: { ...state.documentTitleOverrides, [documentId]: title },
     })),
   setPendingDraft: (draft) => set({ pendingDraft: draft }),
   setDraftQuestioning: (documentId, draftId, questions) =>
@@ -71,5 +78,11 @@ export const useTeamspaceStore = create<TeamspaceState>()((set) => ({
     ),
   clearDraftQA: () => set({ draftQA: null }),
   clearTeamspacePresence: () =>
-    set({ onlineMembers: [], documentAiStatuses: {}, pendingDraft: null, draftQA: null }),
+    set({
+      onlineMembers: [],
+      documentAiStatuses: {},
+      documentTitleOverrides: {},
+      pendingDraft: null,
+      draftQA: null,
+    }),
 }));

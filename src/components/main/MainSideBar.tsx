@@ -42,7 +42,7 @@ export default function MainSideBar({ isSideBarOpen, toggleSideBar }: SideBarPro
   const navigate = useNavigate();
   const { docId } = useParams();
   const { user } = useCurrentUser();
-  const { currentTeamspaceId, documentAiStatuses } = useTeamspaceStore();
+  const { currentTeamspaceId, documentAiStatuses, documentTitleOverrides } = useTeamspaceStore();
   const { teamspace, refetch } = useTeamspaceDetail(currentTeamspaceId);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -106,7 +106,9 @@ export default function MainSideBar({ isSideBarOpen, toggleSideBar }: SideBarPro
               onClick={() => navigate(`/main/${doc.id}`)}
             >
               <span className="font-semibold">
-                {doc.type === 'FREE' ? doc.title : getDocLabel(doc.type)}
+                {doc.type === 'FREE'
+                  ? (documentTitleOverrides[doc.id] ?? doc.title)
+                  : getDocLabel(doc.type)}
               </span>
               {isSideBarOpen && (
                 <span className="ml-auto flex items-center gap-1">
