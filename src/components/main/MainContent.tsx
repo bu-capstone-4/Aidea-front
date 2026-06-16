@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router';
 import { MdAutoAwesome } from 'react-icons/md';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
@@ -13,6 +13,8 @@ import useFeedback from '@/hooks/useFeedback';
 import { Helmet } from 'react-helmet-async';
 import { useTeamspaceStore } from '@/store/teamspaceStore';
 import { useTeamspaceDetail } from '@/hooks/useTeamspaceDetail';
+import { apiClient } from '@/shared/apiClient';
+import { debounce } from '@/shared/debounce';
 
 const CURSOR_COLORS = ['#1971c2', '#e03131', '#2f9e44', '#f08c00', '#7048e8'];
 
@@ -26,9 +28,21 @@ export default function MainContent() {
   const isSplitView = useFeedbackStore((state) => state.isSplitView);
   const status = useFeedbackStore((state) => state.status);
   const feedbackId = useFeedbackStore((state) => state.feedbackId);
-  const { currentTeamspaceId, documentAiStatuses, onlineMembers } = useTeamspaceStore();
-  const { teamspace } = useTeamspaceDetail(currentTeamspaceId);
-  const isAiDraftGenerating = docId ? documentAiStatuses[docId] === 'DRAFT' : false;
+  const { currentTeamspaceId, documentAiStatuses, onlineMembers, setDocumentTitleOverride } =
+    useTeamspaceStore();
+  const { teamspace, refetch: refetchTeamspace } = useTeamspaceDetail(currentTeamspaceId);
+
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const debouncedSaveTitle = useMemo(
+    () =>
+      debounce(async (id: string, title: string, onDone: () => void) => {
+        await apiClient.patch(`/api/documents/${id}`, { title });
+        onDone();
+      }, 600),
+    []
+  );
+  const isAiDraftGenerating =
+    docId && doc?.type !== 'FREE' ? documentAiStatuses[docId] === 'DRAFT' : false;
   const isViewer = onlineMembers.find((m) => m.userId === user?.id)?.role === 'VIEWER';
 
   const resetFeedback = useFeedbackStore((state) => state.resetFeedback);
@@ -55,6 +69,48 @@ export default function MainContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [docId]);
 
+  // FREE 문서 제목: doc이 로드되거나 docId가 바뀔 때 contentEditable DOM에 동기화
+  useEffect(() => {
+    if (doc?.type === 'FREE' && titleRef.current) {
+      titleRef.current.textContent = doc.title;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [doc?.id, doc?.title]);
+
+  // docId 변경 / 언마운트 시 대기 중인 디바운스 취소
+  useEffect(() => {
+    return () => debouncedSaveTitle.cancel();
+  }, [docId, debouncedSaveTitle]);
+
+  const handleTitleInput = (e: React.FormEvent<HTMLHeadingElement>) => {
+    const text = e.currentTarget.textContent ?? '';
+    if (docId) setDocumentTitleOverride(docId, text);
+    debouncedSaveTitle(docId ?? '', text.trim() || '새 문서', refetchTeamspace);
+  };
+
+  const handleTitleKeyDown = (e: React.KeyboardEvent<HTMLHeadingElement>) => {
+    if (e.key === 'Enter') e.preventDefault();
+  };
+
+  const handleTitleBlur = async (e: React.FocusEvent<HTMLHeadingElement>) => {
+    debouncedSaveTitle.cancel();
+    const text = (e.currentTarget.textContent ?? '').trim();
+    const titleToSave = text || '새 문서';
+    if (!text) e.currentTarget.textContent = '새 문서';
+    if (docId) setDocumentTitleOverride(docId, titleToSave);
+    await apiClient.patch(`/api/documents/${docId}`, { title: titleToSave });
+    refetchTeamspace();
+  };
+
+  const handleTitlePaste = (e: React.ClipboardEvent<HTMLHeadingElement>) => {
+    e.preventDefault();
+    const text = e.clipboardData
+      .getData('text/plain')
+      .replace(/[\n\r]+/g, ' ')
+      .trim();
+    document.execCommand('insertText', false, text);
+  };
+
   const toggleFeedbackModal = () => {
     setIsFeedbackModalOpen((prev) => !prev);
   };
@@ -68,19 +124,34 @@ export default function MainContent() {
     color: CURSOR_COLORS[(user?.id ?? 0) % CURSOR_COLORS.length],
   };
 
+  const docTitle = doc.type === 'FREE' ? doc.title : getDocLabel(doc.type);
+
   return (
     <main className="flex-1 overflow-y-auto bg-white relative">
       <Helmet>
-        <title>{`${getDocLabel(doc.type)} - ${teamspace?.name ?? 'Aidea'}`}</title>
+        <title>{`${docTitle} - ${teamspace?.name ?? 'Aidea'}`}</title>
       </Helmet>
-      {isSplitView && <SplitView title={getDocLabel(doc.type)} />}
+      {isSplitView && <SplitView title={docTitle} />}
       <div
         className={`${isSplitView ? 'hidden' : 'block'} max-w-180 mx-auto px-24 md:px-10 sm:px-5 pt-5`}
       >
         <div className="flex items-center gap-3 pb-4">
-          <h1 className="text-[2.5rem] font-bold text-[#1a1a1a] tracking-tight leading-tight">
-            {getDocLabel(doc.type)}
-          </h1>
+          {doc.type === 'FREE' && !isViewer ? (
+            <h1
+              ref={titleRef}
+              contentEditable
+              suppressContentEditableWarning
+              onInput={handleTitleInput}
+              onKeyDown={handleTitleKeyDown}
+              onBlur={handleTitleBlur}
+              onPaste={handleTitlePaste}
+              className="text-[2.5rem] font-bold text-[#1a1a1a] tracking-tight leading-tight outline-none cursor-text"
+            />
+          ) : (
+            <h1 className="text-[2.5rem] font-bold text-[#1a1a1a] tracking-tight leading-tight">
+              {docTitle}
+            </h1>
+          )}
           {(status === 'IDLE' || status === 'ACCEPTED') && (
             <button
               onClick={toggleFeedbackModal}
@@ -112,6 +183,7 @@ export default function MainContent() {
         isFeedbackModalOpen={isFeedbackModalOpen}
         toggleFeedbackModal={toggleFeedbackModal}
         docId={docId ?? ''}
+        isFreeDoc={doc.type === 'FREE'}
       />
 
       {status === 'FAILED' && (

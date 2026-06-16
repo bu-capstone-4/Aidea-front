@@ -1,4 +1,5 @@
 export const DOC_OPTIONS = [
+  { label: '자유 문서', value: 'FREE' },
   { label: '아이디어', value: 'IDEA' },
   { label: '기획서', value: 'PLAN' },
   { label: '유저 시나리오', value: 'USER_SCENARIO' },

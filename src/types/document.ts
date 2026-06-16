@@ -1,4 +1,4 @@
-export type DocumentType = 'IDEA' | 'PLAN' | 'USER_SCENARIO' | 'API_SPEC' | 'ERD';
+export type DocumentType = 'IDEA' | 'PLAN' | 'USER_SCENARIO' | 'API_SPEC' | 'ERD' | 'FREE';
 export type FeedbackStatus =
   | 'IDLE'
   | 'PENDING'

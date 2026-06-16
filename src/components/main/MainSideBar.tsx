@@ -9,6 +9,7 @@ import {
   MdCode,
   MdTableChart,
   MdAdd,
+  MdEditNote,
 } from 'react-icons/md';
 import UserAvatar from '../ui/UserAvatar';
 import Button from '../ui/Button';
@@ -29,6 +30,7 @@ const DOC_ICON: Record<DocumentType, ElementType> = {
   USER_SCENARIO: MdPerson,
   API_SPEC: MdCode,
   ERD: MdTableChart,
+  FREE: MdEditNote,
 };
 
 interface SideBarProps {
@@ -40,13 +42,17 @@ export default function MainSideBar({ isSideBarOpen, toggleSideBar }: SideBarPro
   const navigate = useNavigate();
   const { docId } = useParams();
   const { user } = useCurrentUser();
-  const { currentTeamspaceId, documentAiStatuses } = useTeamspaceStore();
+  const { currentTeamspaceId, documentAiStatuses, documentTitleOverrides } = useTeamspaceStore();
   const { teamspace, refetch } = useTeamspaceDetail(currentTeamspaceId);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleCreateDocument = async (type: string) => {
+  const handleCreateDocument = async (type: string, title?: string) => {
     if (!currentTeamspaceId) return;
-    await apiClient.post('/api/documents', { teamspaceId: currentTeamspaceId, type });
+    await apiClient.post('/api/documents', {
+      teamspaceId: currentTeamspaceId,
+      type,
+      ...(title ? { title } : {}),
+    });
     refetch();
   };
 
@@ -85,7 +91,7 @@ export default function MainSideBar({ isSideBarOpen, toggleSideBar }: SideBarPro
       <div className={cn('flex flex-col p-2 space-y-1', !isSideBarOpen && 'items-center')}>
         {teamspace?.documents.map((doc) => {
           const Icon = DOC_ICON[doc.type] ?? MdDescription;
-          const isDrafting = documentAiStatuses[doc.id] === 'DRAFT';
+          const isDrafting = doc.type !== 'FREE' && documentAiStatuses[doc.id] === 'DRAFT';
 
           return (
             <Button
@@ -99,7 +105,11 @@ export default function MainSideBar({ isSideBarOpen, toggleSideBar }: SideBarPro
               )}
               onClick={() => navigate(`/main/${doc.id}`)}
             >
-              <span className="font-semibold">{getDocLabel(doc.type)}</span>
+              <span className="font-semibold">
+                {doc.type === 'FREE'
+                  ? (documentTitleOverrides[doc.id] ?? doc.title)
+                  : getDocLabel(doc.type)}
+              </span>
               {isSideBarOpen && (
                 <span className="ml-auto flex items-center gap-1">
                   {isDrafting && (
@@ -128,6 +138,7 @@ export default function MainSideBar({ isSideBarOpen, toggleSideBar }: SideBarPro
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onConfirm={handleCreateDocument}
+        existingDocTypes={teamspace?.documents.map((d) => d.type) ?? []}
       />
 
       {/* 하단으로 밀기 */}

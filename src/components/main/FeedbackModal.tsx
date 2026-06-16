@@ -6,12 +6,14 @@ interface FeedbackModalProps {
   isFeedbackModalOpen: boolean;
   toggleFeedbackModal: () => void;
   docId: string;
+  isFreeDoc?: boolean;
 }
 
 export default function FeedbackModal({
   isFeedbackModalOpen,
   toggleFeedbackModal,
   docId,
+  isFreeDoc = false,
 }: FeedbackModalProps) {
   const { requestFeedback } = useFeedback();
   const [prevOpen, setPrevOpen] = useState(isFeedbackModalOpen);
@@ -40,7 +42,11 @@ export default function FeedbackModal({
         <textarea
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
-          placeholder="선택사항입니다. 입력하지 않으면 아이디어와 비교해서 피드백을 해드립니다."
+          placeholder={
+            isFreeDoc
+              ? '어떤 방향으로 개선할지 알려주세요. 작성하지 않으면 AI가 먼저 질문을 드립니다.'
+              : '선택사항입니다. 입력하지 않으면 아이디어와 비교해서 피드백을 해드립니다.'
+          }
           className="w-full h-32 border border-gray-300 rounded-xl p-4 text-sm resize-none focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 placeholder:text-gray-400 transition-all leading-relaxed"
         ></textarea>
         <Button
