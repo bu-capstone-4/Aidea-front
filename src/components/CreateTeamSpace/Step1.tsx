@@ -51,7 +51,7 @@ export default function Step1({ form, onChange, onNext }: Props) {
         <div>
           <p className="text-xs text-gray-500 mb-2">필요한 기획 문서 선택</p>
           <div className="grid grid-cols-2 gap-2">
-            {DOC_OPTIONS.map((doc) => {
+            {DOC_OPTIONS.filter((doc) => doc.value !== 'FREE').map((doc) => {
               const isSelected = form.selectedDocs.includes(doc.value);
               const isRequired = doc.value === 'IDEA';
               return (
