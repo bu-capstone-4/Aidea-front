@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router';
 import { MdAutoAwesome } from 'react-icons/md';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
@@ -14,6 +14,7 @@ import { Helmet } from 'react-helmet-async';
 import { useTeamspaceStore } from '@/store/teamspaceStore';
 import { useTeamspaceDetail } from '@/hooks/useTeamspaceDetail';
 import { apiClient } from '@/shared/apiClient';
+import { debounce } from '@/shared/debounce';
 
 const CURSOR_COLORS = ['#1971c2', '#e03131', '#2f9e44', '#f08c00', '#7048e8'];
 
@@ -32,7 +33,14 @@ export default function MainContent() {
   const { teamspace, refetch: refetchTeamspace } = useTeamspaceDetail(currentTeamspaceId);
 
   const titleRef = useRef<HTMLHeadingElement>(null);
-  const titleDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const debouncedSaveTitle = useMemo(
+    () =>
+      debounce(async (id: string, title: string, onDone: () => void) => {
+        await apiClient.patch(`/api/documents/${id}`, { title });
+        onDone();
+      }, 600),
+    []
+  );
   const isAiDraftGenerating =
     docId && doc?.type !== 'FREE' ? documentAiStatuses[docId] === 'DRAFT' : false;
   const isViewer = onlineMembers.find((m) => m.userId === user?.id)?.role === 'VIEWER';
@@ -69,21 +77,15 @@ export default function MainContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [doc?.id, doc?.title]);
 
-  // docId 변경 / 언마운트 시 디바운스 타이머 정리
+  // docId 변경 / 언마운트 시 대기 중인 디바운스 취소
   useEffect(() => {
-    return () => {
-      if (titleDebounceRef.current) clearTimeout(titleDebounceRef.current);
-    };
-  }, [docId]);
+    return () => debouncedSaveTitle.cancel();
+  }, [docId, debouncedSaveTitle]);
 
   const handleTitleInput = (e: React.FormEvent<HTMLHeadingElement>) => {
     const text = e.currentTarget.textContent ?? '';
     if (docId) setDocumentTitleOverride(docId, text);
-    if (titleDebounceRef.current) clearTimeout(titleDebounceRef.current);
-    titleDebounceRef.current = setTimeout(async () => {
-      await apiClient.patch(`/api/documents/${docId}`, { title: text.trim() || '새 문서' });
-      refetchTeamspace();
-    }, 600);
+    debouncedSaveTitle(docId ?? '', text.trim() || '새 문서', refetchTeamspace);
   };
 
   const handleTitleKeyDown = (e: React.KeyboardEvent<HTMLHeadingElement>) => {
@@ -91,10 +93,7 @@ export default function MainContent() {
   };
 
   const handleTitleBlur = async (e: React.FocusEvent<HTMLHeadingElement>) => {
-    if (titleDebounceRef.current) {
-      clearTimeout(titleDebounceRef.current);
-      titleDebounceRef.current = null;
-    }
+    debouncedSaveTitle.cancel();
     const text = (e.currentTarget.textContent ?? '').trim();
     const titleToSave = text || '새 문서';
     if (!text) e.currentTarget.textContent = '새 문서';
