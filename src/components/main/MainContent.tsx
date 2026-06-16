@@ -28,7 +28,8 @@ export default function MainContent() {
   const feedbackId = useFeedbackStore((state) => state.feedbackId);
   const { currentTeamspaceId, documentAiStatuses, onlineMembers } = useTeamspaceStore();
   const { teamspace } = useTeamspaceDetail(currentTeamspaceId);
-  const isAiDraftGenerating = docId ? documentAiStatuses[docId] === 'DRAFT' : false;
+  const isAiDraftGenerating =
+    docId && doc?.type !== 'FREE' ? documentAiStatuses[docId] === 'DRAFT' : false;
   const isViewer = onlineMembers.find((m) => m.userId === user?.id)?.role === 'VIEWER';
 
   const resetFeedback = useFeedbackStore((state) => state.resetFeedback);
@@ -68,18 +69,20 @@ export default function MainContent() {
     color: CURSOR_COLORS[(user?.id ?? 0) % CURSOR_COLORS.length],
   };
 
+  const docTitle = doc.type === 'FREE' ? doc.title : getDocLabel(doc.type);
+
   return (
     <main className="flex-1 overflow-y-auto bg-white relative">
       <Helmet>
-        <title>{`${getDocLabel(doc.type)} - ${teamspace?.name ?? 'Aidea'}`}</title>
+        <title>{`${docTitle} - ${teamspace?.name ?? 'Aidea'}`}</title>
       </Helmet>
-      {isSplitView && <SplitView title={getDocLabel(doc.type)} />}
+      {isSplitView && <SplitView title={docTitle} />}
       <div
         className={`${isSplitView ? 'hidden' : 'block'} max-w-180 mx-auto px-24 md:px-10 sm:px-5 pt-5`}
       >
         <div className="flex items-center gap-3 pb-4">
           <h1 className="text-[2.5rem] font-bold text-[#1a1a1a] tracking-tight leading-tight">
-            {getDocLabel(doc.type)}
+            {docTitle}
           </h1>
           {(status === 'IDLE' || status === 'ACCEPTED') && (
             <button
@@ -112,6 +115,7 @@ export default function MainContent() {
         isFeedbackModalOpen={isFeedbackModalOpen}
         toggleFeedbackModal={toggleFeedbackModal}
         docId={docId ?? ''}
+        isFreeDoc={doc.type === 'FREE'}
       />
 
       {status === 'FAILED' && (

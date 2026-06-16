@@ -8,7 +8,7 @@ import { apiClient } from '@/shared/apiClient';
 const initialForm: TeamSpaceForm = {
   teamName: '',
   idea: '',
-  selectedDocs: DOC_OPTIONS.map((doc) => doc.value),
+  selectedDocs: DOC_OPTIONS.filter((doc) => doc.value !== 'FREE').map((doc) => doc.value),
   emails: [
     { id: crypto.randomUUID(), value: '', error: null },
     { id: crypto.randomUUID(), value: '', error: null },
