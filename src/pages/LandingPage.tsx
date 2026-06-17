@@ -1,5 +1,6 @@
 import LandingHeader from '@/components/landing/LandingHeader';
 import HeroSection from '@/components/landing/HeroSection';
+import ValuePropSection from '@/components/landing/ValuePropSection';
 import FeaturesSection from '@/components/landing/FeaturesSection';
 import WorkflowSection from '@/components/landing/WorkflowSection';
 import CTASection from '@/components/landing/CTASection';
@@ -11,6 +12,7 @@ export default function LandingPage() {
       <LandingHeader />
       <main>
         <HeroSection />
+        <ValuePropSection />
         <FeaturesSection />
         <WorkflowSection />
         <CTASection />

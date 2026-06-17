@@ -28,9 +28,9 @@ const STEPS: Step[] = [
   },
   {
     number: '04',
-    title: 'GitHub 이슈로 연동',
+    title: '백로그로 전환',
     description:
-      '완성된 기획을 바탕으로 Epic, Story, Task 단위의 GitHub 이슈를 자동 생성하여 개발을 바로 시작합니다.',
+      '완성된 기획을 바탕으로 AI가 Epic, Story, Task 단위의 백로그 초안을 자동 생성하고, 팀이 실시간으로 함께 관리합니다.',
   },
 ];
 
@@ -75,7 +75,7 @@ export default function WorkflowSection() {
           </p>
           <h2 className="mb-4 text-4xl font-bold text-ink">어떻게 시작하나요?</h2>
           <p className="mx-auto max-w-md text-ink-muted" style={{ fontSize: '1rem' }}>
-            4단계만으로 아이디어를 실제 개발 이슈로 연결합니다.
+            4단계만으로 아이디어를 실제 개발 백로그로 연결합니다.
           </p>
         </div>
 

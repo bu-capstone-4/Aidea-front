@@ -18,7 +18,7 @@ export default function HeroSection() {
       <p className="mb-8 max-w-xl leading-relaxed text-ink-muted" style={{ fontSize: '1rem' }}>
         AI가 기획 문서 초안을 자동으로 작성하고, 팀원들과 실시간으로 협업하며,
         <br />
-        완성된 기획을 바로 GitHub 이슈로 연결합니다.
+        완성된 기획을 바로 실시간 백로그로 연결합니다.
       </p>
 
       {/* CTAs */}

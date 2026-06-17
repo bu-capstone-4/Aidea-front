@@ -1,5 +1,5 @@
 import type { ComponentType } from 'react';
-import { MdAutoAwesome, MdGroups, MdGridView, MdCode, MdRateReview } from 'react-icons/md';
+import { MdAutoAwesome, MdGroups, MdGridView, MdViewKanban, MdRateReview } from 'react-icons/md';
 import { cn } from '@/shared/cn';
 
 interface Feature {
@@ -36,12 +36,12 @@ const FEATURES: Feature[] = [
       '유저 스토리, API 설계, 기능 명세 등 프로젝트 유형에 맞는 기획 문서 템플릿을 선택하고 자동 생성합니다.',
   },
   {
-    Icon: MdCode,
+    Icon: MdViewKanban,
     iconBg: 'bg-surface',
     iconColor: 'text-ink',
-    title: 'GitHub 이슈 자동 생성',
+    title: 'AI 백로그 자동 생성',
     description:
-      '완성된 기획 문서에서 바로 Epic, Story, Task 단위의 GitHub 이슈를 자동으로 생성하고 저장소에 반영합니다.',
+      '완성된 기획 문서를 기반으로 AI가 Epic, Story, Task 단위의 백로그 초안을 자동으로 생성하고, 팀이 실시간으로 함께 관리합니다.',
   },
   {
     Icon: MdRateReview,
@@ -80,7 +80,7 @@ export default function FeaturesSection() {
           </p>
           <h2 className="mb-4 text-4xl font-bold text-ink">기획 프로세스의 모든 것을 하나로</h2>
           <p className="mx-auto max-w-lg text-ink-muted" style={{ fontSize: '1rem' }}>
-            아이디어 구체화부터 GitHub 이슈 생성까지,
+            아이디어 구체화부터 백로그 관리까지,
             <br />
             개발 팀의 기획 워크플로우를 하나의 공간에서 완성합니다.
           </p>
