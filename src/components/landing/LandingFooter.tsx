@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import logo from '/favicon.svg';
+import logo from '/logo.svg';
 
 export default function LandingFooter() {
   return (

@@ -1,7 +1,7 @@
 import { Link } from 'react-router';
 import Button from '@/components/ui/Button';
 import { useAuth } from '@/shared/useAuth';
-import logo from '/favicon.svg';
+import logo from '/logo.svg';
 
 const NAV_LINKS = [
   { label: '기능', href: '#features' },
