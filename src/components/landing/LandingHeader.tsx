@@ -16,7 +16,7 @@ export default function LandingHeader() {
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-1.5 no-underline">
-          <img src={logo} alt="AIdea" className="h-8 w-auto" />
+          <img src={logo} alt="AIdea" className="h-6 w-auto" />
         </Link>
 
         {/* Nav */}

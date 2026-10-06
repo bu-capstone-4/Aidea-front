@@ -1,11 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 164 48" fill="none">
-  <rect width="48" height="48" rx="13" fill="#477CED"/>
-  <g transform="translate(8.16 8.16) scale(0.66)" stroke="#FFFFFF" stroke-width="5">
-    <circle cx="21" cy="28" r="10"/>
-    <path d="M31 18v20" stroke-linecap="round"/>
-    <circle cx="38" cy="10" r="4" fill="#FFFFFF" stroke="none"/>
-  </g>
-  <g transform="translate(60.9 7.15) scale(0.8027)" stroke-width="5" stroke-linecap="round">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 -1 128 42" fill="none">
+  <g stroke-width="5" stroke-linecap="round">
     <g stroke="#477CED">
       <circle cx="12.5" cy="28" r="10"/>
       <path d="M22.5 18v20M33 18v20"/>
