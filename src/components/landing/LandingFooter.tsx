@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import logo from '/favicon.svg';
+import logo from '/logo.svg';
 
 export default function LandingFooter() {
   return (
@@ -7,7 +7,7 @@ export default function LandingFooter() {
       <div className="mx-auto flex max-w-6xl flex-col items-center gap-6 sm:flex-row sm:justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-1.5 no-underline">
-          <img src={logo} alt="AIdea" className="h-8 w-auto" />
+          <img src={logo} alt="AIdea" className="h-6 w-auto" />
         </Link>
 
         {/* Copyright */}

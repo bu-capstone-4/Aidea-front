@@ -1,7 +1,7 @@
 import { Link } from 'react-router';
 import Button from '@/components/ui/Button';
 import { useAuth } from '@/shared/useAuth';
-import logo from '/favicon.svg';
+import logo from '/logo.svg';
 
 const NAV_LINKS = [
   { label: '기능', href: '#features' },
@@ -16,7 +16,7 @@ export default function LandingHeader() {
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-1.5 no-underline">
-          <img src={logo} alt="AIdea" className="h-8 w-auto" />
+          <img src={logo} alt="AIdea" className="h-6 w-auto" />
         </Link>
 
         {/* Nav */}
