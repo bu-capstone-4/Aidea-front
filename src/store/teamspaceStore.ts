@@ -29,7 +29,7 @@ interface TeamspaceState {
   setDocumentTitleOverride: (documentId: string, title: string) => void;
   setPendingDraft: (draft: PendingDraft | null) => void;
   setDraftQuestioning: (documentId: string, draftId: string, questions: Question[]) => void;
-  setDraftAnswering: () => void;
+  setDraftAnswering: (draftId?: string) => void;
   restoreDraftQA: (
     documentId: string,
     draftId: string,
@@ -64,9 +64,12 @@ export const useTeamspaceStore = create<TeamspaceState>()((set) => ({
   setPendingDraft: (draft) => set({ pendingDraft: draft }),
   setDraftQuestioning: (documentId, draftId, questions) =>
     set({ draftQA: { documentId, draftId, status: 'QUESTIONING', questions } }),
-  setDraftAnswering: () =>
+  // draftId가 주어지면 현재 draftQA일 때만 전환한다 — 제출자는 REST 성공 후와 draft:answering 수신 시 두 번 호출하므로 멱등
+  setDraftAnswering: (draftId) =>
     set((state) =>
-      state.draftQA ? { draftQA: { ...state.draftQA, status: 'ANSWERING', questions: null } } : {}
+      state.draftQA && (draftId === undefined || state.draftQA.draftId === draftId)
+        ? { draftQA: { ...state.draftQA, status: 'ANSWERING', questions: null } }
+        : {}
     ),
   // doc:init.activeDraft로 상태 복원 시 사용.
   // 이미 같은 문서의 draftQA가 있다면(같은 세션에서 draft:questioning을 수신해 questions를 보유 중) 덮어쓰지 않는다.

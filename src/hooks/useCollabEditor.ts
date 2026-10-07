@@ -10,23 +10,18 @@ import { useCreateBlockNote } from '@blocknote/react';
 import { ko } from '@blocknote/core/locales';
 import { YCursorExtension } from '@blocknote/core';
 import { handleSocketError } from '@/shared/socketErrorHandler';
-import type { DocumentServerMessage } from '@/types/socket';
+import { base64ToUint8Array, uint8ArrayToBase64 } from '@/shared/base64';
+import {
+  applyRemoteQaUpdate,
+  bindQaSender,
+  destroyQaDoc,
+  encodeQaState,
+  hasQaDoc,
+} from '@/shared/qaDocRegistry';
+import type { DocumentServerMessage, QaUpdateRequest } from '@/types/socket';
 import { useFeedbackStore } from '@/store/FeedbackStore';
 import { restoreFeedbackState } from '@/hooks/useFeedback';
 import { useTeamspaceStore } from '@/store/teamspaceStore';
-
-function base64ToUint8Array(b64: string): Uint8Array {
-  return Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
-}
-
-function uint8ArrayToBase64(arr: Uint8Array): string {
-  let binary = '';
-  const chunkSize = 8192;
-  for (let i = 0; i < arr.length; i += chunkSize) {
-    binary += String.fromCharCode(...arr.subarray(i, i + chunkSize));
-  }
-  return btoa(binary);
-}
 
 interface UseCollabEditorOptions {
   docId: string;
@@ -65,6 +60,17 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
 
   useEffect(() => {
     const ws = new WebSocket(`${import.meta.env.VITE_WS_BASE_URL}/ws/documents/${docId}`);
+    let unbindQaSender: (() => void) | null = null;
+
+    const sendQaUpdate = (qaId: string, update: Uint8Array) => {
+      if (ws.readyState !== WebSocket.OPEN) return;
+      const message: QaUpdateRequest = {
+        type: 'qa:update',
+        qaId,
+        update: uint8ArrayToBase64(update),
+      };
+      ws.send(JSON.stringify(message));
+    };
 
     ws.onopen = () => setConnected(true);
     ws.onclose = () => {
@@ -87,6 +93,20 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
         }
         provider.emit('sync', [true]);
         initializedRef.current = true;
+
+        // 답변 Y.Doc 송신은 서버 상태를 받은 뒤부터 이 소켓으로 보낸다
+        unbindQaSender?.();
+        unbindQaSender = bindQaSender(sendQaUpdate);
+        if (msg.activeQa) {
+          const { qaId, updates } = msg.activeQa;
+          // 이미 로컬에 답변 Y.Doc이 있었다면 재연결 — 끊긴 동안의 로컬 입력을 전체 상태로 한 번 재전송한다
+          const isReconnect = hasQaDoc(qaId);
+          for (const b64 of updates) {
+            applyRemoteQaUpdate(qaId, b64);
+          }
+          const localState = isReconnect ? encodeQaState(qaId) : null;
+          if (localState) sendQaUpdate(qaId, localState);
+        }
         if (msg.activeFeedback) {
           restoreFeedbackState(docId, msg.activeFeedback.feedbackId, msg.activeFeedback);
         }
@@ -120,6 +140,11 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
         return;
       }
 
+      if (msg.type === 'qa:update') {
+        applyRemoteQaUpdate(msg.qaId, msg.update);
+        return;
+      }
+
       if (msg.type === 'doc:awareness') {
         applyAwarenessUpdate(provider.awareness, base64ToUint8Array(msg.update), 'remote');
         return;
@@ -149,7 +174,14 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
         return;
       }
 
+      if (msg.type === 'feedback:answering') {
+        feedbackStore.setAnswering(msg.feedbackId);
+        destroyQaDoc(msg.feedbackId);
+        return;
+      }
+
       if (msg.type === 'feedback:ready') {
+        destroyQaDoc(msg.feedbackId);
         feedbackStore.setDone(msg.feedbackId, msg.revisedMarkdown);
         return;
       }
@@ -171,6 +203,7 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
       }
 
       if (msg.type === 'feedback:error') {
+        destroyQaDoc(msg.feedbackId);
         handleSocketError({
           code: 'AI_FEEDBACK_FAILED',
           message: 'AI 피드백 처리 중 오류가 발생했습니다.',
@@ -211,6 +244,7 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
     provider.awareness.on('update', handleAwarenessUpdate);
 
     return () => {
+      unbindQaSender?.();
       provider.awareness.off('update', handleAwarenessUpdate);
       doc.off('update', handleUpdate);
       ws.close(1000);

@@ -45,11 +45,18 @@ export interface ActiveDraftInfo {
   questions?: Question[] | null;
 }
 
+// 질문 답변 중인 피드백/초안의 답변 Y.Doc 업데이트 (qaId = feedbackId | draftId)
+export interface ActiveQaInfo {
+  qaId: string;
+  updates: string[]; // base64[]
+}
+
 export interface DocInitEvent {
   type: 'doc:init';
   updates: string[];
   activeFeedback?: ActiveFeedbackInfo | null;
   activeDraft?: ActiveDraftInfo | null;
+  activeQa?: ActiveQaInfo | null;
 }
 
 export interface DocUpdateEvent {
@@ -72,6 +79,13 @@ export interface DocAwarenessRemoveEvent {
   yjsClientId: number;
 }
 
+// qa:update는 요청·응답이 같은 이름이다 — 서버가 보낸 세션을 제외하고 중계한다
+export interface QaUpdateEvent {
+  type: 'qa:update';
+  qaId: string;
+  update: string; // base64
+}
+
 export interface FeedbackStartedEvent {
   type: 'feedback:started';
   feedbackId: string;
@@ -82,6 +96,12 @@ export interface FeedbackQuestioningEvent {
   type: 'feedback:questioning';
   feedbackId: string;
   questions: Question[];
+}
+
+// 누군가 답변을 제출(커밋)하면 문서 접속자 전원에게 발행된다
+export interface FeedbackAnsweringEvent {
+  type: 'feedback:answering';
+  feedbackId: string;
 }
 
 export interface FeedbackReadyEvent {
@@ -113,8 +133,10 @@ export type DocumentServerMessage =
   | DocAwarenessEvent
   | DocAwarenessInitEvent
   | DocAwarenessRemoveEvent
+  | QaUpdateEvent
   | FeedbackStartedEvent
   | FeedbackQuestioningEvent
+  | FeedbackAnsweringEvent
   | FeedbackReadyEvent
   | FeedbackErrorEvent
   | FeedbackResolvedEvent
@@ -134,7 +156,13 @@ export interface DocAwarenessRequest {
   update: string; // base64
 }
 
-export type DocumentClientMessage = DocUpdateRequest | DocAwarenessRequest;
+export interface QaUpdateRequest {
+  type: 'qa:update';
+  qaId: string;
+  update: string; // base64
+}
+
+export type DocumentClientMessage = DocUpdateRequest | DocAwarenessRequest | QaUpdateRequest;
 
 // ─── 팀스페이스 소켓 에러 코드 ───────────────────────────────────────────────
 
