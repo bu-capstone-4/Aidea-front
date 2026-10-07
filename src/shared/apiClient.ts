@@ -29,6 +29,13 @@ const BACKLOG_DRAFT_ERROR_MESSAGES: Record<string, string> = {
   BACKLOG_DRAFT_ALREADY_IN_PROGRESS: '이미 백로그 초안 생성이 진행 중입니다.',
 };
 
+// POST .../answers (AI 피드백·초안 질문 답변 제출) 에서 발생 가능한 에러
+// 답변은 팀원과 함께 작성하므로, 이미 다른 팀원이 제출해 상태가 바뀐 경우를 안내한다
+const QA_ANSWER_ERROR_MESSAGES: Record<string, string> = {
+  FEEDBACK_INVALID_STATUS: '다른 팀원이 이미 답변을 제출했어요.',
+  DRAFT_INVALID_STATUS: '다른 팀원이 이미 답변을 제출했어요.',
+};
+
 // 목 모드(VITE_USE_REAL_AUTH !== 'true')에서는 빈 baseURL → MSW가 동일 오리진 요청을 인터셉트
 // 실제 모드에서는 VITE_API_BASE_URL 사용
 const baseURL =
@@ -65,10 +72,13 @@ apiClient.interceptors.response.use(
       if (error.response?.status !== 401) {
         const data = error.response?.data as { message?: string; code?: string } | undefined;
         const isRoleChangeRequest = /\/members\/[^/]+\/role$/.test(originalRequest.url ?? '');
+        const isQaAnswerRequest = /\/answers$/.test(originalRequest.url ?? '');
         const customMessage = data?.code
           ? isRoleChangeRequest
             ? ROLE_CHANGE_ERROR_MESSAGES[data.code]
-            : (INVITATION_ERROR_MESSAGES[data.code] ?? BACKLOG_DRAFT_ERROR_MESSAGES[data.code])
+            : ((isQaAnswerRequest ? QA_ANSWER_ERROR_MESSAGES[data.code] : undefined) ??
+              INVITATION_ERROR_MESSAGES[data.code] ??
+              BACKLOG_DRAFT_ERROR_MESSAGES[data.code])
           : undefined;
         const message = customMessage ?? data?.message ?? '서버와 통신 중 오류가 발생했습니다.';
         useToastStore.getState().addToast({ type: 'error', message });
