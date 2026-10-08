@@ -9,12 +9,19 @@ interface SplitViewProps {
 }
 
 export default function FeedbackSplitView({ title }: SplitViewProps) {
-  const { revisedMarkdown, feedbackId, ydoc, resetFeedback, acceptFeedback, status } =
+  const { revisedMarkdown, feedbackId, ydoc, resetFeedback, acceptFeedback, setAccepting, status } =
     useFeedbackStore();
   const { acceptFeedback: acceptFeedbackApi, rejectFeedback } = useFeedback();
 
   const handleAccept = async () => {
-    await acceptFeedbackApi(feedbackId);
+    // feedback:resolved 수신 시 이 클라이언트만 문서를 교체하도록 표시 (REST 응답보다 소켓 이벤트가 먼저 올 수 있어 요청 전에 설정)
+    setAccepting(feedbackId);
+    try {
+      await acceptFeedbackApi(feedbackId);
+    } catch (error) {
+      setAccepting(null);
+      throw error;
+    }
     acceptFeedback();
   };
 

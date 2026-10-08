@@ -188,8 +188,13 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
 
       if (msg.type === 'feedback:resolved') {
         if (msg.outcome === 'ACCEPTED') {
-          const { revisedMarkdown } = useFeedbackStore.getState();
-          if (revisedMarkdown && applyMarkdownRef.current) {
+          const { revisedMarkdown, acceptingFeedbackId } = useFeedbackStore.getState();
+          feedbackStore.setAccepting(null);
+          // 문서 교체는 '이 버전 선택'을 누른 클라이언트만 수행한다.
+          // 모든 클라이언트가 각자 replaceBlocks를 하면 Yjs 병합으로 내용이 중복·뒤섞이므로,
+          // 나머지 클라이언트는 수락자의 doc:update로 결과를 받는다.
+          const isAccepter = acceptingFeedbackId === msg.feedbackId;
+          if (isAccepter && revisedMarkdown && applyMarkdownRef.current) {
             applyMarkdownRef.current(revisedMarkdown).then(() => {
               feedbackStore.acceptFeedback();
             });
