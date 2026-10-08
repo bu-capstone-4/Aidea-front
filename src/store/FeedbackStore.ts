@@ -15,7 +15,7 @@ interface FeedbackState {
   acceptFeedback: () => void;
   setRejected: () => void;
   setFailed: () => void;
-  setAnswering: () => void;
+  setAnswering: (feedbackId?: string) => void;
   setQuestioning: (questions: Question[]) => void;
   setYdoc: (doc: Y.Doc) => void;
   resetFeedback: () => void;
@@ -74,11 +74,13 @@ export const useFeedbackStore = create<FeedbackState>()((set) => ({
       status: 'QUESTIONING',
     }),
 
-  setAnswering: () =>
-    set({
-      questions: null,
-      status: 'ANSWERING',
-    }),
+  // feedbackId가 주어지면 현재 피드백일 때만 전환한다 — 제출자는 REST 성공 후와 feedback:answering 수신 시 두 번 호출하므로 멱등
+  setAnswering: (feedbackId) =>
+    set((state) =>
+      feedbackId !== undefined && feedbackId !== state.feedbackId
+        ? {}
+        : { questions: null, status: 'ANSWERING' }
+    ),
 
   resetFeedback: () =>
     set({

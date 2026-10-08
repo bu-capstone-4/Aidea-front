@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useTeamspaceStore } from '@/store/teamspaceStore';
+import { destroyQaDoc } from '@/shared/qaDocRegistry';
 import type { MemberFocusRequest, TeamspaceServerMessage } from '@/types/teamspaceSocket';
 
 interface UseTeamspaceSocketOptions {
@@ -23,6 +24,7 @@ function isTeamspaceServerMessage(message: unknown): message is TeamspaceServerM
   return (
     event === 'teamspace:init' ||
     event === 'draft:questioning' ||
+    event === 'draft:answering' ||
     event === 'draft:ready' ||
     event === 'draft:error' ||
     event === 'member:update' ||
@@ -42,6 +44,7 @@ export function useTeamspaceSocket({
   const setDocumentAiStatus = useTeamspaceStore((state) => state.setDocumentAiStatus);
   const setPendingDraft = useTeamspaceStore((state) => state.setPendingDraft);
   const setDraftQuestioning = useTeamspaceStore((state) => state.setDraftQuestioning);
+  const setDraftAnswering = useTeamspaceStore((state) => state.setDraftAnswering);
   const clearDraftQA = useTeamspaceStore((state) => state.clearDraftQA);
   const clearTeamspacePresence = useTeamspaceStore((state) => state.clearTeamspacePresence);
 
@@ -73,7 +76,14 @@ export function useTeamspaceSocket({
         return;
       }
 
+      if (message.event === 'draft:answering') {
+        setDraftAnswering(message.data.draftId);
+        destroyQaDoc(message.data.draftId);
+        return;
+      }
+
       if (message.event === 'draft:ready') {
+        destroyQaDoc(message.data.draftId);
         setDocumentAiStatus(message.data.documentId, 'IDLE');
         setPendingDraft({ documentId: message.data.documentId, content: message.data.content });
         clearDraftQA();
@@ -81,6 +91,8 @@ export function useTeamspaceSocket({
       }
 
       if (message.event === 'draft:error') {
+        const { draftQA } = useTeamspaceStore.getState();
+        if (draftQA?.documentId === message.data.documentId) destroyQaDoc(draftQA.draftId);
         setDocumentAiStatus(message.data.documentId, 'IDLE');
         clearDraftQA();
         return;
@@ -111,6 +123,7 @@ export function useTeamspaceSocket({
     clearTeamspacePresence,
     enabled,
     setDocumentAiStatus,
+    setDraftAnswering,
     setDraftQuestioning,
     setMemberRole,
     setOnlineMembers,

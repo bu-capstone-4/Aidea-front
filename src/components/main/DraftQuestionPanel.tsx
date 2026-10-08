@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import Button from '../ui/Button';
 import QuestionList from './QuestionList';
+import ViewerAnswerNotice from './ViewerAnswerNotice';
 import { useTeamspaceStore } from '@/store/teamspaceStore';
 import useDraft from '@/hooks/useDraft';
+import { useQaAnswers } from '@/hooks/useQaAnswers';
+import { useIsViewer } from '@/hooks/useIsViewer';
 
 interface DraftQuestionPanelProps {
   documentId: string;
@@ -15,47 +18,39 @@ export default function DraftQuestionPanel({ documentId }: DraftQuestionPanelPro
   const setDraftAnswering = useTeamspaceStore((state) => state.setDraftAnswering);
   const { submitDraftAnswers, skipDraftQuestions } = useDraft();
 
-  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const isViewer = useIsViewer();
   const [submitting, setSubmitting] = useState(false);
 
   const isQuestioningForThisDoc =
     draftQA?.status === 'QUESTIONING' && draftQA.documentId === documentId;
+  const qa = useQaAnswers(isQuestioningForThisDoc && draftQA.questions ? draftQA.draftId : null);
 
-  const handleSelect = (questionId: string, value: string) => {
-    setAnswers((prev) => ({ ...prev, [questionId]: value }));
-  };
-
-  const handleSubmit = async () => {
-    if (!draftQA?.questions || submitting) return;
+  const runSubmit = async (submit: (draftId: string) => Promise<unknown>) => {
+    if (!draftQA || submitting || isViewer) return;
     setSubmitting(true);
     try {
-      const answerList = draftQA.questions.map((q) => ({
-        questionId: q.id,
-        value: answers[q.id] ?? '',
-      }));
-      await submitDraftAnswers(draftQA.draftId, answerList);
-      setDraftAnswering();
+      await submit(draftQA.draftId);
+      setDraftAnswering(draftQA.draftId);
+    } catch {
+      // 에러 토스트는 apiClient 인터셉터가 표시한다 (동시 제출 경합 포함)
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleSkip = async () => {
-    if (!draftQA || submitting) return;
-    setSubmitting(true);
-    try {
-      await skipDraftQuestions(draftQA.draftId);
-      setDraftAnswering();
-    } finally {
-      setSubmitting(false);
-    }
+  const handleSubmit = () => {
+    const questions = draftQA?.questions;
+    if (!qa || !questions) return;
+    return runSubmit((draftId) => submitDraftAnswers(draftId, qa.buildAnswers(questions)));
   };
+
+  const handleSkip = () => runSubmit(skipDraftQuestions);
 
   if (!isQuestioningForThisDoc) return null;
 
   const { questions } = draftQA;
 
-  if (!questions) {
+  if (!questions || !qa) {
     return (
       <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 bg-white p-6 text-center">
         <div className="bg-[#F4F0FF] rounded-xl p-4 border border-purple-50 max-w-md">
@@ -66,10 +61,11 @@ export default function DraftQuestionPanel({ documentId }: DraftQuestionPanelPro
             질문 내용을 불러올 수 없습니다. 잠시 후 다시 시도해주세요.
           </p>
         </div>
+        {isViewer && <ViewerAnswerNotice />}
         <button
           type="button"
           onClick={handleSkip}
-          disabled={submitting}
+          disabled={submitting || isViewer}
           className="text-gray-400 text-sm font-medium hover:text-gray-600 transition-colors disabled:opacity-60"
         >
           질문 건너뛰고 바로 초안 만들기
@@ -93,13 +89,14 @@ export default function DraftQuestionPanel({ documentId }: DraftQuestionPanelPro
           </div>
         </div>
 
-        <QuestionList questions={questions} answers={answers} onSelect={handleSelect} />
+        <QuestionList key={draftQA.draftId} questions={questions} qa={qa} readOnly={isViewer} />
       </div>
 
       <div className="shrink-0 flex flex-col items-center gap-3 px-6 py-5 border-t border-gray-100 bg-white">
+        {isViewer && <ViewerAnswerNotice />}
         <Button
           onClick={handleSubmit}
-          disabled={submitting}
+          disabled={submitting || isViewer}
           className="w-full max-w-lg py-3.5 bg-blue-600 text-white rounded-xl font-bold text-base hover:bg-blue-700 transition-colors shadow-md disabled:opacity-60"
         >
           답변하고 초안 만들기
@@ -107,7 +104,7 @@ export default function DraftQuestionPanel({ documentId }: DraftQuestionPanelPro
         <button
           type="button"
           onClick={handleSkip}
-          disabled={submitting}
+          disabled={submitting || isViewer}
           className="text-gray-400 text-sm font-medium hover:text-gray-600 transition-colors disabled:opacity-60"
         >
           건너뛰고 바로 초안 만들기

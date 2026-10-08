@@ -42,6 +42,7 @@ pnpm preview       # 빌드 결과 프리뷰
 raw `WebSocket`(socket.io 아님)을 사용하는 3개의 분리된 연결이 있고, 각각 자신의 Zustand 스토어만 갱신함:
 
 1. **문서 협업 소켓** (`useCollabEditor.ts`, `/ws/documents/{docId}`) — Yjs CRDT 업데이트를 base64로 인코딩해 주고받음. BlockNote 에디터(`CollaborativeEditor.tsx`)가 `Y.Doc` + `WebsocketProvider`(connect: false인 더미, 실제 동기화는 위 raw socket이 수행)로 동작. 같은 소켓으로 AI 피드백 진행 상태(`feedback:*`)와 AI 초안 질의응답 상태(`activeDraft`)도 함께 전달됨 → `FeedbackStore`, `teamspaceStore`의 `draftQA`를 갱신.
+   - **AI 질문 답변 실시간 협업**: 피드백/초안 질문의 답변은 문서 본문 Y.Doc이 아니라 qaId(=feedbackId|draftId)별 **전용 Y.Doc**(`shared/qaDocRegistry.ts`, 모듈 레벨 수명)에 담고, 같은 문서 소켓의 `qa:update` 메시지로 중계함(서버는 메모리에만 보관, 접속 시 `doc:init.activeQa`로 복원). 문서 Y.Doc에 넣으면 백엔드 텍스트 추출기가 답변을 AI 입력에 섞기 때문. 스키마는 `getMap('choice')`(questionId → 선택지|`__custom__`) + 루트 `getText('text:<questionId>')`. 입력 바인딩은 `useYTextInput`(diff 반영·커서 변환·IME 조합 보류), 제출 시 `feedback:answering`(문서 소켓)/`draft:answering`(팀스페이스 소켓)으로 전원 화면이 전환되고 답변 Y.Doc은 destroy됨.
 2. **백로그 소켓** (`useBacklogSocket.ts`, `/ws/backlog/{teamspaceId}`) — Epic/Story/Task/BacklogTask의 CRUD 및 정렬, AI 백로그 초안 생성 상태(`backlog:draft_*`)를 JSON 이벤트로 전달. `backlogStore`를 갱신. `backlog:draft_ready` 수신 시 최신 목록을 다시 받기 위해 소켓을 강제 재연결함(`reconnectKey`).
 3. **팀스페이스 소켓** (`useTeamspaceSocket.ts`, `/ws/teamspace/{teamspaceId}`) — 온라인 멤버 프레즌스, 문서별 AI 상태(`documentAiStatuses`), 멤버 역할 변경을 전달. 연결 시/문서 전환 시 `member:focus` 이벤트로 현재 보고 있는 문서를 서버에 알림.
 

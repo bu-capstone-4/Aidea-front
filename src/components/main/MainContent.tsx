@@ -13,6 +13,7 @@ import useFeedback from '@/hooks/useFeedback';
 import { Helmet } from 'react-helmet-async';
 import { useTeamspaceStore } from '@/store/teamspaceStore';
 import { useTeamspaceDetail } from '@/hooks/useTeamspaceDetail';
+import { useIsViewer } from '@/hooks/useIsViewer';
 import { apiClient } from '@/shared/apiClient';
 import { debounce } from '@/shared/debounce';
 
@@ -28,8 +29,7 @@ export default function MainContent() {
   const isSplitView = useFeedbackStore((state) => state.isSplitView);
   const status = useFeedbackStore((state) => state.status);
   const feedbackId = useFeedbackStore((state) => state.feedbackId);
-  const { currentTeamspaceId, documentAiStatuses, onlineMembers, setDocumentTitleOverride } =
-    useTeamspaceStore();
+  const { currentTeamspaceId, documentAiStatuses, setDocumentTitleOverride } = useTeamspaceStore();
   const { teamspace, refetch: refetchTeamspace } = useTeamspaceDetail(currentTeamspaceId);
 
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -43,7 +43,7 @@ export default function MainContent() {
   );
   const isAiDraftGenerating =
     docId && doc?.type !== 'FREE' ? documentAiStatuses[docId] === 'DRAFT' : false;
-  const isViewer = onlineMembers.find((m) => m.userId === user?.id)?.role === 'VIEWER';
+  const isViewer = useIsViewer();
 
   const resetFeedback = useFeedbackStore((state) => state.resetFeedback);
   const { startPolling, stopPolling } = useFeedback();

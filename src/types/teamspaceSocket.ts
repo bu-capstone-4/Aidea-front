@@ -40,6 +40,15 @@ export interface DraftQuestioningEvent {
   };
 }
 
+// 누군가 초안 질문 답변을 제출(커밋)하면 팀스페이스 접속자 전원에게 발행된다
+export interface DraftAnsweringEvent {
+  event: 'draft:answering';
+  data: {
+    documentId: string;
+    draftId: string;
+  };
+}
+
 export interface DraftReadyEvent {
   event: 'draft:ready';
   data: {
@@ -74,6 +83,7 @@ export interface MemberRoleChangedEvent {
 export type TeamspaceServerMessage =
   | TeamspaceInitEvent
   | DraftQuestioningEvent
+  | DraftAnsweringEvent
   | DraftReadyEvent
   | DraftErrorEvent
   | MemberUpdateEvent

@@ -1,20 +1,32 @@
+import { useState } from 'react';
+import YTextField from './YTextField';
+import { CUSTOM_CHOICE } from '@/shared/qaDocRegistry';
+import type { QaAnswers } from '@/hooks/useQaAnswers';
 import type { Question } from '@/types/document';
 
 interface QuestionListProps {
   questions: Question[];
-  answers: Record<string, string>;
-  onSelect: (questionId: string, value: string) => void;
+  qa: QaAnswers;
+  readOnly: boolean;
 }
 
 // feedback:questioning / draft:questioning 공용 — 질문 목록 렌더링 (id/section/text/options[] 구조)
-export default function QuestionList({ questions, answers, onSelect }: QuestionListProps) {
+// 답변은 qaId 전용 Y.Doc(qa)에 있어 같은 문서를 보는 팀원과 실시간으로 공유된다.
+export default function QuestionList({ questions, qa, readOnly }: QuestionListProps) {
+  // 내가 직접 "직접 입력"을 고른 질문만 입력창에 자동 포커스한다 (팀원의 선택으로 포커스를 뺏기지 않게)
+  const [focusQuestionId, setFocusQuestionId] = useState<string | null>(null);
+
+  const selectCustom = (questionId: string) => {
+    setFocusQuestionId(questionId);
+    qa.setChoice(questionId, CUSTOM_CHOICE);
+  };
+
   return (
     <div className="flex flex-col gap-4">
       {questions.map((q, idx) => {
-        const currentAnswer = answers[q.id];
+        const currentChoice = qa.getChoice(q.id);
         const hasOptions = Array.isArray(q.options) && q.options.length > 0;
-        const isCustomSelected =
-          hasOptions && currentAnswer !== undefined && !q.options!.includes(currentAnswer);
+        const isCustomSelected = hasOptions && currentChoice === CUSTOM_CHOICE;
 
         return (
           <div key={q.id} className="border border-gray-200 rounded-2xl p-4 shadow-sm">
@@ -26,17 +38,17 @@ export default function QuestionList({ questions, answers, onSelect }: QuestionL
             </div>
 
             {!hasOptions ? (
-              <textarea
+              <YTextField
+                ytext={qa.getText(q.id)}
+                multiline
+                readOnly={readOnly}
                 placeholder="직접 입력해주세요..."
-                value={currentAnswer || ''}
-                onChange={(e) => onSelect(q.id, e.target.value)}
-                rows={3}
                 className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white resize-none"
               />
             ) : (
               <div className="flex flex-col gap-2">
                 {q.options!.map((option) => {
-                  const isSelected = currentAnswer === option;
+                  const isSelected = currentChoice === option;
                   return (
                     <label
                       key={option}
@@ -50,7 +62,8 @@ export default function QuestionList({ questions, answers, onSelect }: QuestionL
                         type="radio"
                         name={q.id}
                         checked={isSelected}
-                        onChange={() => onSelect(q.id, option)}
+                        disabled={readOnly}
+                        onChange={() => qa.setChoice(q.id, option)}
                         className="w-4 h-4 accent-blue-600 cursor-pointer"
                       />
                       <span
@@ -76,7 +89,8 @@ export default function QuestionList({ questions, answers, onSelect }: QuestionL
                       type="radio"
                       name={q.id}
                       checked={isCustomSelected}
-                      onChange={() => onSelect(q.id, '')}
+                      disabled={readOnly}
+                      onChange={() => selectCustom(q.id)}
                       className="w-4 h-4 accent-blue-600 cursor-pointer"
                     />
                     <span
@@ -91,13 +105,13 @@ export default function QuestionList({ questions, answers, onSelect }: QuestionL
                   </label>
 
                   {isCustomSelected && (
-                    <input
-                      type="text"
+                    <YTextField
+                      ytext={qa.getText(q.id)}
+                      multiline={false}
+                      readOnly={readOnly}
                       placeholder="직접 입력해주세요..."
-                      value={currentAnswer || ''}
-                      onChange={(e) => onSelect(q.id, e.target.value)}
                       className="w-full border border-blue-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                      autoFocus
+                      autoFocus={focusQuestionId === q.id}
                     />
                   )}
                 </div>
