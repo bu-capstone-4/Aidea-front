@@ -9,9 +9,12 @@ interface FeedbackState {
   status: FeedbackStatus;
   questions: Question[] | null;
   revisedMarkdown: string | null;
+  // 이 클라이언트가 '이 버전 선택'으로 수락 요청한 피드백 — 수락 결과를 문서에 반영할 주체를 가리는 데 사용
+  acceptingFeedbackId: string | null;
   ydoc: Y.Doc | null;
   setPending: (docId: string, feedId: string) => void;
   setDone: (feedId: string, revisedMarkdown: string) => void;
+  setAccepting: (feedbackId: string | null) => void;
   acceptFeedback: () => void;
   setRejected: () => void;
   setFailed: () => void;
@@ -27,6 +30,7 @@ export const useFeedbackStore = create<FeedbackState>()((set) => ({
   feedbackId: '',
   status: 'IDLE',
   revisedMarkdown: null,
+  acceptingFeedbackId: null,
   questions: null,
   ydoc: null,
 
@@ -47,6 +51,8 @@ export const useFeedbackStore = create<FeedbackState>()((set) => ({
       isSplitView: true,
     }),
 
+  setAccepting: (feedbackId) => set({ acceptingFeedbackId: feedbackId }),
+
   acceptFeedback: () =>
     set({
       status: 'ACCEPTED',
@@ -59,6 +65,7 @@ export const useFeedbackStore = create<FeedbackState>()((set) => ({
       isSplitView: false,
       feedbackId: '',
       revisedMarkdown: null,
+      acceptingFeedbackId: null,
     }),
 
   setFailed: () =>
@@ -88,5 +95,6 @@ export const useFeedbackStore = create<FeedbackState>()((set) => ({
       isSplitView: false,
       feedbackId: '',
       revisedMarkdown: null,
+      acceptingFeedbackId: null,
     }),
 }));
