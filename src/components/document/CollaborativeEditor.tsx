@@ -6,6 +6,8 @@ import { useDocumentEditorStore } from '@/store/documentEditorStore';
 import { useTeamspaceStore } from '@/store/teamspaceStore';
 import { useToastStore } from '@/store/toastStore';
 import DraftQuestionPanel from '@/components/main/DraftQuestionPanel';
+import DocumentSkeleton from '@/components/document/DocumentSkeleton';
+import Button from '@/components/ui/Button';
 
 interface Props {
   docId: string;
@@ -65,6 +67,20 @@ function LoadingSpinner({ message }: { message: string }) {
   );
 }
 
+function DocumentLoadError() {
+  return (
+    <div
+      role="alert"
+      className="absolute inset-x-0 top-0 flex flex-col items-center gap-4 pt-20 text-center"
+    >
+      <p className="text-sm font-medium text-ink">문서를 불러오지 못했어요.</p>
+      <Button variant="secondary" size="sm" onClick={() => window.location.reload()}>
+        새로고침
+      </Button>
+    </div>
+  );
+}
+
 function CollaborativeEditor({
   docId,
   editable,
@@ -73,7 +89,7 @@ function CollaborativeEditor({
   user,
   token,
 }: Props) {
-  const { editor } = useCollabEditor({ docId, editable, user, token });
+  const { editor, syncStatus } = useCollabEditor({ docId, editable, user, token });
   const setEditor = useDocumentEditorStore((state) => state.setEditor);
   const draftQA = useTeamspaceStore((state) => state.draftQA);
   const lastViewerToastRef = useRef(0);
@@ -106,21 +122,31 @@ function CollaborativeEditor({
   // IDEA 초안 Q&A 흐름의 세부 단계 — 같은 문서에 대한 draftQA가 있을 때만 의미가 있다.
   const isQuestioningThisDoc = draftQA?.documentId === docId && draftQA.status === 'QUESTIONING';
   const isAnsweringThisDoc = draftQA?.documentId === docId && draftQA.status === 'ANSWERING';
+  // doc:init 처리 전에는 본문이 비어 보이고, 이때의 입력은 서버로 전송되지 않아 분기하므로 숨기고 막는다.
+  // BlockNoteView는 y-prosemirror 바인딩 유지를 위해 언마운트하지 않는다.
+  const isSynced = syncStatus === 'ready';
 
   return (
     <div className="relative min-h-[calc(100vh-160px)]">
       <div
-        inert={isAiDraftGenerating || undefined}
+        inert={isAiDraftGenerating || !isSynced || undefined}
+        className={isSynced ? undefined : 'invisible'}
         onKeyDownCapture={isViewer ? handleViewerKeyDown : undefined}
         onPasteCapture={isViewer ? handleViewerPaste : undefined}
       >
         <BlockNoteView editor={editor} theme="light" editable={editable} />
       </div>
-      {isQuestioningThisDoc && <DraftQuestionPanel documentId={docId} />}
-      {!isQuestioningThisDoc && isAnsweringThisDoc && (
+      {syncStatus === 'loading' && (
+        <div className="absolute inset-x-0 top-0">
+          <DocumentSkeleton />
+        </div>
+      )}
+      {syncStatus === 'error' && <DocumentLoadError />}
+      {isSynced && isQuestioningThisDoc && <DraftQuestionPanel documentId={docId} />}
+      {isSynced && !isQuestioningThisDoc && isAnsweringThisDoc && (
         <LoadingSpinner message="답변을 반영해 초안을 다시 작성하고 있어요. 시간이 조금 더 걸릴 수 있어요." />
       )}
-      {!isQuestioningThisDoc && !isAnsweringThisDoc && isAiDraftGenerating && (
+      {isSynced && !isQuestioningThisDoc && !isAnsweringThisDoc && isAiDraftGenerating && (
         <LoadingSpinner message="AI 초안을 생성하고 있습니다. 잠시 후 자동으로 반영됩니다." />
       )}
     </div>
