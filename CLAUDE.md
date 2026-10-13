@@ -25,8 +25,18 @@ pnpm preview       # 빌드 결과 프리뷰
 `.env.local`에 다음 값 필요 (`vite.config.ts`에서 `@` → `src` 경로 별칭 사용):
 
 - `VITE_USE_REAL_AUTH`: `true`면 GitHub OAuth 등 auth API가 실제 백엔드로 전달됨. `false`(기본값)면 목 모드로 동작.
-- `VITE_API_BASE_URL`: 실제 백엔드 모드에서 사용 (예: `http://localhost:8080`). 목 모드에서는 빈 값 유지.
-- `VITE_WS_BASE_URL`: WebSocket 서버 주소. 목 모드 여부와 무관하게 항상 실제 서버를 바라봄.
+- `VITE_API_BASE_URL`: 실제 백엔드 모드에서 사용 (예: `http://localhost:8080`). 목 모드에서는 빈 값 유지. **운영(Cloudflare Pages)에서는 빈 값** — 아래 프록시를 통해 같은 오리진으로 호출함.
+- `VITE_WS_BASE_URL`: WebSocket 서버 주소. 목 모드 여부와 무관하게 항상 실제 서버를 바라봄. 운영에서는 `wss://aidea-front.pages.dev`(프록시 경유).
+
+### 운영 배포 — 백엔드 동일 오리진 프록시
+
+운영 프론트(`aidea-front.pages.dev`)와 백엔드(`aidea-bu.duckdns.org`)는 서로 다른 site라서, 백엔드를 직접 호출하면 인증 쿠키가 서드파티 쿠키가 되고 iOS Safari(ITP)가 이를 차단해 로그인이 유지되지 않는다. 그래서 `functions/[[path]].ts`(Cloudflare Pages Functions)가 `/api/*`, `/oauth2/*`, `/login/oauth2/*`, `/ws/*`를 백엔드로 그대로 프록시하고, 브라우저는 프론트 오리진에만 요청한다.
+
+- 함수가 실행되는 경로는 `public/_routes.json`으로 제한함(정적 파일은 Functions 무료 한도에서 제외). 새 백엔드 경로 접두사를 추가하면 `_routes.json`과 함수의 `PROXY_PATH_PREFIXES` 양쪽에 반영할 것.
+- 프록시 대상은 Pages 환경 변수 `BACKEND_ORIGIN`(미설정 시 `https://aidea-bu.duckdns.org`).
+- 백엔드 prod `redirect-uri`와 GitHub OAuth App 콜백 URL은 `https://aidea-front.pages.dev/login/oauth2/code/github`(프론트 오리진).
+- `functions/`는 `tsc -b`(`src`만 포함) 대상이 아니며 Pages가 배포 시 자체 번들링함. 로컬 확인은 빌드 후 `pnpm dlx wrangler@4 pages dev dist`.
+- 로컬 개발(`localhost:5173` ↔ `localhost:8080`)은 포트만 다른 same-site라 프록시 없이 직접 호출해도 됨.
 
 ## Architecture
 
