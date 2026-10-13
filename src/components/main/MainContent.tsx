@@ -4,6 +4,7 @@ import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useDocument } from '@/hooks/useDocument';
 import { getDocLabel } from '@/components/CreateTeamSpace/types';
 import CollaborativeEditor from '@/components/document/CollaborativeEditor';
+import DocumentSkeleton, { DocumentTitleSkeleton } from '@/components/document/DocumentSkeleton';
 import Button from '@/components/ui/Button';
 import FeedbackModal from './FeedbackModal';
 import SplitView from './SplitView';
@@ -20,6 +21,8 @@ import { debounce } from '@/shared/debounce';
 const CURSOR_COLORS = ['#1971c2', '#e03131', '#2f9e44', '#f08c00', '#7048e8'];
 
 const POLLING_TIMEOUT_MS = 30_000;
+
+const DOC_BODY_LAYOUT_CLASS = 'max-w-180 mx-auto px-5 md:px-10 pt-5';
 
 export default function MainContent() {
   const { docId } = useParams();
@@ -115,9 +118,25 @@ export default function MainContent() {
     setIsFeedbackModalOpen((prev) => !prev);
   };
 
-  if (!docId || !doc) {
+  if (!docId) {
     return <main className="flex-1 bg-white" />;
   }
+
+  if (!doc) {
+    return (
+      <main className="flex-1 overflow-y-auto bg-white">
+        <div className={DOC_BODY_LAYOUT_CLASS}>
+          <div className="pb-4">
+            <DocumentTitleSkeleton />
+          </div>
+          <DocumentSkeleton />
+        </div>
+      </main>
+    );
+  }
+
+  // useDocument는 docId가 바뀌어도 응답 전까지 이전 문서를 유지하므로, 그동안 이전 제목을 보여 주지 않는다
+  const isDocStale = doc.id !== docId;
 
   const collabUser = {
     name: user?.name ?? '익명',
@@ -133,9 +152,11 @@ export default function MainContent() {
         <title>{`${docTitle} - ${teamspace?.name ?? 'Aidea'}`}</title>
       </Helmet>
       {isSplitView && <SplitView title={docTitle} />}
-      <div className={`${isSplitView ? 'hidden' : 'block'} max-w-180 mx-auto px-5 md:px-10 pt-5`}>
+      <div className={`${isSplitView ? 'hidden' : 'block'} ${DOC_BODY_LAYOUT_CLASS}`}>
         <div className="flex items-center gap-3 pb-4">
-          {doc.type === 'FREE' && !isViewer ? (
+          {isDocStale ? (
+            <DocumentTitleSkeleton />
+          ) : doc.type === 'FREE' && !isViewer ? (
             <h1
               ref={titleRef}
               contentEditable

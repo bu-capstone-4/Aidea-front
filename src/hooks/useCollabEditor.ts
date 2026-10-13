@@ -30,6 +30,8 @@ interface UseCollabEditorOptions {
   editable: boolean;
 }
 
+export type DocSyncStatus = 'loading' | 'ready' | 'error';
+
 export function useCollabEditor({ docId, user, token, editable }: UseCollabEditorOptions) {
   // lazy initializer로 마운트 시 1회만 생성 → 탭마다 고유한 doc.clientID 보장.
   // doc/provider는 렌더 시점에 useCreateBlockNote에 전달되므로 useState가 적합하다.
@@ -45,7 +47,8 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
     };
   });
 
-  const [connected, setConnected] = useState(false);
+  // 로딩 기준은 소켓 open이 아니라 doc:init 처리 완료 — open 뒤에도 서버 상태가 오기 전까지 본문이 비어 있다
+  const [syncStatus, setSyncStatus] = useState<DocSyncStatus>('loading');
   const initializedRef = useRef(false);
   const applyMarkdownRef = useRef<((md: string) => Promise<void>) | null>(null);
   const pendingDraftRef = useRef<string | null>(null);
@@ -72,9 +75,9 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
       ws.send(JSON.stringify(message));
     };
 
-    ws.onopen = () => setConnected(true);
     ws.onclose = () => {
-      setConnected(false);
+      // 자동 재연결이 없으므로 doc:init 전에 끊기면 무한 로딩 대신 에러로 전환한다
+      if (!initializedRef.current) setSyncStatus('error');
       initializedRef.current = false;
     };
 
@@ -131,6 +134,7 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
             msg.activeDraft.questions
           );
         }
+        setSyncStatus('ready');
         return;
       }
 
@@ -249,6 +253,9 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
     provider.awareness.on('update', handleAwarenessUpdate);
 
     return () => {
+      // 정상 종료(언마운트·의존성 변경)의 close는 연결 실패가 아니다
+      ws.onclose = null;
+      initializedRef.current = false;
       unbindQaSender?.();
       provider.awareness.off('update', handleAwarenessUpdate);
       doc.off('update', handleUpdate);
@@ -286,5 +293,5 @@ export function useCollabEditor({ docId, user, token, editable }: UseCollabEdito
     }
   }, [editor]);
 
-  return { editor, doc, provider, connected };
+  return { editor, doc, provider, syncStatus };
 }
