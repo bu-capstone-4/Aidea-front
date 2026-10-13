@@ -31,22 +31,22 @@ export default function FeedbackSplitView({ title }: SplitViewProps) {
   };
 
   return (
-    <div className="flex flex-col h-full w-full max-w-6xl mx-auto p-6 gap-4 bg-white">
+    <div className="flex flex-col h-full w-full max-w-6xl mx-auto p-6 gap-4 bg-white max-md:h-auto max-md:p-4">
       <h1 className="text-2xl font-bold text-gray-900 tracking-tight">{title}</h1>
       {status === 'DONE' && (
-        <div className="flex items-center justify-between px-4 py-3 shrink-0 bg-purple-50 text-purple-700 rounded-lg text-sm font-medium">
+        <div className="flex items-center justify-between gap-2 px-4 py-3 shrink-0 bg-purple-50 text-purple-700 rounded-lg text-sm font-medium">
           <div className="flex items-center gap-2">
             <span>✨</span>
             <span>AI가 피드백을 반영하여 내용을 수정했습니다. 두 버전을 비교해 보세요.</span>
           </div>
-          <button className="text-purple-400 hover:text-purple-600" onClick={handleReject}>
+          <button className="shrink-0 text-purple-400 hover:text-purple-600" onClick={handleReject}>
             ✕
           </button>
         </div>
       )}
 
-      {/* 스플릿 뷰 */}
-      <div className="flex gap-6 h-full min-h-0">
+      {/* 스플릿 뷰: 모바일은 세로로 쌓고 페이지(main) 스크롤로 본다 */}
+      <div className="flex gap-6 h-full min-h-0 max-md:flex-col max-md:h-auto max-md:*:min-h-[60vh]">
         <VersionPanel
           panelTitle="수정 전"
           content={ydoc}

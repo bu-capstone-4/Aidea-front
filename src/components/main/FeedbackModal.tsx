@@ -28,7 +28,7 @@ export default function FeedbackModal({
 
   return (
     <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-999">
-      <div className="bg-white rounded-2xl shadow-2xl w-125 p-6 flex flex-col gap-4 relative">
+      <div className="bg-white rounded-2xl shadow-2xl w-125 max-w-[calc(100vw-2rem)] p-6 max-md:p-5 flex flex-col gap-4 relative">
         <div className="flex justify-between">
           <span className="text-2xl font-bold text-gray-900">AI 피드백</span>
           <Button variant="secondary" size="sm" onClick={toggleFeedbackModal}>
