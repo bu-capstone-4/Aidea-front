@@ -59,8 +59,10 @@ export default function MainSideBar({ isSideBarOpen, toggleSideBar }: SideBarPro
   return (
     <aside
       className={cn(
-        'bg-sidebar flex flex-col h-screen transition-all duration-300 ease-in-out overflow-hidden',
-        isSideBarOpen ? 'w-60' : 'w-14'
+        'bg-sidebar flex flex-col h-dvh transition-all duration-300 ease-in-out overflow-hidden',
+        // 모바일: 본문 위를 덮는 오버레이 (자리는 MainPage의 레일 스페이서가 확보)
+        'max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-40',
+        isSideBarOpen ? 'w-60 max-md:w-[min(15rem,85vw)] max-md:shadow-xl' : 'w-14'
       )}
     >
       {/* 상단 헤더: 펼쳤을 때는 팀스페이스 + 닫기, 접혔을 때는 펼치기 아이콘만 */}

@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router';
-import { MdAutoAwesome } from 'react-icons/md';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useDocument } from '@/hooks/useDocument';
 import { getDocLabel } from '@/components/CreateTeamSpace/types';
@@ -8,6 +7,7 @@ import CollaborativeEditor from '@/components/document/CollaborativeEditor';
 import Button from '@/components/ui/Button';
 import FeedbackModal from './FeedbackModal';
 import SplitView from './SplitView';
+import AiFeedbackButton from './AiFeedbackButton';
 import { useFeedbackStore } from '@/store/FeedbackStore';
 import useFeedback from '@/hooks/useFeedback';
 import { Helmet } from 'react-helmet-async';
@@ -125,6 +125,7 @@ export default function MainContent() {
   };
 
   const docTitle = doc.type === 'FREE' ? doc.title : getDocLabel(doc.type);
+  const canRequestFeedback = status === 'IDLE' || status === 'ACCEPTED';
 
   return (
     <main className="flex-1 overflow-y-auto bg-white relative">
@@ -132,9 +133,7 @@ export default function MainContent() {
         <title>{`${docTitle} - ${teamspace?.name ?? 'Aidea'}`}</title>
       </Helmet>
       {isSplitView && <SplitView title={docTitle} />}
-      <div
-        className={`${isSplitView ? 'hidden' : 'block'} max-w-180 mx-auto px-24 md:px-10 sm:px-5 pt-5`}
-      >
+      <div className={`${isSplitView ? 'hidden' : 'block'} max-w-180 mx-auto px-5 md:px-10 pt-5`}>
         <div className="flex items-center gap-3 pb-4">
           {doc.type === 'FREE' && !isViewer ? (
             <h1
@@ -145,24 +144,15 @@ export default function MainContent() {
               onKeyDown={handleTitleKeyDown}
               onBlur={handleTitleBlur}
               onPaste={handleTitlePaste}
-              className="text-[2.5rem] font-bold text-[#1a1a1a] tracking-tight leading-tight outline-none cursor-text"
+              className="text-[2.5rem] max-md:text-[1.75rem] font-bold text-[#1a1a1a] tracking-tight leading-tight outline-none cursor-text"
             />
           ) : (
-            <h1 className="text-[2.5rem] font-bold text-[#1a1a1a] tracking-tight leading-tight">
+            <h1 className="text-[2.5rem] max-md:text-[1.75rem] font-bold text-[#1a1a1a] tracking-tight leading-tight">
               {docTitle}
             </h1>
           )}
-          {(status === 'IDLE' || status === 'ACCEPTED') && (
-            <button
-              onClick={toggleFeedbackModal}
-              className="group flex shrink-0 items-center gap-1.5 rounded-full border border-ai/15 bg-ai-bg px-3.5 py-1.5 text-sm font-semibold text-ai transition-colors hover:bg-ai hover:text-white"
-            >
-              <MdAutoAwesome
-                size={15}
-                className="transition-transform duration-300 group-hover:rotate-45"
-              />
-              AI 피드백
-            </button>
+          {canRequestFeedback && (
+            <AiFeedbackButton variant="inline" onClick={toggleFeedbackModal} />
           )}
         </div>
 
@@ -178,6 +168,10 @@ export default function MainContent() {
           />
         </div>
       </div>
+
+      {canRequestFeedback && !isSplitView && (
+        <AiFeedbackButton variant="floating" onClick={toggleFeedbackModal} />
+      )}
 
       <FeedbackModal
         isFeedbackModalOpen={isFeedbackModalOpen}

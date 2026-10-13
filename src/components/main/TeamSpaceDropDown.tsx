@@ -68,7 +68,7 @@ export default function TeamSpaceDropDown() {
   return (
     <div className="relative">
       <button
-        className="flex items-center gap-2 group cursor-pointer"
+        className="flex min-w-0 max-w-full items-center gap-2 group cursor-pointer"
         onClick={() => setIsDropDownOpen((p) => !p)}
       >
         <TeamSpaceAvatar name={teamspace?.name ?? '...'} size="sm" />
